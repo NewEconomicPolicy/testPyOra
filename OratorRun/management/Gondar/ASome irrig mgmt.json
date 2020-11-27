@@ -1,0 +1,77 @@
+{
+  "site definition": {
+	"area name": "No irrigation",
+	"area (ha)": 3.5,
+	"soil": {"t_bulk": 1.54, "t_carbon": 0.86, "t_clay":24.0, "t_sand":47.0, "t_silt":29.0, "t_depth":30.0, "t_pH":6.4, "t_salinity":0.1, "tot_soc_meas": 39.732}	
+  },  
+  "steady state": {
+    "nyears": 10,
+    "management1": {
+		"year": 0,
+		"crops": {
+			"Rice IR36":{
+				"sowing":"Feb",
+				"harvest":"May",
+				"inorganic fert": {"month":"Feb", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month":"Apr", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Feb":50, "Mar":50, "Apr":50, "May":50},
+				"yield": 4.5
+			},
+			"Rice Kranti":{
+				"sowing":"Jul", 
+				"harvest":"Oct",
+				"inorganic fert": {"month":"Jul", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month": "Nov", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Jul":0, "Aug":0, "Sep":0, "Oct":0},
+				"yield": 5.1
+			}
+		}	
+	},
+	"management2": {}
+  },
+  "forward run": {
+    "nyears": 50,
+	"management1": {
+		"year":  0,
+		"crops": {
+			"Rice IR36":{
+				"sowing":"Feb", 
+				"harvest":"May",
+				"inorganic fert": {"month":"Feb", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month":"Apr", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Feb":50, "Mar":50, "Apr":50, "May":50},
+				"yield": 4.5
+			},
+			"Rice Kranti":{
+				"sowing":"Jul",
+				"harvest":"Oct",
+				"inorganic fert": {"month":"Jul", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month": "Nov", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Jul":0, "Aug":0, "Sep":0, "Oct":0},
+				"yield": 5.1
+			}
+		}	
+	},
+	"management3": {
+		"year":  10,
+		"crops": {
+			"Rice IR36":{
+				"sowing":"Feb", 
+				"harvest":"May",
+				"inorganic fert": {"month":"Feb", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month":"Apr", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Feb":50, "Mar":50, "Apr":50, "May":50},
+				"yield": 4.5
+			},
+			"Rice Kranti":{
+				"sowing":"Jul",
+				"harvest":"Oct",
+				"inorganic fert": {"month": "Jul", "type":"Urea", "fertP":0.5,"fertN":78.0},					
+				"organic fert": {"month":"Nov", "type":"Fresh waste", "amount":4.0},
+				"irrigation": {"Jul":0, "Aug":0, "Sep":0, "Oct":0},
+				"yield": 5.1
+			}
+		}
+	}
+  }
+}
