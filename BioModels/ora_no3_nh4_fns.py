@@ -133,7 +133,7 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
     '''
     no3_d50 = n_d50 * t_depth     # soil nitrate-N content at which denitrification is 50% of its full potential (kg ha-1)
     dummy, days_in_mnth = monthrange(2011, imnth)   # TODO: ignores leap year, is this correct?
-    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX * t_depth * days_in_mnth)    # (eq.2.4.9) maximum potential rate of denitrification (kg ha-1 month-1)
+    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX*days_in_mnth * (t_depth/5))   # (eq.2.4.9) maximum potential rate of denitrification (kg ha-1 month-1)
 
     rate_denit_no3 = no3_avail/(no3_d50 + no3_avail)    # (eq.2.4.10) nitrate rate modifier
 
