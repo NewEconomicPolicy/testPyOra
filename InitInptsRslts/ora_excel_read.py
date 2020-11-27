@@ -26,7 +26,7 @@ from openpyxl import load_workbook
 from pandas import Series, read_excel
 from zipfile import BadZipFile
 
-from ora_excel_write import check_out_dir, retrieve_output_xls_files
+from ora_excel_write import retrieve_output_xls_files
 from ora_water_model import add_pet_to_weather
 from ora_low_level_fns import average_weather
 
@@ -80,7 +80,6 @@ def check_excel_input_file(form, xls_inp_fname):
 
         form.settings['study'] = study
         form.settings['inp_dir'], dummy = os.path.split(xls_inp_fname)
-        check_out_dir(form)
         retrieve_output_xls_files(form, study)
 
     else:

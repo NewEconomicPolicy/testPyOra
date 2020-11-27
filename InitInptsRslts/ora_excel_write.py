@@ -200,34 +200,13 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
 
     return
 
-def check_out_dir(form):
-
-    # check and if necessary create output directory
-    # ==============================================
-    form.settings['out_dir'] = ''
-    orator_path, dummy = os.path.split(form.settings['inp_dir'])
-    out_dir = os.path.normpath(os.path.join(orator_path, 'outputs'))
-    if not os.path.isdir(out_dir):
-        try:
-            os.mkdir(out_dir)
-            print('Created output directory: ' + out_dir)
-        except PermissionError as err:
-            print('*** Error *** Could not create output directory: ' + out_dir)
-            out_dir = None
-
-    form.settings['out_dir'] = out_dir
-    if out_dir is not None:
-        form.w_soil_cn.setEnabled(True)
-
-    return
-
 def extend_out_dir(form):
 
     # check and if necessary create extended output directory
     # =======================================================
     mgmt_dir = form.w_lbl06.text()
     dummy, short_dir = os.path.split(mgmt_dir)
-    curr_out_dir = form.settings['out_dir']
+    curr_out_dir = form.w_lbl15.text()
 
     out_dir = os.path.normpath(os.path.join(curr_out_dir, short_dir))
     if os.path.isdir(out_dir):

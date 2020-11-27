@@ -164,6 +164,7 @@ def read_lookup_excel_file(settings):
                 print(ERROR_STR + str(err) + ' reading Excel file: ' + fname_lookup)
                 fname_lookup = None
     else:
+        print(ERROR_STR + ' lookup Excel file: ' + fname_lookup + '\n\tnot found - cannot run program ')
         fname_lookup = None
 
     settings['fname_lookup'] = fname_lookup

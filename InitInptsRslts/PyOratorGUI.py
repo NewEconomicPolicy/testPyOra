@@ -85,7 +85,7 @@ class Form(QWidget):
         # for message from check_xls_fname
         # ================================
         w_lbl14 = QLabel('')
-        grid.addWidget(w_lbl14, 3, 0, 1, 5)
+        grid.addWidget(w_lbl14, 3, 0, 1, 2)
         self.w_lbl14 = w_lbl14
 
         # rows 4 and 5
@@ -170,6 +170,18 @@ class Form(QWidget):
         grid.addWidget(w_combo09, 9, 1, 1, 2)
 
         grid.addWidget(QLabel(), 10, 0, )   # spacer
+
+        # row 15
+        # ======
+        w_out_dir = QPushButton("Outputs directory")
+        helpText = 'Select a file path for Excel outputs files'
+        w_out_dir.setToolTip(helpText)
+        grid.addWidget(w_out_dir, 15, 0)
+        w_out_dir.clicked.connect(self.fetchOutDir)
+
+        w_lbl15 = QLabel('')
+        grid.addWidget(w_lbl15, 15, 1, 1, 5)
+        self.w_lbl15 = w_lbl15
 
         # line 16: generate Excel files
         # =============================
@@ -263,10 +275,15 @@ class Form(QWidget):
         # ==================================
         read_config_file(self)
 
-    def fetchInpJson(self):
-        """
+    def fetchOutDir(self):
 
-        """
+        dirname_cur = self.w_lbl15.text()
+        dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
+        if dirname != '' and dirname != dirname_cur:
+            self.w_lbl15.setText(dirname)
+
+    def fetchInpJson(self):
+
         dirname_cur = self.w_lbl06.text()
         dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
         if dirname != '' and dirname != dirname_cur:

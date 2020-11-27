@@ -25,7 +25,7 @@ from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
 from ora_excel_read import check_excel_input_file, ReadStudy
-from ora_excel_write import retrieve_output_xls_files, check_out_dir
+from ora_excel_write import retrieve_output_xls_files
 from ora_json_read import check_json_input_files
 from ora_cn_classes import CarbonChange, NitrogenChange
 from ora_water_model import  SoilWaterChange
@@ -167,7 +167,6 @@ def _write_default_setup_file(setup_file):
         fsetup.close()
         return _default_setup
 
-
 def _write_default_config_file(config_file):
     """
 
@@ -209,10 +208,15 @@ def read_config_file(form):
             sleep(sleepTime)
             sys.exit(0)
 
-    form.settings['out_dir'] = ''
+    # must come first
+    # ===============
+    out_dir = os.path.normpath(config['out_dir'])
+    form.settings['out_dir'] = out_dir
+    form.w_lbl15.setText(out_dir)
+
     inp_xls = os.path.normpath(config['inp_xls'])
     form.w_lbl13.setText(inp_xls)
-    form.w_lbl14.setText(check_excel_input_file(form, inp_xls))
+    form.w_lbl14.setText(check_excel_input_file(form, inp_xls))     # needs out_dir from form.settings
 
     # this stanza relates to use of JSON files
     # ========================================
@@ -233,8 +237,7 @@ def read_config_file(form):
 
     # enable users to view outputs from previous run TODO: does not work
     # ==============================================
-    check_out_dir(form)
-    study = ReadStudy(inp_xls, form.settings['out_dir'])
+    study = ReadStudy(inp_xls, out_dir)
     retrieve_output_xls_files(form, study.study_name)     # TODO: revisit
 
     # populate popup lists
@@ -272,7 +275,7 @@ def write_config_file(form, message_flag=True):
         "mgmt_dir": form.w_lbl06.text(),
         "use_json": form.w_use_json.isChecked(),
         "write_excel": form.w_make_xls.isChecked(),
-        "out_dir": ""
+        "out_dir": form.w_lbl15.text()
     }
     if os.path.isfile(config_file):
         descriptor = 'Updated existing'
