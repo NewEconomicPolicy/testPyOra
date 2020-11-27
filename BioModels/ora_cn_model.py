@@ -30,7 +30,7 @@ from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange
 from ora_water_model import SoilWaterChange, fix_soil_water
 from ora_nitrogen_model import soil_nitrogen
-from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles, check_out_dir, extend_out_dir
+from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles, extend_out_dir
 from ora_excel_write_cn_water import write_excel_all_subareas
 from ora_excel_read import ReadCropOwNitrogenParms, ReadInputSubareas, ReadStudy, ReadWeather
 from ora_json_read import ReadJsonSubareas
@@ -123,8 +123,6 @@ def run_soil_cn_algorithms(form):
         print('Excel input file ' + xls_inp_fname + 'must exist')
         return
 
-    check_out_dir(form)     # resets output directory
-
     # read input Excel workbook
     # =========================
     print('Loading: ' + xls_inp_fname)
@@ -189,5 +187,5 @@ def run_soil_cn_algorithms(form):
         form.w_disp_n.setEnabled(False)
         form.w_disp_w.setEnabled(False)
 
-    print('\nCarbon, Nitrogen and Soil Water model run complete')
+    print('\nCarbon, Nitrogen and Soil Water model run complete\n')
     return
