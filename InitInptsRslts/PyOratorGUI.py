@@ -309,8 +309,8 @@ class Form(QWidget):
     def displayXlsxOutput(self):
 
         excel_file = self.settings['out_dir'] + '\\' + self.w_combo17.currentText()
-        exe_path = self.settings['exe_path']
-        junk = Popen(list([exe_path, excel_file]), stdout = DEVNULL)
+        excel_path = self.settings['excel_path']
+        junk = Popen(list([excel_path, excel_file]), stdout = DEVNULL)
         '''
         import signal
         os.kill(junk.pid, signal.SIGTERM)

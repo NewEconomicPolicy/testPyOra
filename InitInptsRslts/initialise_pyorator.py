@@ -32,6 +32,8 @@ from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
 PROGRAM_ID = 'pyorator'
+EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
+ERROR_STR = '*** Error *** '
 sleepTime = 5
 
 def initiation(form):
@@ -41,7 +43,6 @@ def initiation(form):
     # retrieve settings
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
-    form.settings['exe_path'] = 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
     form.settings['studies'] = []
     form.all_runs_output = {}       # TODO: important bridge beween GUI and results
 
@@ -55,6 +56,13 @@ def _read_setup_file(program_id):
     or create setup file using default values if file does not exist
     """
     func_name = __prog__ + ' _read_setup_file'
+
+    # TODO: this is an unsafe assumption, e.g. if user uses Apache OpenOffice
+    # =======================================================================
+    if not os.path.isfile(EXCEL_EXE_PATH):
+        print(ERROR_STR + 'Excel must be installed - usually here: ' + EXCEL_EXE_PATH)
+        sleep(sleepTime)
+        exit(0)
 
     # validate setup file
     # ===================
@@ -79,7 +87,7 @@ def _read_setup_file(program_id):
     settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup']
     for key in settings_list:
         if key not in settings:
-            print('*** Error *** setting {} is required in setup file {} '.format(key, setup_file))
+            print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
             sleep(sleepTime)
             exit(0)
 
@@ -106,6 +114,7 @@ def _read_setup_file(program_id):
     print('Using configuration file: ' + config_file)
 
     settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
+    settings['excel_path'] = EXCEL_EXE_PATH
 
     return settings
 
@@ -204,7 +213,7 @@ def read_config_file(form):
 
     for attrib in list(['inp_xls', 'mgmt_dir', 'write_excel', 'out_dir', 'use_json']):
         if attrib not in config:
-            print('*** Error *** attribute {} not present in configuration file: {}'.format(attrib, config_file))
+            print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
             sys.exit(0)
 
