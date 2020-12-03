@@ -25,7 +25,7 @@ from pandas import DataFrame, ExcelWriter, Series
 from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
                             A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification
 import os
-from string import ascii_uppercase
+
 from openpyxl import load_workbook
 from openpyxl.chart import (LineChart, Reference)
 
@@ -33,6 +33,10 @@ from ora_lookup_df_fns import fetch_variable_definition
 
 PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py     width in EMUs
 MIN_NUM_COLS = 5
+
+from string import ascii_uppercase
+ALPHABET = list(ascii_uppercase)
+FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}      # period, year, month and crop name
 
 def _generate_metric_charts(fname, lookup_df, sheet_name):
     '''
@@ -51,20 +55,39 @@ def _generate_metric_charts(fname, lookup_df, sheet_name):
                                                     .format(MIN_NUM_COLS, sheet.max_column))
         return -1
 
-    alphabet_string = ascii_uppercase
-    alphabet = list(alphabet_string)
+    # reset column width
+    # ==================
+    max_wdth = 8       # we want first column to be as wide as "steady state" i.e. 12 chars
+    for icol in range(sheet.max_column):
+        val = sheet.cell(row = 1, column = icol + 1).value
+        nchars = len(val)
+        if nchars > max_wdth:
+            max_wdth = nchars
 
+    for ch in ALPHABET[4:]:
+        sheet.column_dimensions[ch].width = max_wdth + 2  # set the width of the column
+
+    for ch in FIXED_WDTHS:
+        sheet.column_dimensions[ch].width = FIXED_WDTHS[ch]
+
+    # adjust row height
+    # =================
+    for irow in range(sheet.max_row):
+        sheet.row_dimensions[irow].height = 18
+
+    # chart creation
+    # ==============
     chart_sheet = wb_obj.create_sheet('charts')
     nrow_chart = 10
 
     # generate charts for all metrics except for period, month and tstep
     # ==================================================================
-    max_column = min(len(alphabet), sheet.max_column)
+    max_column = min(len(ALPHABET), sheet.max_column)
     for col_indx in range(max_column, 4, -1):               # ignore period, month and tstep fields
         metric_chart = LineChart()
         metric_chart.style = 13
 
-        metric = sheet[alphabet[col_indx - 1] + '1'].value      # read field name
+        metric = sheet[ALPHABET[col_indx - 1] + '1'].value      # read field name
         defn, units = fetch_variable_definition(lookup_df, metric)
         metric_chart.title = defn
         metric_chart.y_axis.title = units
