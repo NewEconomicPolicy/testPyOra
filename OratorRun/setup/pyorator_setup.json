@@ -1,8 +1,0 @@
-{
-  "setup": {
-    "config_dir": "G:\\PyOraDev\\testPyOra\\OratorRun\\config",
-    "fname_png": "G:\\PyOraDev\\testPyOra\\OratorRun\\Images\\orator_logo.png",
-	"fname_lookup": "G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx",
-    "log_dir": "G:\\PyOraDev\\testPyOra\\OratorRun\\logs\\logs"
-  }
-}
