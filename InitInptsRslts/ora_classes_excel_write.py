@@ -19,7 +19,7 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from operator import add
+from operator import add, mul
 
 def _setup_sheet_data_dict(pettmp, var_format_dict):
     '''
@@ -59,8 +59,7 @@ class  A2fNitrification(object, ):
         self.title = 'Nitrification'
 
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
-                           'prop_yld_opt': '2f', 'n_crop_dem': '2f', 'n_crop_dem_adj': '2f',
-                           'prop_yld_opt_adj': '2f', 'cumul_n_uptake': '2f', 'cumul_n_uptake_adj': '2f'}
+                           'nh4_start':'2f', 'nh4_total_inp':'2f', 'nh4_nitrif':'2f', 'nh4_nitrif_adj':'2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
@@ -86,18 +85,21 @@ class  A2eVolatilisedNloss(object, ):
                            'nh4_ow_fert': '2f', 'nh4_inorg_fert': '2f', 'total_n_appld': '2f',
                            'nh4_volat': '2f', 'nh4_volat_adj': '2f'}
 
-        sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
+        sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict) # adds period, year and month
 
         sheet_data['precip'] = pettmp['precip']
 
-        for key_name in list(['nh4_ow_fert', 'nh4_inorg_fert', 'nh4_volat']):
-            sheet_data[key_name] = nitrogen_change.data[key_name]
+        for key_name in var_format_dict:
+            if key_name in exclusion_list:
+                continue
 
-        # use operator module and list comprehension for clarity and reduce code
+            if key_name in nitrogen_change.data:
+                sheet_data[key_name] = nitrogen_change.data[key_name]
+
+        # use operator module for clarity and reduce code
         # =======================================================================
         sheet_data['total_n_appld'] = list(map(add, sheet_data['nh4_ow_fert'], sheet_data['nh4_inorg_fert']))
-        sheet_data['nh4_volat_adj'] = [loss_adj_rat*nh4_volat for loss_adj_rat, nh4_volat in
-                                            zip(nitrogen_change.data['loss_adj_rat_nh4'], sheet_data['nh4_volat'])]
+        sheet_data['nh4_volat_adj'] = list(map(mul, nitrogen_change.data['loss_adj_rat_nh4'], sheet_data['nh4_volat']))
 
         self.sheet_data = sheet_data
         self.var_name_list = var_name_list

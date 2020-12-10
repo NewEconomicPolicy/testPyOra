@@ -234,7 +234,7 @@ class NitrogenChange(object,):
                         'no3_denit', 'no3_cropup', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
                         'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end',  'n2o_denit_relese',
                         'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner',
-                        'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_volat', 'nh4_volat_adj',
+                        'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat', 'nh4_volat_adj',
                         'nh4_cropup', 'nh4_total_loss', 'loss_adj_rat_nh4',
                         'nh4_loss_adj', 'nh4_end',
                         'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
@@ -249,8 +249,11 @@ class NitrogenChange(object,):
     def additional_n_variables(self):
         '''
         populate additional fields from existing data
+
         '''
 
+        # cumulative N uptake - sheets A2 and A2b
+        # =======================================
         tmp_list = []
         cumul_n_uptake = 0
         cumul_n_uptake_adj = 0
@@ -271,6 +274,15 @@ class NitrogenChange(object,):
 
             self.data['cumul_n_uptake'].append(cumul_n_uptake)
             self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+
+
+
+        # nitrified N adjsuted for other losses - sheet A2f
+        # =================================================
+        self.data['nh4_nitrif_adj'] = [nh4_nitrif * loss_adj_rat for nh4_nitrif, loss_adj_rat in
+                                                        zip(self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4'])]
+
+
 
     def append_vars(self, imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,

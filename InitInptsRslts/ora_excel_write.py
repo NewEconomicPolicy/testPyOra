@@ -191,7 +191,7 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
     pettmp = {'period':period_lst, 'precip':precip_lst, 'tair':tair_lst, 'pet':pet_lst}
 
     carbon_change, nitrogen_change, soil_water = complete_run
-    nitrogen_change.additional_n_variables()
+    nitrogen_change.additional_n_variables() # use existing data to populate additional fields
     print()
 
     som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
