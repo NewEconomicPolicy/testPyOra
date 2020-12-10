@@ -20,6 +20,7 @@ __version__ = '0.0.0'
 # ---------------
 #
 from math import ceil
+from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 
 class MngmntSubarea(object, ):
@@ -277,12 +278,9 @@ class NitrogenChange(object,):
 
 
 
-        # nitrified N adjsuted for other losses - sheet A2f
+        # nitrified N adjusted for other losses - sheet A2f
         # =================================================
-        self.data['nh4_nitrif_adj'] = [nh4_nitrif * loss_adj_rat for nh4_nitrif, loss_adj_rat in
-                                                        zip(self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4'])]
-
-
+        self.data['nh4_nitrif_adj'] = list(map(mul, self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4']))
 
     def append_vars(self, imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,
@@ -338,4 +336,3 @@ class NitrogenChange(object,):
         # ===========
         for var in ['n_release', 'n_adjust', 'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum']:
             self.data[var].append(eval(var))
-
