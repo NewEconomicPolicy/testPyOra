@@ -151,7 +151,8 @@ class SoilWaterChange(object, ):
 
         self.data = {}
         var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_stress_index', 'aet', 'aet_prentice','irrig',
-                'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff', 'pcnt_c'])
+                'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff', 'pcnt_c',
+                                                                                                    'max_root_dpth'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -212,6 +213,7 @@ class SoilWaterChange(object, ):
         self.data['aet_irri'].append(aet_irri)  # col O - AET to rooting depth after irrigation (mm)
         self.data['wc_soil_irri'].append(wc_soil_irri)  # col P - Soil water content to soil depth after irrigation (mm)
 
+        self.data['max_root_dpth'].append(max_root_dpth)    # col H
         dpth_soil_root_rat = t_depth / max_root_dpth  # used in PET (eq.2.2.13)
         pet_dpth = min(pet, pet*dpth_soil_root_rat)
         wat_hydro_eff = precip - pet_dpth
