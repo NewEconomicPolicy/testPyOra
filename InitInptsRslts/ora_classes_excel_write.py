@@ -247,21 +247,23 @@ class A3SoilWater(object, ):
         '''
         self.title = 'Soil water'
 
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 'd', 'wat_soil': '2f', 'pcnt_c': '2f',
-                           'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_stress_index': '2f', 'aet': '2f',
-                           'aet_prentice': '2f', 'irrig': '2f',
-                            'wc_soil_irri_root_zone': '2f', 'aet_irri': '2f', 'wc_soil_irri': '2f', 'wat_drain': '2f',
-                           'pcnt_c': '2f'}
+        # TODO: rooting depth
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 'd', 'pet': '2f', 'pcnt_c': '2f',
+                           'max_root_dpth': '2f', 'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_soil': '2f',
+                           'aet': '2f', 'irrig': '2f','wc_soil_irri_root_zone': '2f',           # cols L, M, N
+                           'aet_irri': '2f', 'wc_soil_irri': '2f', 'wat_drain': '2f',           # cols O, P, Q
+                           'aet_prentice': '2f', 'wat_stress_index': '2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
         for key_name in var_format_dict:
-            if key_name in exclusion_list + list(['crop_name']):
+            if key_name in exclusion_list + list(['crop_name', 'pet']):
                 continue
 
             sheet_data[key_name] = soil_water_obj.data[key_name]
 
         sheet_data['crop_name'] = nitrogen_change.data['crop_name']
+        sheet_data['pet'] = pettmp['pet']
 
         self.sheet_data = sheet_data
         self.var_name_list = var_name_list
