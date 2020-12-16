@@ -31,7 +31,7 @@ from calendar import monthrange
 
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
-def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert , nut_n_min, nut_n_opt):
+def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
     '''
 
     '''

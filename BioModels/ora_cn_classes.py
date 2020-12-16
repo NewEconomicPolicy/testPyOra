@@ -276,11 +276,10 @@ class NitrogenChange(object,):
             self.data['cumul_n_uptake'].append(cumul_n_uptake)
             self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
 
-
-
         # nitrified N adjusted for other losses - sheet A2f
         # =================================================
         self.data['nh4_nitrif_adj'] = list(map(mul, self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4']))
+        self.data['nut_n_fert'] = list(map(add, self.data['nh4_ow_fert'], self.data['nh4_inorg_fert']))
 
     def append_vars(self, imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,

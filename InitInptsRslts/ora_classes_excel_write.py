@@ -46,9 +46,61 @@ def _setup_sheet_data_dict(pettmp, var_format_dict):
 
         sheet_data['year'].append(this_year)
 
-    exclusion_list = list(['period', 'year', 'month'])
+    exclusion_list = list(['period', 'year', 'month', 'days_month'])
 
     return sheet_data, var_name_list, exclusion_list
+
+class  B1CropProduction(object, ):
+
+    def __init__(self, pettmp, soil_water, mngmnt_ss, mngmnt_fwd):
+        '''
+        B1
+        '''
+        self.title = 'Crop Production'
+
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'days_month': 'd','crop_name': '2f',
+                        'tair': '2f', 'precip': '2f','npp_miami':'2f', 'prodn_miami':'2f', 'yld_miami':'2f',
+                        'grow_dds':'2f', 'aet':'2f', 'pet':'2f', 'npp_zaks':'2f', 'prodn_zaks':'2f', 'yld_zaks':'2f'}
+
+        sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
+
+        sheet_data['aet'] = soil_water.data['aet']
+        sheet_data['pet'] = pettmp['pet']
+
+        sheet_data['precip'] = pettmp['precip']
+        sheet_data['tair'] = pettmp['tair']
+
+        sheet_data['grow_dds'] = pettmp['grow_dds']
+        sheet_data['npp_miami'] = mngmnt_ss.npp_miami + mngmnt_fwd.npp_miami
+        sheet_data['npp_zaks'] = mngmnt_ss.npp_zaks + mngmnt_fwd.npp_zaks
+        self.sheet_data = sheet_data
+        self.var_name_list = var_name_list
+        self.var_formats = var_format_dict
+
+class  B1cNlimitation(object, ):
+
+    def __init__(self, pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd):
+        '''
+        B1c
+        '''
+        self.title = 'Nitrogen limitation'
+
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+                           'soil_n_sply':'2f', 'nut_n_fert':'2f',
+                           'n_sply_scld':'2f', 'yld_scld':'2f', 'yld_scld_adj':'2f', 'yld_n_lim':'2f', 'prodn_ss':'2f' }
+
+        sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
+
+        for key_name in var_format_dict:
+            if key_name in exclusion_list:
+                continue
+
+            if key_name in nitrogen_change.data:
+                sheet_data[key_name] = nitrogen_change.data[key_name]
+
+        self.sheet_data = sheet_data
+        self.var_name_list = var_name_list
+        self.var_formats = var_format_dict
 
 class  A2fNitrification(object, ):
 
@@ -241,7 +293,7 @@ class A2MineralN(object,):
 
 class A3SoilWater(object, ):
 
-    def __init__(self, pettmp, nitrogen_change, soil_water_obj):
+    def __init__(self, pettmp, nitrogen_change, soil_water):
         '''
         A3
         '''
@@ -260,7 +312,7 @@ class A3SoilWater(object, ):
             if key_name in exclusion_list + list(['crop_name', 'pet']):
                 continue
 
-            sheet_data[key_name] = soil_water_obj.data[key_name]
+            sheet_data[key_name] = soil_water.data[key_name]
 
         sheet_data['crop_name'] = nitrogen_change.data['crop_name']
         sheet_data['pet'] = pettmp['pet']
@@ -271,7 +323,7 @@ class A3SoilWater(object, ):
 
 class A1SomChange(object, ):
 
-    def __init__(self, pettmp, carbon_obj, soil_water_obj):
+    def __init__(self, pettmp, carbon_obj, soil_water):
         '''
         A1. Change in soil organic matter
         '''
@@ -295,7 +347,7 @@ class A1SomChange(object, ):
 
         # extra columns
         # =============
-        sheet_data['wat_soil'] = soil_water_obj.data['wat_soil']  # col F
+        sheet_data['wat_soil'] = soil_water.data['wat_soil']  # col F
         sheet_data['tair'] = pettmp['tair']
 
         ntsteps = len(sheet_data['tair'])

@@ -23,7 +23,8 @@ from glob import glob
 from pandas import DataFrame, ExcelWriter, Series
 
 from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
-                            A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification
+                A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification, \
+                B1CropProduction, B1cNlimitation
 import os
 
 from openpyxl import load_workbook
@@ -38,7 +39,7 @@ from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}      # period, year, month and crop name
 
-def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, complete_run):
+def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, complete_run, mngmnt_ss, mngmnt_fwd):
     '''
 
     '''
@@ -55,17 +56,20 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
     precip_lst = weather.pettmp_ss['precip'] + weather.pettmp_fwd['precip']
     tair_lst = weather.pettmp_ss['tair'] + weather.pettmp_fwd['tair']
     pet_lst = weather.pettmp_ss['pet'] + weather.pettmp_fwd['pet']
+    gdds_lst = weather.pettmp_ss['grow_dds'] + weather.pettmp_fwd['grow_dds']
 
-    pettmp = {'period':period_lst, 'precip':precip_lst, 'tair':tair_lst, 'pet':pet_lst}
+    pettmp = {'period':period_lst, 'precip':precip_lst, 'tair':tair_lst, 'pet':pet_lst, 'grow_dds':gdds_lst}
 
     carbon_change, nitrogen_change, soil_water = complete_run
     nitrogen_change.additional_n_variables() # use existing data to populate additional fields
     print()
 
-    '''
-    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
-    '''
+    crop_prodn_b1 = B1CropProduction(pettmp, soil_water, mngmnt_ss, mngmnt_fwd)
+    _write_excel_out(study_full_name, lookup_df, 'B1 Crop Production', out_dir, crop_prodn_b1)
+
+    n_limitation_b1c = B1cNlimitation(pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd)
+    _write_excel_out(study_full_name, lookup_df, 'B1c Nitrogen Limitation', out_dir, n_limitation_b1c)
+
     som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
     _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
 

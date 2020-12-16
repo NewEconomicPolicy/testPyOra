@@ -165,7 +165,8 @@ def run_soil_cn_algorithms(form):
         # ============
         form.all_runs_output[subarea] = complete_run
         if excel_out_flag:
-            generate_excel_outfiles(study, subarea, lookup_df, form.settings['out_dir'], ora_weather, complete_run)
+            generate_excel_outfiles(study, subarea, lookup_df, form.settings['out_dir'], ora_weather, complete_run,
+                                                                                                mngmnt_ss, mngmnt_fwd)
 
         print()
         all_runs[subarea] = complete_run
