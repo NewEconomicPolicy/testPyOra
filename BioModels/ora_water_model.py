@@ -150,7 +150,7 @@ class SoilWaterChange(object, ):
         self.irrig = 0  # D1. Water use
 
         self.data = {}
-        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_stress_index', 'aet', 'aet_prentice','irrig',
+        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'aet_prentice','irrig',
                 'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff', 'pcnt_c',
                                                                                                     'max_root_dpth'])
         for var_name in var_name_list:
@@ -191,10 +191,10 @@ class SoilWaterChange(object, ):
             self.data['aet'].append(aet)
             self.data['aet_prentice'].append(min(pet, 5*days_in_mnth*(wat_soil - wc_pwp)/(wc_fld_cap - wc_pwp)) )
 
-            self.data['wat_stress_index'].append(self.data['aet'][-1]/pet_prev)
+            self.data['wat_strss_indx'].append(self.data['aet'][-1]/pet_prev)
             wat_soil_prev = self.data['wat_soil'][-1]
         else:
-            self.data['wat_stress_index'].append(1.0)
+            self.data['wat_strss_indx'].append(1.0)
             aet = pet
             wat_soil_prev = 0
 

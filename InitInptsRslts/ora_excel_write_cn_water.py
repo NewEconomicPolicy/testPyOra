@@ -38,7 +38,7 @@ Y_AXIS_LABELS = {'co2_release':'Carbon (t/ha)',
                 'no3_leach':'Leached nitrate (kg/ha)', 'no3_denit':' Denitrified nitrate (kg/ha)',
                 'nh4_cropup':'Crop N demand from ammonium (kg/ha)', 'nh4_volat':'Volatilised ammonium (kg/ha)',
                  'wc_pwp':'', 'wat_soil':'', 'wc_fld_cap':'Water content of root zone at field capacity (mm)',
-                 'wat_stress_index':'', 'aet':'AET to rooting depth before irrigation (mm)',
+                 'wat_strss_indx':'', 'aet':'AET to rooting depth before irrigation (mm)',
                  'aet_prentice':'AET by Prentice (mm)', 'irrig':'',
                  'wc_soil_irri_root_zone':'Soil water content of root zone after irrigation (mm)',
                  'aet_irri':'AET to rooting depth after irrigation (mm)',
@@ -51,7 +51,7 @@ CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bi
                                                                                 'tot_soc_simul',  'co2_release'])
 CHANGE_VARS['nitrogen'] = list(['soil_n_sply', 'no3_cropup', 'no3_nitrif', 'no3_leach', 'no3_denit',
                                                                             'nh4_cropup', 'nh4_volat'])
-CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_stress_index', 'aet', 'aet_prentice', 'irrig',
+CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'aet_prentice', 'irrig',
                              'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'pcnt_c'])
 
 PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py  width in EMUs

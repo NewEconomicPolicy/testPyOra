@@ -252,7 +252,7 @@ class A3SoilWater(object, ):
                            'max_root_dpth': '2f', 'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_soil': '2f',
                            'aet': '2f', 'irrig': '2f','wc_soil_irri_root_zone': '2f',           # cols L, M, N
                            'aet_irri': '2f', 'wc_soil_irri': '2f', 'wat_drain': '2f',           # cols O, P, Q
-                           'aet_prentice': '2f', 'wat_stress_index': '2f'}
+                           'aet_prentice': '2f', 'wat_strss_indx': '2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 

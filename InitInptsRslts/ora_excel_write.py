@@ -38,6 +38,63 @@ from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}      # period, year, month and crop name
 
+def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, complete_run):
+    '''
+
+    '''
+    study_full_name = study.study_name + ' ' + subarea      # typical study: Zerai Farm; subarea: Base line
+
+    # concatenate weather into single entity
+    # ======================================
+    len_ss = len(weather.pettmp_ss['precip'])
+    period_lst = len_ss*['steady state']
+
+    len_fwd = len(weather.pettmp_fwd['precip'])
+    period_lst += len_fwd*['forward run']
+
+    precip_lst = weather.pettmp_ss['precip'] + weather.pettmp_fwd['precip']
+    tair_lst = weather.pettmp_ss['tair'] + weather.pettmp_fwd['tair']
+    pet_lst = weather.pettmp_ss['pet'] + weather.pettmp_fwd['pet']
+
+    pettmp = {'period':period_lst, 'precip':precip_lst, 'tair':tair_lst, 'pet':pet_lst}
+
+    carbon_change, nitrogen_change, soil_water = complete_run
+    nitrogen_change.additional_n_variables() # use existing data to populate additional fields
+    print()
+
+    '''
+    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
+    _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
+    '''
+    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
+    _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
+
+    mineralN_a2 = A2MineralN(pettmp, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2. Mineral N', out_dir, mineralN_a2)
+
+    soilN_supply_a2a = A2aSoilNsupply(pettmp, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2a. Soil N supply', out_dir, soilN_supply_a2a)
+
+    cropN_uptake_a2b = A2bCropNuptake(pettmp, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2b. Crop N uptake', out_dir, cropN_uptake_a2b)  
+     
+    leachedN_loss_a2c = A2cLeachedNloss(pettmp, soil_water, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2c. LeachedNloss', out_dir, leachedN_loss_a2c)
+
+    denitrified_Nloss_a2d = A2dDenitrifiedNloss(pettmp, carbon_change, nitrogen_change, soil_water)
+    _write_excel_out(study_full_name, lookup_df, 'A2d. Denitrified N loss', out_dir, denitrified_Nloss_a2d)
+
+    volatilised_Nloss_a2e = A2eVolatilisedNloss(pettmp, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2e. Volatilised N loss', out_dir, volatilised_Nloss_a2e)
+
+    nitrification_a2f = A2fNitrification(pettmp, nitrogen_change)
+    _write_excel_out(study_full_name, lookup_df, 'A2f. Nitrification', out_dir, nitrification_a2f)
+
+    soil_water_a3 = A3SoilWater(pettmp, nitrogen_change, soil_water)
+    _write_excel_out(study_full_name, lookup_df, 'A3 Soil Water', out_dir, soil_water_a3)
+
+    return
+
 def _generate_metric_charts(fname, lookup_df, sheet_name):
     '''
     add charts to an existing Excel file
@@ -169,59 +226,6 @@ def _write_excel_out(study, lookup_df, sheet_name, out_dir, output_obj):
     _generate_metric_charts(fname, lookup_df, sheet_name)
 
     return 0
-
-def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, complete_run):
-    '''
-
-    '''
-    study_full_name = study.study_name + ' ' + subarea      # typical study: Zerai Farm; subarea: Base line
-
-    # concatenate weather into single entity
-    # ======================================
-    len_ss = len(weather.pettmp_ss['precip'])
-    period_lst = len_ss*['steady state']
-
-    len_fwd = len(weather.pettmp_fwd['precip'])
-    period_lst += len_fwd*['forward run']
-
-    precip_lst = weather.pettmp_ss['precip'] + weather.pettmp_fwd['precip']
-    tair_lst = weather.pettmp_ss['tair'] + weather.pettmp_fwd['tair']
-    pet_lst = weather.pettmp_ss['pet'] + weather.pettmp_fwd['pet']
-
-    pettmp = {'period':period_lst, 'precip':precip_lst, 'tair':tair_lst, 'pet':pet_lst}
-
-    carbon_change, nitrogen_change, soil_water = complete_run
-    nitrogen_change.additional_n_variables() # use existing data to populate additional fields
-    print()
-
-    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
-
-    mineralN_a2 = A2MineralN(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2. Mineral N', out_dir, mineralN_a2)
-
-    soilN_supply_a2a = A2aSoilNsupply(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2a. Soil N supply', out_dir, soilN_supply_a2a)
-
-    cropN_uptake_a2b = A2bCropNuptake(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2b. Crop N uptake', out_dir, cropN_uptake_a2b)  
-     
-    leachedN_loss_a2c = A2cLeachedNloss(pettmp, soil_water, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2c. LeachedNloss', out_dir, leachedN_loss_a2c)
-
-    denitrified_Nloss_a2d = A2dDenitrifiedNloss(pettmp, carbon_change, nitrogen_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A2d. Denitrified N loss', out_dir, denitrified_Nloss_a2d)
-
-    volatilised_Nloss_a2e = A2eVolatilisedNloss(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2e. Volatilised N loss', out_dir, volatilised_Nloss_a2e)
-
-    nitrification_a2f = A2fNitrification(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2f. Nitrification', out_dir, nitrification_a2f)
-
-    soil_water_a3 = A3SoilWater(pettmp, nitrogen_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A3 Soil Water', out_dir, soil_water_a3)
-
-    return
 
 def extend_out_dir(form):
 

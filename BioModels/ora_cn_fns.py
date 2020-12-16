@@ -30,12 +30,13 @@ def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
     This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
     calculated monthly using the water stress index for the previous month.
     '''
-    frig_factor = 100/t_grow   # TODO
+    gdds_scle_factr = 11500
+    iws_scle_factr  = 2720
     if management.pi_props[tstep] > 0:
-        wat_stress_index = soil_water.data['wat_stress_index'][tstep]
+        wat_strss_indx = soil_water.data['wat_strss_indx'][tstep]
         tgdd = pettmp['grow_dds'][tstep]
-        npp = (0.0396/(1 + exp(6.33 - 1.5*(tgdd/11500))))*(39.58*wat_stress_index - 14.52)
-        npp_month = frig_factor*(27.20 * max(0, npp))    # TODO
+        npp = (0.0396/(1 + exp(6.33 - 1.5*(tgdd/gdds_scle_factr))))*(39.58*wat_strss_indx - 14.52)
+        npp_month = iws_scle_factr * max(0, npp/t_grow)    # (eq.3.2.1)
     else:
         npp_month = 0
 
