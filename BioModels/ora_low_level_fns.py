@@ -140,10 +140,14 @@ def average_weather(latitude, precip, tair):
 
     return  ave_precip, ave_tmean, pet
 
-def optimisation_cycle(form, iteration = None):
-
-    """Update progress bar."""
-    mess = 'Optimisation Cycle'
+def optimisation_cycle(form, subarea = None, iteration = None):
+    """
+    Update progress bar
+    """
+    if subarea is None:
+        mess = 'Optimisation Cycle'
+    else:
+        mess = 'Sub area: ' + subarea + '\tOptimisation Cycle'
 
     if iteration is None:
         return mess
