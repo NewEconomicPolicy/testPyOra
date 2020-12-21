@@ -59,7 +59,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
         # run RothC
         # =========
-        optimisation_cycle(form, iteration)
+        optimisation_cycle(form, subarea, iteration)
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = \
                         run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
                                   pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
@@ -77,8 +77,8 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         # =====================
         diff_abs = abs(tot_soc_meas - tot_soc_simul)
         if  diff_abs < SOC_MIN_DIFF:
-            print('\nSub area: {}\t\tsimulated and measured SOC: {}\t*** converged *** after {} iterations'
-                                                            .format(subarea, round(tot_soc_simul, 3), iteration + 1))
+            print('\nSimulated and measured SOC: {}\t*** converged *** after {} iterations'
+                                                            .format(round(tot_soc_simul, 3), iteration + 1))
             summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
                                                                                 management.pi_tonnes, summary_table)
             converge_flag = True
