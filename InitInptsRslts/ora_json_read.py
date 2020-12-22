@@ -21,12 +21,15 @@ __version__ = '0.0.0'
 #
 import os
 import json
+from time import sleep
 from glob import glob
 from copy import copy
 
 from ora_low_level_fns import get_imnth
 
 METRIC_LIST = list(['precip', 'tair'])
+ERROR_STR = '*** Error *** '
+sleepTime = 5
 
 def check_json_input_files(form, mgmt_dirname):
     '''
@@ -87,8 +90,17 @@ def _read_crop_mngmnt(mgmt_defn, crop_vars):
     '''
     create crops, typically two crops per year over 10, 20, 30, 40 etc. years
     '''
+
+    # TODO: replace with validation function
+    # ======================================
+    mandatory_key = 'management1'
+    if mandatory_key not in mgmt_defn:
+        print('mandatory key ' + mandatory_key + ' not present in management file')
+        sleep(sleepTime)
+        exit(0)
+
     nyears = mgmt_defn['nyears']
-    this_mgmt = mgmt_defn['management1']
+    this_mgmt = mgmt_defn[mandatory_key]
 
     # create list of crops for one year
     # =================================

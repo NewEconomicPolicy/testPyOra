@@ -188,5 +188,5 @@ def run_soil_cn_algorithms(form):
         form.w_disp_n.setEnabled(False)
         form.w_disp_w.setEnabled(False)
 
-    print('\nCarbon, Nitrogen and Soil Water model run complete\n')
+    print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return
