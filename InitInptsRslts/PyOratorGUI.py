@@ -16,7 +16,7 @@ __author__ = 's03mm5'
 import sys
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, \
-                                                                        QComboBox, QPushButton, QCheckBox, QFileDialog
+                                                    QComboBox, QPushButton, QCheckBox, QFileDialog, QTextEdit
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
@@ -30,39 +30,22 @@ from ora_lookup_df_fns import fetch_variable_definition, fetch_pyora_varname_fro
 from ora_low_level_fns import optimisation_cycle
 
 class Form(QWidget):
-
+    '''
+   define two vertical boxes - in LH vertical box put the painter and in RH put the grid
+   define main horizoneal box to put LH and RH vertical boxes in
+   grid layout consists of combo boxes, labels and buttons
+   '''
     def __init__(self, parent=None):
 
         super(Form, self).__init__(parent)
 
         self.version = 'PyOrator_v2'
         initiation(self)
-        # define two vertical boxes, in LH vertical box put the painter and in RH put the grid
-        # define horizon box to put LH and RH vertical boxes in
-        hbox = QHBoxLayout()
-        hbox.setSpacing(10)
 
-        # left hand vertical box consists of png image
-        # ============================================
-        lh_vbox = QVBoxLayout()
-
-        # LH vertical box contains image only
-        lbl20 = QLabel()
-        pixmap = QPixmap(self.settings['fname_png'])
-        lbl20.setPixmap(pixmap)
-
-        lh_vbox.addWidget(lbl20)
-
-        # add LH vertical box to horizontal box
-        hbox.addLayout(lh_vbox)
-
-        # right hand box consists of combo boxes, labels and buttons
-        # ==========================================================
-        rh_vbox = QVBoxLayout()
-
-        # The layout is done with the QGridLayout
+        # grid will be put in RH vertical box
+        # ===================================
         grid = QGridLayout()
-        grid.setSpacing(10)	# set spacing between widgets
+        grid.setSpacing(10)	    # set spacing between widgets
 
         # line 0 for study details
         # ========================
@@ -257,15 +240,41 @@ class Form(QWidget):
         grid.addWidget(w_exit, 19, 6)
         w_exit.clicked.connect(self.exitClicked)
 
-        # add grid to RH vertical box
-        # ===========================
+        # LH vertical box consists of png image
+        # =====================================
+        lh_vbox = QVBoxLayout()
+
+        lbl20 = QLabel()
+        lbl20.setPixmap(QPixmap(self.settings['fname_png']))
+        lh_vbox.addWidget(lbl20)
+
+        # add grid consisting of combo boxes, labels and buttons to RH vertical box
+        # =========================================================================
+        rh_vbox = QVBoxLayout()
         rh_vbox.addLayout(grid)
 
-        # vertical box goes into horizontal box
-        hbox.addLayout(rh_vbox)
+        # add reporting
+        # =============
+        bot_hbox = QHBoxLayout()
+        w_report = QTextEdit('Freddie')
+        w_report.verticalScrollBar().minimum()
+        w_report.setMinimumHeight(150)
+        bot_hbox.addWidget(w_report, 1)
+        self.w_report = w_report
 
-        # the horizontal box fits inside the window
-        self.setLayout(hbox)
+        # add LH and RH vertical boxes to main horizontal box
+        # ===================================================
+        main_hbox = QHBoxLayout()
+        main_hbox.setSpacing(10)
+        main_hbox.addLayout(lh_vbox)
+        main_hbox.addLayout(rh_vbox)
+
+        # feed horizontal boxes into the window
+        # =====================================
+        outer_layout = QVBoxLayout()
+        outer_layout.addLayout(main_hbox)
+        outer_layout.addLayout(bot_hbox)
+        self.setLayout(outer_layout)
 
         # posx, posy, width, height
         self.setGeometry(500, 100, 500, 400)
