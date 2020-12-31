@@ -32,7 +32,7 @@ from ora_low_level_fns import optimisation_cycle
 class Form(QWidget):
     '''
    define two vertical boxes - in LH vertical box put the painter and in RH put the grid
-   define main horizoneal box to put LH and RH vertical boxes in
+   define main horizontal box to put LH and RH vertical boxes in
    grid layout consists of combo boxes, labels and buttons
    '''
     def __init__(self, parent=None):
@@ -111,16 +111,6 @@ class Form(QWidget):
         w_combo07.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo07))
         self.w_combo07 = w_combo07
         grid.addWidget(w_combo07, 7, 1, 1, 2)
-
-        w_min_wat = QLineEdit()
-        grid.addWidget(w_min_wat, 7, 3)
-        w_min_wat.setFixedWidth(60)
-        self.w_min_wat = w_min_wat
-
-        w_max_wat = QLineEdit()
-        grid.addWidget(w_max_wat, 7, 4)
-        w_max_wat.setFixedWidth(60)
-        self.w_max_wat = w_max_wat
 
         # line 8: nitrogen
         # ================
@@ -256,7 +246,7 @@ class Form(QWidget):
         # add reporting
         # =============
         bot_hbox = QHBoxLayout()
-        w_report = QTextEdit('Freddie')
+        w_report = QTextEdit()
         w_report.verticalScrollBar().minimum()
         w_report.setMinimumHeight(150)
         bot_hbox.addWidget(w_report, 1)
@@ -292,12 +282,18 @@ class Form(QWidget):
             self.w_lbl15.setText(dirname)
 
     def fetchInpJson(self):
-
+        '''
+        disable display push buttons
+        '''
         dirname_cur = self.w_lbl06.text()
         dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
         if dirname != '' and dirname != dirname_cur:
             self.w_lbl06.setText(dirname)
             self.w_lbl07.setText(check_json_input_files(self, dirname))
+            self.w_disp_c.setEnabled(False)
+            self.w_disp_n.setEnabled(False)
+            self.w_disp_w.setEnabled(False)
+            self.w_disp_out.setEnabled(False)
 
     def changeHelpText(self, w_combo):
         '''
@@ -382,12 +378,11 @@ class Form(QWidget):
         except AttributeError:
             pass
 
-        # sleep(2)
         self.close()
 
 def main():
     """
-
+    program entry point
     """
     app = QApplication(sys.argv)  # create QApplication object
     form = Form() # instantiate form
