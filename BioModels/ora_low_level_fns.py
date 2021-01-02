@@ -20,6 +20,7 @@ from time import time
 from openpyxl import load_workbook
 from pandas import read_excel
 from zipfile import BadZipFile
+from PyQt5.QtWidgets import QApplication
 
 from thornthwaite import thornthwaite
 
@@ -138,7 +139,7 @@ def average_weather(latitude, precip, tair):
     year = 2001 # not a leap year
     pet = thornthwaite(ave_tmean, latitude, year)
 
-    return  ave_precip, ave_tmean, pet
+    return ave_precip, ave_tmean, pet
 
 def optimisation_cycle(form, subarea = None, iteration = None):
     """
@@ -147,15 +148,16 @@ def optimisation_cycle(form, subarea = None, iteration = None):
     if subarea is None:
         mess = 'Optimisation Cycle'
     else:
-        mess = 'Sub area: ' + subarea + '\tOptimisation Cycle'
+        mess = 'Sub area: ' + subarea + '\t\tOptimisation Cycle'
 
     if iteration is None:
         return mess
     else:
-        mess += ' {:6d}'.format(iteration)
+        mess += ' {:6d}'.format(iteration + 1)
         if int(iteration/10)*10 == iteration:
-            sys.stdout.flush()
-            sys.stdout.write('\r' + mess)
+            # sys.stdout.flush()
+            # sys.stdout.write('\r' + mess)
+            QApplication.processEvents()
 
         form.w_opt_cycle.setText(mess)
 

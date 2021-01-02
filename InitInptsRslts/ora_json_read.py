@@ -121,7 +121,7 @@ def _read_crop_mngmnt(mgmt_defn, crop_vars):
 
 class ReadJsonSubareas(object, ):
 
-    def __init__(self,  mgmt_files, crop_vars):
+    def __init__(self, mgmt_files, crop_vars):
         '''
         management files have been validated
         gather soil params and management for each subarea

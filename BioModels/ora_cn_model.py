@@ -24,6 +24,7 @@ __version__ = '0.0.0'
 # ---------------
 #
 import os
+from PyQt5.QtWidgets import QApplication
 
 from ora_low_level_fns import summary_table_add, optimisation_cycle
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp
@@ -60,6 +61,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         # run RothC
         # =========
         optimisation_cycle(form, subarea, iteration)
+
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = \
                         run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
                                   pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
@@ -89,6 +91,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), tot_soc_meas, iteration + 1))
 
+    QApplication.processEvents()    # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water
 
 def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):

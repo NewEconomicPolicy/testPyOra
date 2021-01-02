@@ -14,7 +14,7 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 import sys
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, \
                                                     QComboBox, QPushButton, QCheckBox, QFileDialog, QTextEdit
 from subprocess import Popen, DEVNULL
@@ -28,6 +28,7 @@ from ora_json_read import check_json_input_files
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_variable_definition, fetch_pyora_varname_from_pyora_display
 from ora_low_level_fns import optimisation_cycle
+from set_up_logging import OutLog
 
 class Form(QWidget):
     '''
@@ -181,7 +182,7 @@ class Form(QWidget):
         # user feedback
         # =============
         w_opt_cycle = QLabel(optimisation_cycle(self))
-        # grid.addWidget(w_opt_cycle, 18, 2, 1, 2)
+        grid.addWidget(w_opt_cycle, 18, 1, 1, 6)
         self.w_opt_cycle = w_opt_cycle
 
         # line 19
@@ -251,6 +252,8 @@ class Form(QWidget):
         w_report.setMinimumHeight(150)
         bot_hbox.addWidget(w_report, 1)
         self.w_report = w_report
+        sys.stdout = OutLog(self.w_report, sys.stdout)
+        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
         # add LH and RH vertical boxes to main horizontal box
         # ===================================================
