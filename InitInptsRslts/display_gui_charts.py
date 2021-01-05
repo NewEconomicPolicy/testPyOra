@@ -17,8 +17,8 @@ __version__ = '0.0.0'
 #
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget, QTableWidget, QTableWidgetItem, \
-                                                            QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, \
+                                                                                        QPushButton, QLineEdit, QLabel
 from PyQt5.QtChart import QChart, QValueAxis, QChartView, QLineSeries
 from random import random
 from math import floor, ceil
@@ -157,6 +157,8 @@ class Second(QWidget):
             self.w_chart.removeAllSeries()
             # self.w_chart.removeAxis()
         else:
+            self.ymin_orig = yaxis_min
+            self.ymax_orig = yaxis_max
             ndecimals = int(out_format.rstrip('f'))
 
         line_series = {}
@@ -186,6 +188,9 @@ class Second(QWidget):
         self.w_chart.axisY(lseries).setRange(yaxis_min, yaxis_max)
         self.w_chart.axisY(lseries).setTitleText(pyora_display + ' ' + units)
 
+        self.w_min_yval.setText(str(round(yaxis_min,4)))
+        self.w_max_yval.setText(str(round(yaxis_max,4)))
+
         self.ndecimals = ndecimals
         self.subareas = subareas
         self.data_for_display = data_for_display
@@ -212,7 +217,9 @@ class Second(QWidget):
         except ValueError as err:
             ymax = None
 
-        if ymin is not None and ymax is not None:
+        if ymin is None or ymax is None:
+            self.post_line_series(self.ymin_orig, self.ymax_orig)
+        else:
             if ymin > ymax:
                 ytmp = ymin
                 ymin = ymax
@@ -221,12 +228,11 @@ class Second(QWidget):
             if ymin == ymax:
                 ymax += 10.0
 
-        self.post_line_series(ymin, ymax)
-        pass
+            self.post_line_series(ymin, ymax)
 
     def resetClicked(self):
 
-        pass
+        self.post_line_series(self.ymin_orig, self.ymax_orig)
 
     def print_mess(self):
 
@@ -275,22 +281,5 @@ def _select_data_for_display(form, category, metric):
 
         ntsteps = len(data_for_display[subareas[0]])
         ndecimals = int(out_format.rstrip('f'))
-        '''
-        # check min/max specified by user
-        # ===============================
 
-        try:
-            ymin = float(form.second.w_min_yval.text())
-        except ValueError as err:
-            ymin = LRGE_NUM
-
-        ymin = floor(min(ymin, yaxis_min))
-
-        try:
-            ymax = float(form.second.w_max_yval.text())
-        except ValueError as err:
-            ymax = -LRGE_NUM
-
-        ymax = ceil(max(ymax, yaxis_max))
-        '''
     return  subareas, data_for_display, ntsteps, description, units, out_format, pyora_display, yaxis_min, yaxis_max
