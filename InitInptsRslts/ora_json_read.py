@@ -96,8 +96,7 @@ def _read_crop_mngmnt(mgmt_defn, crop_vars):
     mandatory_key = 'management1'
     if mandatory_key not in mgmt_defn:
         print('mandatory key ' + mandatory_key + ' not present in management file')
-        sleep(sleepTime)
-        exit(0)
+        return None
 
     nyears = mgmt_defn['nyears']
     this_mgmt = mgmt_defn[mandatory_key]
@@ -122,7 +121,7 @@ def _read_crop_mngmnt(mgmt_defn, crop_vars):
 
 class ReadJsonSubareas(object, ):
 
-    def __init__(self,  mgmt_files, crop_vars):
+    def __init__(self, mgmt_files, crop_vars):
         '''
         management files have been validated
         gather soil params and management for each subarea

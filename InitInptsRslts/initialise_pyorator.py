@@ -111,7 +111,7 @@ def _read_setup_file(program_id):
     # ================================================
     config_file = os.path.normpath(settings['config_dir'] + '/' + program_id + '_config.json')
     settings['config_file'] = config_file
-    print('Using configuration file: ' + config_file)
+    # print('Using configuration file: ' + config_file)
 
     settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
     settings['excel_path'] = EXCEL_EXE_PATH

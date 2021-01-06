@@ -217,6 +217,16 @@ def nh4_mineralisation(soil_n_sply):
                 Losses of ammonium
      =====================================
 '''
+def n2o_released_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
+    '''
+    After Bell et al. (2012), 2% of the fully nitrified N is assumed to be lost as gas, with 40% lost as NO and
+    60% s N2O, and 2% of the partially nitrified N is assumed to be lost as gas at field capacity, with a linear
+    decrease in this loss as water declines to wilting point
+    '''
+    n2o_relse_nitrif = nh4_nitrif * ( (n_parms['prop_n2o_fc'] * (wat_soil / wc_fld_cap)) +
+                                      (n_parms['prop_nitrif_gas'] * (1 - n_parms['prop_nitrif_no'])))  # (eq.2.4.24)
+    return n2o_relse_nitrif
+
 def nh4_immobilisation(soil_n_sply, nh4_min):
     '''
     Immobilisation – A negative soil N supply represents immobilised N and is assumed

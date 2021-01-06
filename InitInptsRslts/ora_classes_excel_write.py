@@ -169,7 +169,7 @@ class A2dDenitrifiedNloss(object, ):
                'no3_avail': '2f', 'n_denit_max': '2f', 'rate_denit_no3': '2f',
                'wc_pwp': '2f', 'wat_soil': '2f', 'wc_fld_cap': '2f', 'rate_denit_moist': '2f',
                'co2_release': '2f', 'rate_denit_bio': '2f', 'no3_denit': '2f', 'no3_denit_adj': '2f',
-               'prop_n2_wat': '2f', 'prop_n2_no3': '2f', 'n2o_denit_relese': '2f'}
+               'prop_n2_wat': '2f', 'prop_n2_no3': '2f', 'n2o_relse_denit': '2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 

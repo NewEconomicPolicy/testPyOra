@@ -14,9 +14,9 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 import sys
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, \
-                                                                        QComboBox, QPushButton, QCheckBox, QFileDialog
+                                                    QComboBox, QPushButton, QCheckBox, QFileDialog, QTextEdit
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
@@ -28,41 +28,25 @@ from ora_json_read import check_json_input_files
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_variable_definition, fetch_pyora_varname_from_pyora_display
 from ora_low_level_fns import optimisation_cycle
+from set_up_logging import OutLog
 
 class Form(QWidget):
-
+    '''
+   define two vertical boxes - in LH vertical box put the painter and in RH put the grid
+   define main horizontal box to put LH and RH vertical boxes in
+   grid layout consists of combo boxes, labels and buttons
+   '''
     def __init__(self, parent=None):
 
         super(Form, self).__init__(parent)
 
         self.version = 'PyOrator_v2'
         initiation(self)
-        # define two vertical boxes, in LH vertical box put the painter and in RH put the grid
-        # define horizon box to put LH and RH vertical boxes in
-        hbox = QHBoxLayout()
-        hbox.setSpacing(10)
 
-        # left hand vertical box consists of png image
-        # ============================================
-        lh_vbox = QVBoxLayout()
-
-        # LH vertical box contains image only
-        lbl20 = QLabel()
-        pixmap = QPixmap(self.settings['fname_png'])
-        lbl20.setPixmap(pixmap)
-
-        lh_vbox.addWidget(lbl20)
-
-        # add LH vertical box to horizontal box
-        hbox.addLayout(lh_vbox)
-
-        # right hand box consists of combo boxes, labels and buttons
-        # ==========================================================
-        rh_vbox = QVBoxLayout()
-
-        # The layout is done with the QGridLayout
+        # grid will be put in RH vertical box
+        # ===================================
         grid = QGridLayout()
-        grid.setSpacing(10)	# set spacing between widgets
+        grid.setSpacing(10)	    # set spacing between widgets
 
         # line 0 for study details
         # ========================
@@ -128,16 +112,6 @@ class Form(QWidget):
         w_combo07.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo07))
         self.w_combo07 = w_combo07
         grid.addWidget(w_combo07, 7, 1, 1, 2)
-
-        w_min_wat = QLineEdit()
-        grid.addWidget(w_min_wat, 7, 3)
-        w_min_wat.setFixedWidth(60)
-        self.w_min_wat = w_min_wat
-
-        w_max_wat = QLineEdit()
-        grid.addWidget(w_max_wat, 7, 4)
-        w_max_wat.setFixedWidth(60)
-        self.w_max_wat = w_max_wat
 
         # line 8: nitrogen
         # ================
@@ -208,7 +182,7 @@ class Form(QWidget):
         # user feedback
         # =============
         w_opt_cycle = QLabel(optimisation_cycle(self))
-        # grid.addWidget(w_opt_cycle, 18, 2, 1, 2)
+        grid.addWidget(w_opt_cycle, 18, 1, 1, 6)
         self.w_opt_cycle = w_opt_cycle
 
         # line 19
@@ -257,15 +231,43 @@ class Form(QWidget):
         grid.addWidget(w_exit, 19, 6)
         w_exit.clicked.connect(self.exitClicked)
 
-        # add grid to RH vertical box
-        # ===========================
+        # LH vertical box consists of png image
+        # =====================================
+        lh_vbox = QVBoxLayout()
+
+        lbl20 = QLabel()
+        lbl20.setPixmap(QPixmap(self.settings['fname_png']))
+        lh_vbox.addWidget(lbl20)
+
+        # add grid consisting of combo boxes, labels and buttons to RH vertical box
+        # =========================================================================
+        rh_vbox = QVBoxLayout()
         rh_vbox.addLayout(grid)
 
-        # vertical box goes into horizontal box
-        hbox.addLayout(rh_vbox)
+        # add reporting
+        # =============
+        bot_hbox = QHBoxLayout()
+        w_report = QTextEdit()
+        w_report.verticalScrollBar().minimum()
+        w_report.setMinimumHeight(150)
+        bot_hbox.addWidget(w_report, 1)
+        self.w_report = w_report
+        sys.stdout = OutLog(self.w_report, sys.stdout)
+        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
-        # the horizontal box fits inside the window
-        self.setLayout(hbox)
+        # add LH and RH vertical boxes to main horizontal box
+        # ===================================================
+        main_hbox = QHBoxLayout()
+        main_hbox.setSpacing(10)
+        main_hbox.addLayout(lh_vbox)
+        main_hbox.addLayout(rh_vbox)
+
+        # feed horizontal boxes into the window
+        # =====================================
+        outer_layout = QVBoxLayout()
+        outer_layout.addLayout(main_hbox)
+        outer_layout.addLayout(bot_hbox)
+        self.setLayout(outer_layout)
 
         # posx, posy, width, height
         self.setGeometry(500, 100, 500, 400)
@@ -283,12 +285,18 @@ class Form(QWidget):
             self.w_lbl15.setText(dirname)
 
     def fetchInpJson(self):
-
+        '''
+        disable display push buttons
+        '''
         dirname_cur = self.w_lbl06.text()
         dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
         if dirname != '' and dirname != dirname_cur:
             self.w_lbl06.setText(dirname)
             self.w_lbl07.setText(check_json_input_files(self, dirname))
+            self.w_disp_c.setEnabled(False)
+            self.w_disp_n.setEnabled(False)
+            self.w_disp_w.setEnabled(False)
+            self.w_disp_out.setEnabled(False)
 
     def changeHelpText(self, w_combo):
         '''
@@ -373,12 +381,11 @@ class Form(QWidget):
         except AttributeError:
             pass
 
-        # sleep(2)
         self.close()
 
 def main():
     """
-
+    program entry point
     """
     app = QApplication(sys.argv)  # create QApplication object
     form = Form() # instantiate form
