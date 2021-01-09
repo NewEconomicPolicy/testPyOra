@@ -24,6 +24,6 @@ def test_livestock_algorithms(form):
     '''
     stub
     '''
-    print('ORATOR livestock model')
+    print('ORATOR livestock model - Test GitHub Upload D McBey')
 
     return
