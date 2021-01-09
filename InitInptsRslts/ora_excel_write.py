@@ -19,21 +19,21 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
+import os
 from glob import glob
 from pandas import DataFrame, ExcelWriter, Series
-
-from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
-                A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification, \
-                B1CropProduction, B1cNlimitation
-import os
+from PyQt5.QtWidgets import QApplication
 
 from openpyxl import load_workbook
 from openpyxl.chart import (LineChart, Reference)
 
+from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
+                A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification, \
+                B1CropProduction, B1cNlimitation
+
 from ora_lookup_df_fns import fetch_variable_definition
 
 PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py     width in EMUs
-MIN_NUM_COLS = 5
 
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
@@ -65,56 +65,106 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
     print()
 
     crop_prodn_b1 = B1CropProduction(pettmp, soil_water, mngmnt_ss, mngmnt_fwd)
-    _write_excel_out(study_full_name, lookup_df, 'B1 Crop Production', out_dir, crop_prodn_b1)
+    _write_excel_out(study_full_name, lookup_df, 'B1 Crop Production', out_dir, crop_prodn_b1, create_flag = True)
 
     n_limitation_b1c = B1cNlimitation(pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd)
     _write_excel_out(study_full_name, lookup_df, 'B1c Nitrogen Limitation', out_dir, n_limitation_b1c)
 
     som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A1. SOM change', out_dir, som_change_a1)
+    _write_excel_out(study_full_name, lookup_df, 'A1 SOM change', out_dir, som_change_a1)
 
     mineralN_a2 = A2MineralN(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2. Mineral N', out_dir, mineralN_a2)
+    _write_excel_out(study_full_name, lookup_df, 'A2 Mineral N', out_dir, mineralN_a2)
 
     soilN_supply_a2a = A2aSoilNsupply(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2a. Soil N supply', out_dir, soilN_supply_a2a)
+    _write_excel_out(study_full_name, lookup_df, 'A2a Soil N supply', out_dir, soilN_supply_a2a)
 
     cropN_uptake_a2b = A2bCropNuptake(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2b. Crop N uptake', out_dir, cropN_uptake_a2b)  
+    _write_excel_out(study_full_name, lookup_df, 'A2b Crop N uptake', out_dir, cropN_uptake_a2b)
      
     leachedN_loss_a2c = A2cLeachedNloss(pettmp, soil_water, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2c. LeachedNloss', out_dir, leachedN_loss_a2c)
+    _write_excel_out(study_full_name, lookup_df, 'A2c LeachedNloss', out_dir, leachedN_loss_a2c)
 
     denitrified_Nloss_a2d = A2dDenitrifiedNloss(pettmp, carbon_change, nitrogen_change, soil_water)
-    _write_excel_out(study_full_name, lookup_df, 'A2d. Denitrified N loss', out_dir, denitrified_Nloss_a2d)
+    _write_excel_out(study_full_name, lookup_df, 'A2d Denitrified N loss', out_dir, denitrified_Nloss_a2d)
 
     volatilised_Nloss_a2e = A2eVolatilisedNloss(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2e. Volatilised N loss', out_dir, volatilised_Nloss_a2e)
+    _write_excel_out(study_full_name, lookup_df, 'A2e Volatilised N loss', out_dir, volatilised_Nloss_a2e)
 
     nitrification_a2f = A2fNitrification(pettmp, nitrogen_change)
-    _write_excel_out(study_full_name, lookup_df, 'A2f. Nitrification', out_dir, nitrification_a2f)
+    _write_excel_out(study_full_name, lookup_df, 'A2f Nitrification', out_dir, nitrification_a2f)
 
     soil_water_a3 = A3SoilWater(pettmp, nitrogen_change, soil_water)
     _write_excel_out(study_full_name, lookup_df, 'A3 Soil Water', out_dir, soil_water_a3)
 
     return
 
-def _generate_metric_charts(fname, lookup_df, sheet_name):
+def _write_excel_out(study, lookup_df, sheet_name, out_dir, output_obj, create_flag = False):
+    '''
+    condition data before outputting
+    '''
+    func_name =  __prog__ +  ' write_excel_out'
+
+    # make a safe name
+    # ===============
+    fname = os.path.join(out_dir, study + '.xlsx')
+    if create_flag:
+        if os.path.isfile(fname):
+            try:
+                os.remove(fname)
+            except PermissionError as err:
+                print(err)
+                return -1
+    else:
+        if not os.path.isfile(fname):
+            print('File ' + fname + ' must exist')
+            return -1
+
+    # create data frame from dictionary
+    # =================================
+    data_frame = DataFrame()
+    for var_name in output_obj.var_name_list:
+
+        tmp_list = output_obj.sheet_data[var_name]
+
+        var_fmt = output_obj.var_formats[var_name]
+        if var_fmt[-1] == 'f':
+            ndecis = int(var_fmt[:-1])
+            try:
+                if var_name == 'crop_name':
+                    data_frame[var_name] = Series(tmp_list)
+                else:
+                    data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
+            except TypeError as err:
+                print(err)
+                return -1
+        else:
+            data_frame[var_name] = Series(tmp_list)
+
+    # use pandas to write to Excel
+    # ============================
+    writer = ExcelWriter(fname, engine = 'openpyxl')
+    if not create_flag:
+        writer.book = load_workbook(fname)  # open existing workbook
+        writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)   # copy existing sheets
+
+    data_frame.to_excel(writer, sheet_name, index=False, freeze_panes=(1, 1))
+    writer.save()
+
+    # reopen Excel file and write a chart
+    # ===================================
+    _generate_metric_charts(fname, lookup_df, sheet_name, create_flag)
+
+    return 0
+
+def _generate_metric_charts(fname, lookup_df, sheet_name, create_flag):
     '''
     add charts to an existing Excel file
     '''
     func_name =  __prog__ + ' generate_charts'
 
-    if not os.path.exists(fname):
-        print('File ' + fname + ' must exist')
-        return -1
-
     wb_obj = load_workbook(fname, data_only=True)
     sheet = wb_obj[sheet_name]
-    if sheet.max_column < MIN_NUM_COLS:
-        print('Sheet ' + sheet_name + ' must must have at least {} columns, found: {}'
-                                                    .format(MIN_NUM_COLS, sheet.max_column))
-        return -1
 
     # reset column width
     # ==================
@@ -138,7 +188,8 @@ def _generate_metric_charts(fname, lookup_df, sheet_name):
 
     # chart creation
     # ==============
-    chart_sheet = wb_obj.create_sheet('charts')
+    sheet_ref = sheet_name.split()[0]
+    chart_sheet = wb_obj.create_sheet(sheet_ref + ' charts')
     nrow_chart = 10
 
     # generate charts for all metrics except for period, month and tstep
@@ -174,62 +225,16 @@ def _generate_metric_charts(fname, lookup_df, sheet_name):
     try:
         wb_obj.active = 1   # make the charts sheet active - assumes there are only two sheets
         wb_obj.save(fname)
-        print('\tcreated: ' + fname)
-    except PermissionError as e:
-        print(str(e) + ' - could not create: ' + fname)
+        if create_flag:
+            print('Created: ' + fname)
+        print('\tadded charts for sheet: ' + sheet_name)
+
+    except PermissionError as err:
+        print(str(err) + ' - could not save: ' + fname)
+
+    QApplication.processEvents()
 
     return
-
-def _write_excel_out(study, lookup_df, sheet_name, out_dir, output_obj):
-    '''
-    condition data before outputting
-    '''
-    func_name =  __prog__ +  ' write_excel_out'
-
-    # make a safe name
-    # ===============
-    sht_abbrev = sheet_name.replace('.','').replace(' ','_')    # remove periods and replace spaces with underscores
-    fname = os.path.join(out_dir, study + ' ' + sht_abbrev + '.xlsx')
-    if os.path.isfile(fname):
-        try:
-            os.remove(fname)
-        except PermissionError as err:
-            print(err)
-            return -1
-
-    # create data frame from dictionary
-    # =================================
-    data_frame = DataFrame()
-    for var_name in output_obj.var_name_list:
-
-        tmp_list = output_obj.sheet_data[var_name]
-
-        var_fmt = output_obj.var_formats[var_name]
-        if var_fmt[-1] == 'f':
-            ndecis = int(var_fmt[:-1])
-            try:
-                if var_name == 'crop_name':
-                    data_frame[var_name] = Series(tmp_list)
-                else:
-                    data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
-            except TypeError as err:
-                print(err)
-                return -1
-        else:
-            data_frame[var_name] = Series(tmp_list)
-
-    # write to Excel
-    # ==============
-    # print('Will write ' + fname)
-    writer = ExcelWriter(fname)
-    data_frame.to_excel(writer, sheet_name, index = False, freeze_panes = (1,1))
-    writer.save()
-
-    # reopen Excel file and write a chart
-    # ===================================
-    _generate_metric_charts(fname, lookup_df, sheet_name)
-
-    return 0
 
 def extend_out_dir(form):
 

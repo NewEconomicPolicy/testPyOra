@@ -14,8 +14,9 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 import sys
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QColor
-from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, \
+from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, \
                                                     QComboBox, QPushButton, QCheckBox, QFileDialog, QTextEdit
 from subprocess import Popen, DEVNULL
 
@@ -177,7 +178,7 @@ class Form(QWidget):
 
         w_combo17 = QComboBox()
         self.w_combo17 = w_combo17
-        grid.addWidget(w_combo17, 17, 1, 1, 4)
+        grid.addWidget(w_combo17, 17, 1, 1, 3)
 
         # user feedback
         # =============
@@ -222,13 +223,13 @@ class Form(QWidget):
         w_save = QPushButton("Save", self)
         helpText = 'save the configuration file'
         w_save.setToolTip(helpText)
-        grid.addWidget(w_save, 19, 5)
+        grid.addWidget(w_save, 19, 6)
         w_save.clicked.connect(self.saveClicked)
 
         w_exit = QPushButton("Exit", self)
         helpText = 'Close GUI - the configuration file will be saved'
         w_exit.setToolTip(helpText)
-        grid.addWidget(w_exit, 19, 6)
+        grid.addWidget(w_exit, 19, 7)
         w_exit.clicked.connect(self.exitClicked)
 
         # LH vertical box consists of png image
@@ -250,6 +251,15 @@ class Form(QWidget):
         w_report = QTextEdit()
         w_report.verticalScrollBar().minimum()
         w_report.setMinimumHeight(150)
+        w_report.setMinimumWidth(1000)
+        w_report.setStyleSheet('font: normal 8px Courier')
+        ''' 
+        w_report.setStyleSheet('font: 9pt Courier')
+        w_report.setStyleSheet('font: normal 12px Calabri; color: blue;'
+                               'background-color: yellow;'
+                               'selection-color: yellow;'
+                               'selection-background-color: blue;')
+        '''
         bot_hbox.addWidget(w_report, 1)
         self.w_report = w_report
         sys.stdout = OutLog(self.w_report, sys.stdout)
@@ -260,7 +270,7 @@ class Form(QWidget):
         main_hbox = QHBoxLayout()
         main_hbox.setSpacing(10)
         main_hbox.addLayout(lh_vbox)
-        main_hbox.addLayout(rh_vbox)
+        main_hbox.addLayout(rh_vbox, stretch = 1)
 
         # feed horizontal boxes into the window
         # =====================================
@@ -270,7 +280,7 @@ class Form(QWidget):
         self.setLayout(outer_layout)
 
         # posx, posy, width, height
-        self.setGeometry(500, 100, 500, 400)
+        self.setGeometry(500, 100, 750, 400)
         self.setWindowTitle('Run ORATOR analysis')
 
         # reads and set values from last run
