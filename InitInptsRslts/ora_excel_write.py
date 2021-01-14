@@ -69,7 +69,7 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
 
     n_limitation_b1c = B1cNlimitation(pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd)
     _write_excel_out(study_full_name, lookup_df, 'B1c Nitrogen Limitation', out_dir, n_limitation_b1c)
-
+    return
     som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
     _write_excel_out(study_full_name, lookup_df, 'A1 SOM change', out_dir, som_change_a1)
 
@@ -149,7 +149,11 @@ def _write_excel_out(study, lookup_df, sheet_name, out_dir, output_obj, create_f
         writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)   # copy existing sheets
 
     data_frame.to_excel(writer, sheet_name, index=False, freeze_panes=(1, 1))
-    writer.save()
+    try:
+        writer.save()
+    except PermissionError as err:
+        print(err)
+        return -1
 
     # reopen Excel file and write a chart
     # ===================================

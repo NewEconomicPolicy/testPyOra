@@ -54,25 +54,27 @@ class  B1CropProduction(object, ):
 
     def __init__(self, pettmp, soil_water, mngmnt_ss, mngmnt_fwd):
         '''
-        B1
+        B1      TODO: removed 'days_month': 'd' from var_format_dict - don't know why it was there
         '''
         self.title = 'Crop Production'
 
-        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'days_month': 'd','crop_name': '2f',
-                        'tair': '2f', 'precip': '2f','npp_miami':'2f', 'prodn_miami':'2f', 'yld_miami':'2f',
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+                        'wat_soil': '2f', 'tair': '2f', 'npp_miami':'2f', 'prodn_miami':'2f', 'yld_miami':'2f',
                         'grow_dds':'2f', 'aet':'2f', 'pet':'2f', 'npp_zaks':'2f', 'prodn_zaks':'2f', 'yld_zaks':'2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
+        sheet_data['crop_name'] = mngmnt_ss.crop_names + mngmnt_fwd.crop_names
         sheet_data['aet'] = soil_water.data['aet']
         sheet_data['pet'] = pettmp['pet']
 
-        sheet_data['precip'] = pettmp['precip']
+        sheet_data['wat_soil'] = soil_water.data['wat_soil']
         sheet_data['tair'] = pettmp['tair']
 
         sheet_data['grow_dds'] = pettmp['grow_dds']
         sheet_data['npp_miami'] = mngmnt_ss.npp_miami + mngmnt_fwd.npp_miami
         sheet_data['npp_zaks'] = mngmnt_ss.npp_zaks + mngmnt_fwd.npp_zaks
+
         self.sheet_data = sheet_data
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict

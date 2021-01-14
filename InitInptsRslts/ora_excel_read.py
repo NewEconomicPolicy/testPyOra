@@ -202,8 +202,8 @@ def _read_crop_vars(xls_fname, sheet_name):
     read maximum rooting depths etc. for each crop from sheet A1c
     '''
     crop_parm_names = Series(list(['lu_code', 'rat_dpm_rpm', 'harv_indx', 'prop_npp_to_pi', 'max_root_dpth',
-                    'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'dummy1']) + MNTH_NAMES_SHORT + list(['dummy2',
-                    'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
+                    'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'dummy1']) + MNTH_NAMES_SHORT + list(['max_yld',
+                    'dummy2', 'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
                     'dummy3', 'n_rcoef_a', 'n_rcoef_b', 'n_rcoef_c', 'n_rcoef_d', 'gdds_scle_factr','iws_scle_factr']))
 
     data = read_excel(xls_fname, sheet_name)

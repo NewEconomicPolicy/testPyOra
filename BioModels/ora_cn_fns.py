@@ -23,7 +23,6 @@ from math import exp, atan
 from time import sleep
 
 sleepTime = 5
-MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
     '''
