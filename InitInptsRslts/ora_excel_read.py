@@ -28,12 +28,12 @@ from zipfile import BadZipFile
 
 from ora_excel_write import retrieve_output_xls_files
 from ora_water_model import add_pet_to_weather
+from ora_cn_fns import plant_inputs_crops_distribution
 from ora_low_level_fns import average_weather
 
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Inputs3b- Soils & Rotations',
-                             'Inputs3d- Changes in rotations', 'Crop parms','Org Waste parms','Weather'])
+REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather'])
 
 ERR_MESS_SHEET = '*** Error *** reading sheet '
 
@@ -110,7 +110,7 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
 
     n_parm_names = list(['atmos_n_depos', 'prop_atmos_dep_no3', 'no3_min', 'k_nitrif',
                       'n_denit_max', 'n_d50', 'prop_n2o_fc', 'prop_nitrif_gas', 'prop_nitrif_no',
-                      'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_som', 'r_dry'])
+                      'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_som', 'r_dry', 'k_c_rate'])
 
     data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1,3))
     n_parms_df = data.dropna(how='all')
@@ -119,49 +119,6 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
         n_parms[defn]  = n_parms_df['Value'].values[indx]
 
     return n_parms
-
-def _read_crop_mngmnt_sheet(xls_fname, sheet_name, skip_until, crop_vars):
-
-    nlines_crop_desc = 26   # temporary
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1,9))
-    management = data.dropna(how='all')
-    area_names = management.columns[3:]
-    management = management.rename(columns={'Unnamed: 1': 'Crop'})
-
-    soil_section = management['Crop'].loc[management['Crop'] == 'SOILS']
-
-    crop_starts = management['Crop'].loc[management['Crop'] == 'Crop ']
-
-    crop_mngmnt_all_areas = {}
-    soil_all_areas = {}
-
-    for area in area_names:
-
-        if len(soil_section) > 0:
-            soil_all_areas[area] = Soil(management[area].values[2: 10])
-
-        crop_defns = []
-        for indx in crop_starts.index:
-            crop_slice = management[area].values[indx + 1: indx + nlines_crop_desc - 1]
-            crop_defn = Crop(crop_slice)
-            crop_name = crop_defn.crop_lu
-            if type(crop_name) is not str:
-                break
-
-            # check for consistency
-            # =====================
-            crop_defns.append(crop_defn)
-            if crop_name in crop_vars:
-                ngrow = crop_defn.harvest_mnth - crop_defn.sowing_mnth + 1
-                nprops = len(crop_vars[crop_name]['pi_prop'])
-                if ngrow != nprops:
-                    print(ERR_MESS_SHEET + sheet_name + ' inconsistent growing season lengths: {} {}'.format(ngrow, nprops))
-            else:
-                print(ERR_MESS_SHEET + sheet_name + ' unknown crop: {} '.format(crop_name))
-
-        crop_mngmnt_all_areas[area] = crop_defns
-
-    return crop_mngmnt_all_areas, soil_all_areas
 
 def _extract_weather(pettmp_dframe, year_strt, year_end, indx):
 
@@ -202,8 +159,8 @@ def _read_crop_vars(xls_fname, sheet_name):
     read maximum rooting depths etc. for each crop from sheet A1c
     '''
     crop_parm_names = Series(list(['lu_code', 'rat_dpm_rpm', 'harv_indx', 'prop_npp_to_pi', 'max_root_dpth',
-                    'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'dummy1']) + MNTH_NAMES_SHORT + list(['max_yld',
-                    'dummy2', 'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
+                    'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'max_yld', 'dummy1',
+                    'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
                     'dummy3', 'n_rcoef_a', 'n_rcoef_b', 'n_rcoef_c', 'n_rcoef_d', 'gdds_scle_factr','iws_scle_factr']))
 
     data = read_excel(xls_fname, sheet_name)
@@ -214,25 +171,29 @@ def _read_crop_vars(xls_fname, sheet_name):
     except ValueError as err:
 
         print(ERR_MESS_SHEET + sheet_name + ' ' + str(err))
-        crop_vars = None
+        return None
 
-    # normalise PI tonnages
-    # =====================
+    # discard unwanted entries
+    # ========================
     for crop in ['Crop', 'None', 'Null']:
         del(crop_vars[crop])
 
     for crop_name in crop_vars:
-        pi_tonnes = []
-        for mnth in MNTH_NAMES_SHORT:
-            pi = crop_vars[crop_name][mnth]
-            if  pi > 0:
-                pi_tonnes.append(pi)
 
-        pi_proportions = [val/sum(pi_tonnes) for val in pi_tonnes]
-        crop_vars[crop_name]['pi_tonnes'] = pi_tonnes
-        crop_vars[crop_name]['pi_prop'] = pi_proportions
+        # clean data
+        # ==========
+        for var in ['harv_mnth', 'sow_mnth', 'lu_code']:
+            crop_vars[crop_name][var] = int(crop_vars[crop_name][var])
 
-        crop_vars[crop_name]['t_grow'] = crop_vars[crop_name]['harv_mnth'] - crop_vars[crop_name]['sow_mnth'] + 1
+        # number of months in the growing season
+        # ======================================
+        harv_mnth = crop_vars[crop_name]['harv_mnth']
+        sow_mnth = crop_vars[crop_name]['sow_mnth']
+        if sow_mnth > harv_mnth:
+            harv_mnth += 12
+        t_grow = harv_mnth - sow_mnth + 1
+        crop_vars[crop_name]['pi_tonnes'], crop_vars[crop_name]['pi_prop'] = plant_inputs_crops_distribution(t_grow)
+        crop_vars[crop_name]['t_grow'] = t_grow
 
     return crop_vars
 
@@ -340,22 +301,6 @@ class ReadCropOwNitrogenParms(object, ):
         # =====================================================
         self.ow_parms = _read_organic_waste_sheet(xls_inp_fname, 'Org Waste parms', 0)
         self.crop_vars = _read_crop_vars(xls_inp_fname, 'Crop parms')
-
-class ReadInputSubareas(object, ):
-
-    def __init__(self, xls_inp_fname, crop_vars):
-        '''
-        read parameters from ORATOR inputs Excel file
-        '''
-
-        print('Reading management sheets...')
-
-        # Soil params and management
-        # ==========================
-        self.crop_mngmnt_ss, self.soil_all_areas = \
-                        _read_crop_mngmnt_sheet(xls_inp_fname, 'Inputs3b- Soils & Rotations', 13, crop_vars)
-        self.crop_mngmnt_fwd, dummy = \
-                        _read_crop_mngmnt_sheet(xls_inp_fname, 'Inputs3d- Changes in rotations', 14, crop_vars)
 
 class Soil(object,):
     '''

@@ -53,7 +53,6 @@ def check_json_input_files(form, mgmt_dirname):
     nfiles = len(mgmt_files)
     if nfiles == 0 :
         mess = 'No management JSON files'
-        form.w_use_json.setCheckState(0)  # adjust GUI to deny use of JSON files
     else:
         dummy, short_fname = os.path.split(mgmt_files[0])
         mess = '{} management JSON files eg: {}'.format(nfiles, short_fname)

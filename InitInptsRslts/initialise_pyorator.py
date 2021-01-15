@@ -183,7 +183,6 @@ def _write_default_config_file(config_file):
     _default_config = {
         'inp_xls': '',
         'mgmt_dir': '',
-        'use_json': False,
         'write_excel': True,
         'out_dir': ''
     }
@@ -211,7 +210,7 @@ def read_config_file(form):
     else:
         config = _write_default_config_file(config_file)
 
-    for attrib in list(['inp_xls', 'mgmt_dir', 'write_excel', 'out_dir', 'use_json']):
+    for attrib in list(['inp_xls', 'mgmt_dir', 'write_excel', 'out_dir']):
         if attrib not in config:
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
@@ -231,11 +230,6 @@ def read_config_file(form):
     # ========================================
     mgmt_dir = os.path.normpath(config['mgmt_dir'])
     form.w_lbl06.setText(mgmt_dir)
-
-    if config['use_json']:
-        form.w_use_json.setCheckState(2)
-    else:
-        form.w_use_json.setCheckState(0)
 
     form.w_lbl07.setText(check_json_input_files(form, mgmt_dir))
 
@@ -282,7 +276,6 @@ def write_config_file(form, message_flag=True):
     config = {
         "inp_xls": form.w_lbl13.text(),
         "mgmt_dir": form.w_lbl06.text(),
-        "use_json": form.w_use_json.isChecked(),
         "write_excel": form.w_make_xls.isChecked(),
         "out_dir": form.w_lbl15.text()
     }

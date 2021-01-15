@@ -85,16 +85,8 @@ class Form(QWidget):
         grid.addWidget(w_lbl06, 4, 1, 1, 5)
         self.w_lbl06 = w_lbl06
 
-        # line 5
-        # ======
-        w_use_json = QCheckBox('Use JSON files')
-        helpText = 'Will use JSON files for management instead of Inputs3b and Inputs3d sheets in Excel inputs file'
-        w_use_json.setToolTip(helpText)
-        w_use_json.setChecked(True)
-        grid.addWidget(w_use_json, 5, 0, 1, 2)
-        self.w_use_json = w_use_json
-
-        # for message from check_json_fname
+        # line 5 - for message from check_json_fname
+        # ==========================================
         w_lbl07 = QLabel('')
         grid.addWidget(w_lbl07, 5, 1, 1, 5)
         self.w_lbl07 = w_lbl07

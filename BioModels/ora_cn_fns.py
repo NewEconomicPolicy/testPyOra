@@ -24,6 +24,10 @@ from time import sleep
 
 sleepTime = 5
 
+def plant_inputs_annual_crops(t_grow):
+
+    return
+
 def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
     '''
     This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
@@ -240,32 +244,32 @@ def carbon_lost_from_pool(c_in_pool, k_rate_constant, rate_mod):
 
     return c_loss
 
-def plant_inputs_crops_distribution(c_pi_yr, t_sow, t_harv, annual_flag = True):
+def plant_inputs_crops_distribution(t_grow, c_pi_yr = None):
     '''
     plant inputs for annual crops are distributed over the growing season between sowing and harvest using
     the equation for C inputs provided by Bradbury et al. (1993);
     '''
     k_pi_c = 0.6    # constant describing the shape of the exponential curve for C input
 
-    if annual_flag:
-        # annual crops - (14)
-        # ==================
-        c_pi_mnths = [0]*12     # initiate
+    if t_grow < 12:
 
-        for t_mnth in range(t_sow, t_harv + 1):
-            numer = exp(-k_pi_c*(t_harv - t_mnth))      # (eq.2.1.14)
-            denom = 0
-            for imnth in range(t_sow, t_harv + 1):
-                denom += numer
-
-            c_pi_mnths[t_mnth - 1] = c_pi_yr*(numer/denom)
+        # annual crops e.g. wheat
+        # =======================
+        pi_tonnes = []
+        denom = 0
+        for imnth in range(t_grow + 1):
+            c_pi = exp(-k_pi_c*(t_grow - imnth))      # (eq.2.1.14)
+            denom += c_pi
+            pi_tonnes.append(c_pi)
     else:
-        # perennial crops
-        # ===============
-        c_pi_mnth = c_pi_yr/12
-        c_pi_mnths = [c_pi_mnth]*12
+        # perennial crops e.g. grass
+        # ==========================
+        if c_pi_yr is None:
+            c_pi_yr = 12
+        pi_tonnes = [c_pi_yr/12]*12
 
-    return c_pi_mnths
+    pi_proportions = [c_pi / sum(pi_tonnes) for c_pi in pi_tonnes]
+    return pi_tonnes, pi_proportions
 
 def inert_organic_carbon(prop_iom_in_ow, cow):
     '''
