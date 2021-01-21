@@ -24,7 +24,28 @@ from time import sleep
 
 sleepTime = 5
 
-def plant_inputs_annual_crops(t_grow):
+def npp_zaks_grow_season(management):
+    '''
+    '''
+    ntsteps = management.ntsteps
+    npp_cumul = 0
+    tgrow = 0
+    for tstep in range(ntsteps):
+
+        # second condition covers last month of last year
+        # ===============================================
+        if management.npp_zaks[tstep] == 0 or tstep == (ntsteps - 1):
+            if tgrow > 0:
+
+                # fetch npp for this growing season and backfill monthly NPPs
+                # ===========================================================
+                management.npp_zaks_grow.append(npp_cumul)
+
+                tgrow = 0
+                npp_cumul = 0
+        else:
+            npp_cumul += management.npp_zaks[tstep]
+            tgrow += 1
 
     return
 
@@ -68,46 +89,39 @@ def generate_miami_dyce_npp(pettmp, management):
     return list of miami dyce npp estimates based on rainfall and temperature for growing months only
     '''
     ntsteps = management.ntsteps
-    npp_annual = []
-    npp_mnthly = []
     precip_cumul = 0
     tair_cumul = 0
     tgrow = 0
-    imnth = 1
+    strt_indx = None
     for tstep in range(ntsteps):
 
-        if management.pi_props[tstep] > 0:
+        # second condition covers last month of last year
+        # ===============================================
+        if management.pi_props[tstep] == 0 or tstep == (ntsteps - 1):
+            if tgrow > 0:
+
+                # fetch npp for this growing season and backfill monthly NPPs
+                # ===========================================================
+                tair_ave = tair_cumul / tgrow
+                npp = _miami_dyce_growing_season(precip_cumul, tair_ave)
+                management.npp_miami_grow.append(npp)
+
+                npp_mnthly = npp/tgrow
+                for indx in range(strt_indx, tstep):
+                    management.npp_miami[indx] = npp_mnthly
+
+                tgrow = 0
+                precip_cumul = 0
+                tair_cumul = 0
+                strt_indx = None
+        else:
+            if strt_indx is None:
+                strt_indx = tstep
             precip_cumul += pettmp['precip'][tstep]
             tair_cumul += pettmp['tair'][tstep]
             tgrow += 1
 
-        imnth += 1
-        if imnth > 12:
-            tair_ave = tair_cumul / tgrow
-            npp = _miami_dyce_growing_season(precip_cumul, tair_ave)
-            npp_annual.append(npp)
-            npp_mnthly.append(npp/tgrow)
-            tgrow = 0
-            precip_cumul = 0
-            tair_cumul = 0
-            imnth = 1
-
-    # populate monthly npp
-    # ====================
-    imnth = 1
-    iyr = 0
-    for tstep in range(ntsteps):
-        if management.pi_props[tstep] > 0:
-            management.npp_miami[tstep] = npp_mnthly[iyr]
-        else:
-            management.npp_miami[tstep] = 0
-
-        imnth += 1
-        if imnth > 12:
-            iyr += 1
-            imnth = 1
-
-    return npp_annual
+    return
 
 def get_soil_vars(soil_vars):
     '''

@@ -46,8 +46,8 @@ class MngmntSubarea(object, ):
         pi_tonnes_list = np1*[0]   # plant input - will be overwritten
         crop_names = np1 * [None]
         crop_currs = np1 * [None]
-        npp_zaks = np1 * [None]
-        npp_miami = np1 * [None]
+        npp_zaks = np1 * [0]
+        npp_miami = np1 * [0]
 
         # populate list of current crops
         # ==============================
@@ -99,7 +99,9 @@ class MngmntSubarea(object, ):
         self.pi_props  = pi_prop_list[1:]
         self.crop_currs = crop_currs[1:]
         self.npp_zaks = npp_zaks[1:]
+        self.npp_zaks_grow = []
         self.npp_miami = npp_miami[1:]
+        self.npp_miami_grow = []
 
 class CarbonChange(object, ):
 

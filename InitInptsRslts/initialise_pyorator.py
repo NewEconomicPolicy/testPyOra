@@ -25,7 +25,7 @@ from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
 from ora_excel_read import check_excel_input_file, ReadStudy
-from ora_excel_write import retrieve_output_xls_files
+from ora_excel_write import extend_out_dir, retrieve_output_xls_files
 from ora_json_read import check_json_input_files
 from ora_cn_classes import CarbonChange, NitrogenChange
 from ora_water_model import  SoilWaterChange
@@ -238,11 +238,6 @@ def read_config_file(form):
     else:
         form.w_make_xls.setCheckState(0)
 
-    # enable users to view outputs from previous run TODO: does not work
-    # ==============================================
-    study = ReadStudy(inp_xls, out_dir)
-    retrieve_output_xls_files(form, study.study_name)     # TODO: revisit
-
     # populate popup lists
     # ===================
     lookup_df = form.settings['lookup_df']
@@ -260,6 +255,13 @@ def read_config_file(form):
     display_names = fetch_display_names_from_metrics(lookup_df, soil_water)
     for display_name in display_names:
             form.w_combo09.addItem(display_name)
+
+
+    # enable users to view outputs from previous run
+    # ==============================================
+    study = ReadStudy(inp_xls, out_dir)
+    extend_out_dir(form)
+    retrieve_output_xls_files(form, study.study_name)
 
     return True
 

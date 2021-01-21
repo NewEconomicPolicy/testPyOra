@@ -27,7 +27,7 @@ import os
 from PyQt5.QtWidgets import QApplication
 
 from ora_low_level_fns import summary_table_add, optimisation_cycle
-from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp
+from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange
 from ora_water_model import SoilWaterChange, fix_soil_water
 from ora_nitrogen_model import soil_nitrogen
@@ -45,7 +45,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
     '''
     pettmp = weather.pettmp_ss
-    annual_miami_npps = generate_miami_dyce_npp(pettmp, management)
+    generate_miami_dyce_npp(pettmp, management)
 
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
     pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = init_ss_carbon_pools(tot_soc_meas)
@@ -99,7 +99,7 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     '''
     pettmp = weather.pettmp_fwd
-    annual_miami_npps = generate_miami_dyce_npp(pettmp, management)
+    generate_miami_dyce_npp(pettmp, management)
 
     pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
                                     c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio \
@@ -159,6 +159,11 @@ def run_soil_cn_algorithms(form):
         mngmnt_fwd = MngmntSubarea(ora_subareas.crop_mngmnt_fwd[subarea], ora_parms, pi_tonnes)
         complete_run = \
             _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_change, nitrogen_change, soil_water)
+
+        # TODO: a messy afterthought
+        # ==========================
+        npp_zaks_grow_season(mngmnt_ss)
+        npp_zaks_grow_season(mngmnt_fwd)
 
         # outputs only
         # ============

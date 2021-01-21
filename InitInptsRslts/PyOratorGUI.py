@@ -15,12 +15,13 @@ __author__ = 's03mm5'
 
 import sys
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout, \
                                                     QComboBox, QPushButton, QCheckBox, QFileDialog, QTextEdit
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
+from ora_excel_write import extend_out_dir, retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
 from ora_livestock_model import test_livestock_algorithms
 from ora_cn_model import run_soil_cn_algorithms
@@ -43,6 +44,9 @@ class Form(QWidget):
 
         self.version = 'PyOrator_v2'
         initiation(self)
+        font = QFont(self.font())
+        font.setPointSize(font.pointSize() + 2)
+        self.setFont(font)
 
         # grid will be put in RH vertical box
         # ===================================
@@ -244,7 +248,7 @@ class Form(QWidget):
         w_report.verticalScrollBar().minimum()
         w_report.setMinimumHeight(150)
         w_report.setMinimumWidth(1000)
-        w_report.setStyleSheet('font: normal 8px Courier')
+        w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
         ''' 
         w_report.setStyleSheet('font: 9pt Courier')
         w_report.setStyleSheet('font: normal 12px Calabri; color: blue;'
@@ -299,6 +303,8 @@ class Form(QWidget):
             self.w_disp_n.setEnabled(False)
             self.w_disp_w.setEnabled(False)
             self.w_disp_out.setEnabled(False)
+            extend_out_dir(self)
+            retrieve_output_xls_files(self)
 
     def changeHelpText(self, w_combo):
         '''

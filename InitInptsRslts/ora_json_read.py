@@ -132,9 +132,14 @@ class ReadJsonSubareas(object, ):
         soil_all_areas = {}
 
         for mgmt_fname in mgmt_files:
+
+            # avoid error when user has removed a management file during a session
+            # ====================================================================
+            if not os.path.isfile(mgmt_fname):
+                continue
+
             with open(mgmt_fname, 'r') as fmgmt:
                 mgmt_content = json.load(fmgmt)
-                # TODO: logging?         print('Read management input file ' + mgmt_fname)
 
             site_defn = mgmt_content['site definition']
             area = site_defn['area name']

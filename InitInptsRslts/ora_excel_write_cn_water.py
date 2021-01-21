@@ -248,7 +248,7 @@ def write_excel_all_subareas(study, out_dir, ora_weather, all_runs):
         # make a safe name
         # ===============
         sht_abbrev = sub_system
-        fname = os.path.join(out_dir, study.study_name + ' ' + sht_abbrev + '.xlsx')
+        fname = os.path.join(out_dir, study.study_name + ' z_' + sht_abbrev + '.xlsx')   # add 'z' to force order
         if os.path.isfile(fname):
             try:
                 os.remove(fname)
