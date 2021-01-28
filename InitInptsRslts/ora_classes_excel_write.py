@@ -170,8 +170,8 @@ class A2dDenitrifiedNloss(object, ):
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': '2f',
                'no3_avail': '2f', 'n_denit_max': '2f', 'rate_denit_no3': '2f',
                'wc_pwp': '2f', 'wat_soil': '2f', 'wc_fld_cap': '2f', 'rate_denit_moist': '2f',
-               'co2_release': '2f', 'rate_denit_bio': '2f', 'no3_denit': '2f', 'no3_denit_adj': '2f',
-               'prop_n2_wat': '2f', 'prop_n2_no3': '2f', 'n2o_relse_denit': '2f'}
+               'co2_emiss': '2f', 'rate_denit_bio': '2f', 'no3_denit': '2f', 'no3_denit_adj': '2f',
+               'prop_n2_wat': '2f', 'prop_n2_no3': '2f', 'n2o_emiss_denit': '2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
@@ -183,7 +183,7 @@ class A2dDenitrifiedNloss(object, ):
             elif var_name in list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_drain']):     # soil water list
                 sheet_data[var_name] = soil_water.data[var_name]
 
-            elif var_name == 'co2_release':
+            elif var_name == 'co2_emiss':
                 sheet_data[var_name] = carbon_change.data[var_name]
             else:
                 sheet_data[var_name] = nitrogen_change.data[var_name]
@@ -333,16 +333,16 @@ class A1SomChange(object, ):
 
         var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'tair':'2f',
                    'wat_soil':'2f', 'rate_mod':'2f', 'c_pi_mnth':'2f', 'cow':'2f',
-                   'pool_c_dpm':'2f', 'dpm_inpt':'2f', 'c_loss_dpm':'2f',
+                   'pool_c_dpm':'2f', 'c_input_dpm':'2f', 'c_loss_dpm':'2f',
                    'pool_c_rpm':'2f', 'pi_to_rpm':'2f', 'c_loss_rpm':'2f',
                    'pool_c_bio':'2f', 'c_input_bio':'2f', 'c_loss_bio':'2f',
                    'pool_c_hum':'2f', 'cow_to_hum':'2f', 'c_input_hum':'2f', 'c_loss_hum':'2f',
-                   'pool_c_iom':'2f', 'cow_to_iom':'2f', 'tot_soc_simul':'2f', 'co2_release':'2f'}
+                   'pool_c_iom':'2f', 'cow_to_iom':'2f', 'tot_soc_simul':'2f', 'co2_emiss':'2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
         for key_name in var_format_dict:
-            if key_name in exclusion_list + list(['tair', 'wat_soil', 'dpm_inpt']):
+            if key_name in exclusion_list + list(['tair', 'wat_soil', 'c_input_dpm']):
                 continue
 
             sheet_data[key_name] = carbon_obj.data[key_name]
@@ -353,7 +353,7 @@ class A1SomChange(object, ):
         sheet_data['tair'] = pettmp['tair']
 
         ntsteps = len(sheet_data['tair'])
-        sheet_data['dpm_inpt'] \
+        sheet_data['c_input_dpm'] \
                     = [carbon_obj.data['pi_to_dpm'][i] + carbon_obj.data['cow_to_dpm'][i] for i in range(ntsteps)]
 
         self.sheet_data = sheet_data

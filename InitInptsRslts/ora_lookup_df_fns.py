@@ -5,7 +5,8 @@
 # Created:     26/12/2019
 # Licence:     <your licence>#
 # Description:
-#
+#   lookup table has followimg headers:
+#       "PyOrator variable"	Category	"PyOrator display"	Symbol	Definition	Units	"Output format"	Notes
 #-------------------------------------------------------------------------------
 
 __prog__ = 'ora_lookup_df_fns.py'
@@ -30,13 +31,13 @@ PY_VAR = 'PyOrator variable'
 PY_DISP = 'PyOrator display'
 APPNDX_A_SHEET = 'Appendix A'
 
-def fetch_display_names_from_metrics(lookup_df, system_obj):
+def fetch_display_names_from_metrics(lookup_df, category_change):
     '''
-    return list of PyOrator display names from lookup data frame
-    system_obj can be carbon, nitrogen or soil water
+    return list of PyOrator display names from lookup data frame for this category where
+    category can be carbon, nitrogen or soil water
     '''
     metric_list = []
-    for metric in system_obj.data.keys():
+    for metric in category_change.data.keys():
         if metric == 'imnth' or metric == 'tstep':
             continue
         else:
@@ -57,14 +58,14 @@ def fetch_display_names_from_metrics(lookup_df, system_obj):
 
     return sorted(display_names)
 
-
-def fetch_metric_detail(lookup_df, metric):
+def fetch_detail_from_varname(lookup_df, metric):
     '''
-    retrieve metric display from metric if it is present
+    retrieve detail associated with metric if it is present
     '''
+    dflt_rtrn = list([metric, '', '', metric])
     result = lookup_df[PY_VAR][lookup_df[PY_VAR] == metric]
     if len(result) == 0:
-        return None
+        return dflt_rtrn
     else:
         key = result.index[0]
         definition = lookup_df['Definition'][key]
@@ -74,9 +75,9 @@ def fetch_metric_detail(lookup_df, metric):
 
         return definition, units, out_format, pyora_display
 
-def fetch_display_from_metric(lookup_df, metric):
+def fetch_display_from_varname(lookup_df, metric):
     '''
-    retrieve metric display from metric if it is present
+    retrieve variable display name from metric if it is present
     '''
     result = lookup_df[PY_VAR][lookup_df[PY_VAR] == metric]
     if len(result) == 0:
@@ -98,11 +99,11 @@ def fetch_pyora_varname_from_pyora_display(lookup_df, pyora_display):
         return None
     else:
         key = result.index[0]
-        var_name = lookup_df[PY_VAR][key]
+        varname = lookup_df[PY_VAR][key]
 
-        return var_name
+        return varname
 
-def fetch_var_details_from_metric_display(lookup_df, pyora_display):
+def fetch_definition_from_pyora_display(lookup_df, pyora_display):
     '''
     return symbol definition from data frame for PyOrator display value if found
     '''
@@ -115,7 +116,7 @@ def fetch_var_details_from_metric_display(lookup_df, pyora_display):
 
         return defn
 
-def fetch_variable_definition(lookup_df, pyora_display):
+def fetch_defn_units_from_pyora_display(lookup_df, pyora_display):
     '''
     retrieve variable definition from data frame if it is present
     '''

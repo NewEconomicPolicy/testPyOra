@@ -25,7 +25,8 @@ from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
 from ora_excel_read import check_excel_input_file, ReadStudy
-from ora_excel_write import extend_out_dir, retrieve_output_xls_files
+from ora_excel_write import retrieve_output_xls_files
+from ora_low_level_fns import extend_out_dir
 from ora_json_read import check_json_input_files
 from ora_cn_classes import CarbonChange, NitrogenChange
 from ora_water_model import  SoilWaterChange

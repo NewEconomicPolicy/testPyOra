@@ -29,6 +29,7 @@ __version__ = '0.0.0'
 from math import exp
 from calendar import monthrange
 
+
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
 def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
@@ -133,7 +134,10 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
     '''
     no3_d50 = n_d50 * t_depth     # soil nitrate-N content at which denitrification is 50% of its full potential (kg ha-1)
     dummy, days_in_mnth = monthrange(2011, imnth)   # TODO: ignores leap year, is this correct?
-    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX*days_in_mnth * (t_depth/5))   # (eq.2.4.9) maximum potential rate of denitrification (kg ha-1 month-1)
+
+    # (eq.2.4.9) maximum potential rate of denitrification (kg ha-1 month-1)
+    # ======================================================================
+    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX*days_in_mnth * (t_depth/5))
 
     rate_denit_no3 = no3_avail/(no3_d50 + no3_avail)    # (eq.2.4.10) nitrate rate modifier
 
@@ -217,15 +221,15 @@ def nh4_mineralisation(soil_n_sply):
                 Losses of ammonium
      =====================================
 '''
-def n2o_released_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
+def n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
     '''
     After Bell et al. (2012), 2% of the fully nitrified N is assumed to be lost as gas, with 40% lost as NO and
     60% s N2O, and 2% of the partially nitrified N is assumed to be lost as gas at field capacity, with a linear
     decrease in this loss as water declines to wilting point
     '''
-    n2o_relse_nitrif = nh4_nitrif * ( (n_parms['prop_n2o_fc'] * (wat_soil / wc_fld_cap)) +
+    n2o_emiss_nitrif = nh4_nitrif * ( (n_parms['prop_n2o_fc'] * (wat_soil / wc_fld_cap)) +
                                       (n_parms['prop_nitrif_gas'] * (1 - n_parms['prop_nitrif_no'])))  # (eq.2.4.24)
-    return n2o_relse_nitrif
+    return n2o_emiss_nitrif
 
 def nh4_immobilisation(soil_n_sply, nh4_min):
     '''

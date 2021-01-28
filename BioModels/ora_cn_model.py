@@ -26,12 +26,12 @@ __version__ = '0.0.0'
 import os
 from PyQt5.QtWidgets import QApplication
 
-from ora_low_level_fns import summary_table_add, optimisation_cycle
+from ora_low_level_fns import summary_table_add, optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange
 from ora_water_model import SoilWaterChange, fix_soil_water
 from ora_nitrogen_model import soil_nitrogen
-from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles, extend_out_dir
+from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, ReadWeather
 from ora_json_read import ReadJsonSubareas
@@ -101,13 +101,9 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
     pettmp = weather.pettmp_fwd
     generate_miami_dyce_npp(pettmp, management)
 
-    pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
-                                    c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio \
-                                                                                = carbon_change.get_last_tstep_pools()
     # run RothC
     # =========
-    pools_set = run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
-                                                            pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
+    pools_set = run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water)
 
     nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
                                                                                         soil_vars, nitrogen_change)

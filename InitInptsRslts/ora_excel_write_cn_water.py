@@ -32,7 +32,7 @@ POOL_GROUPS = {'Active Pools':list(['pool_c_dpm', 'pool_c_rpm', 'pool_c_bio']),
 LINE_COLORS = list(['FF0000', '00FF00','0000FF'])
 LINE_COLORS2 = list(['FF0000', '00FF00','0000FF', '0FF000', '000FF0'])
 
-Y_AXIS_LABELS = {'co2_release':'Carbon (t/ha)',
+Y_AXIS_LABELS = {'co2_emiss':'Carbon (t/ha)',
                  'soil_n_sply':'Soil N supply (kg/ha)', 'no3_cropup':'Crop N demand from N pool (kg/ha)',
                            'no3_nitrif':'Nitrified N (kg/ha)',
                 'no3_leach':'Leached nitrate (kg/ha)', 'no3_denit':' Denitrified nitrate (kg/ha)',
@@ -48,7 +48,7 @@ Y_AXIS_LABELS = {'co2_release':'Carbon (t/ha)',
 
 CHANGE_VARS = {}
 CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
-                                                                                'tot_soc_simul',  'co2_release'])
+                                                                                'tot_soc_simul',  'co2_emiss'])
 CHANGE_VARS['nitrogen'] = list(['soil_n_sply', 'no3_cropup', 'no3_nitrif', 'no3_leach', 'no3_denit',
                                                                             'nh4_cropup', 'nh4_volat'])
 CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'aet_prentice', 'irrig',
@@ -219,7 +219,7 @@ def _generate_charts(fname, metric, sub_system):
 
     if sub_system == 'carbon':
         nrow_chart = _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
-        nrow_chart = _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, 'co2_release',
+        nrow_chart = _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, 'co2_emiss',
                                                                                                     max_sheet_row)
     elif sub_system == 'nitrogen':
         for metric in CHANGE_VARS['nitrogen']:

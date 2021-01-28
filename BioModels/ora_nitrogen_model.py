@@ -21,7 +21,7 @@ __version__ = '0.0.0'
 from ora_cn_fns import get_fert_vals_for_tstep, get_soil_vars
 from ora_no3_nh4_fns import no3_nh4_crop_uptake, get_n_parameters, no3_immobilisation, no3_denitrific, \
                     no3_leaching, loss_adjustment_ratio, prop_n_opt_from_soil_n_supply, \
-                    nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_released_nitrif
+                    nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_lost_nitrif
 
 def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, soil_vars, nitrogen_change):
     '''
@@ -35,8 +35,18 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
     no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_som, precip_critic, prop_volat = \
                                                                                             get_n_parameters(n_parms)
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
-    no3_start = no3_atmos
-    nh4_start = nh4_atmos
+
+    # ensure continuity with steady state run
+    # =======================================
+    len_n_change = len(nitrogen_change.data['no3_end'])
+    if len_n_change > 0:
+        no3_start = nitrogen_change.data['no3_end'][-1]
+        nh4_start = nitrogen_change.data['nh4_end'][-1]
+        c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
+    else:
+        no3_start = no3_atmos
+        nh4_start = nh4_atmos
+        c_n_rat_hum_prev = 8.5  # (8.5 after Bradbury et al., 1993)
 
     # main temporal loop
     # ==================
@@ -53,23 +63,22 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         nh4_ow_fert, nh4_inorg_fert, no3_inorg_fert, c_n_rat_ow, pi_tonnes = \
                                                                 get_fert_vals_for_tstep(management, parameters, tstep)
 
-        cow, rate_mod, co2_release, c_loss_bio, pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm, \
+        cow, rate_mod, co2_emiss, c_loss_bio, pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm, \
                             pool_c_hum, cow_to_hum, c_loss_hum, pool_c_rpm, pi_to_rpm, c_loss_rpm = \
-                                                                                carbon_obj.get_cvals_for_tstep(tstep)
-        wat_soil, wc_pwp, wc_fld_cap = soil_water_obj.get_wvals_for_tstep(tstep)
+                                                                carbon_obj.get_cvals_for_tstep(tstep + len_n_change)
+        wat_soil, wc_pwp, wc_fld_cap = soil_water_obj.get_wvals_for_tstep(tstep + len_n_change)
         if tstep == 0:
             wc_start = wat_soil
             pool_c_dpm_prev = pool_c_dpm
             pool_c_rpm_prev = pool_c_rpm
             pool_c_hum_prev = pool_c_hum
             c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2 * [c_n_rat_pi]
-            c_n_rat_hum_prev = 8.5  # (8.5 after Bradbury et al., 1993)
 
         # C to N ratios A2a soil N supply
         # ===============================
-        dpm_inpt = pi_to_dpm + cow_to_dpm
-        denom = (pool_c_dpm_prev/c_n_rat_dpm_prev) + (dpm_inpt/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
-        c_n_rat_dpm = (pool_c_dpm_prev + dpm_inpt)/denom                                                            # (eq.3.3.10)
+        c_input_dpm = pi_to_dpm + cow_to_dpm
+        denom = (pool_c_dpm_prev/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
+        c_n_rat_dpm = (pool_c_dpm_prev + c_input_dpm)/denom                                                            # (eq.3.3.10)
         c_n_rat_rpm = (pool_c_rpm_prev + pi_to_rpm)/((pool_c_rpm_prev/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))   # (eq.3.3.11)
         c_n_rat_hum = (pool_c_hum_prev + cow_to_hum)/((pool_c_hum_prev/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow)) # (eq.3.3.12)
         c_n_rat_dpm_prev = c_n_rat_dpm
@@ -122,7 +131,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         no3_leach, wat_drain = no3_leaching(precip, wc_start, pet, wc_fld_cap, no3_start, no3_total_inp, min_no3_nh4)
 
         no3_denit, n_denit_max, rate_denit_no3, rate_denit_moist, rate_denit_bio, prop_n2_wat, prop_n2_no3  = \
-                            no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_release, no3_avail, n_d50)
+                            no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_emiss, no3_avail, n_d50)
 
         # crop uptake col M
         # =================
@@ -131,7 +140,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         no3_loss_adj = loss_adj_rat_no3 * no3_total_loss
 
         no3_denit_adj = no3_denit * loss_adj_rat_no3
-        n2o_relse_denit = (1.0 - (prop_n2_wat * prop_n2_no3)) * no3_denit_adj  # (eq.2.4.13)
+        n2o_emiss_denit = (1.0 - (prop_n2_wat * prop_n2_no3)) * no3_denit_adj  # (eq.2.4.13)
 
         no3_end = no3_start + no3_total_inp - no3_loss_adj
         no3_leach_adj = no3_leach * no3_loss_adj   # A2c - Nitrate-N lost by leaching (kg ha-1)
@@ -144,14 +153,14 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         nh4_loss_adj = loss_adj_rat_nh4 * nh4_total_loss
         nh4_end = nh4_start + nh4_total_inp - nh4_loss_adj
         nh4_volat_adj = nh4_volat * loss_adj_rat_nh4  # A2e - Volatilised N loss
-        n2o_relse_nitrif = n2o_released_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms)
+        n2o_emiss_nitrif = n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms)
 
         nitrogen_change.append_vars(imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,
                     no3_avail, no3_total_inp, no3_immob, no3_leach, no3_leach_adj,
                     no3_denit, rate_denit_no3, n_denit_max, rate_denit_moist, rate_denit_bio,
-                    no3_denit_adj, n2o_relse_nitrif, prop_n2_no3, prop_n2_wat,
-                    no3_cropup, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_relse_denit,
+                    no3_denit_adj, n2o_emiss_nitrif, prop_n2_no3, prop_n2_wat,
+                    no3_cropup, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_emiss_denit,
                     nh4_start, nh4_ow_fert, nh4_inorg_fert, nh4_miner, nh4_atmos, nh4_total_inp, nh4_immob, nh4_nitrif,
                     nh4_volat, nh4_volat_adj, nh4_cropup, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
                                 n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum)

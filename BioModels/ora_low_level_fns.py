@@ -161,22 +161,26 @@ def optimisation_cycle(form, subarea = None, iteration = None):
 
         form.w_opt_cycle.setText(mess)
 
-def update_progress(last_time, iteration, tot_soc_meas, tot_soc_simul,
-                                    pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom):
+def extend_out_dir(form):
+    '''
+     extend outputs directory by mirroring inputs location
+     check and if necessary create extended output directory
+    '''
+    mgmt_dir = form.w_lbl06.text()
+    dummy, short_dir = os.path.split(mgmt_dir)
+    curr_out_dir = form.w_lbl15.text()
 
-    """Update progress bar."""
-    new_time = time()
-    if new_time - last_time > 5:
-        # used to be: Estimated remaining
-        mess = '\rIterations completed: {:=6d} SOC meas: {:=8.3f} simul: {:=8.3f}'\
-                                                        .format(iteration, tot_soc_meas, tot_soc_simul)
+    out_dir = os.path.normpath(os.path.join(curr_out_dir, short_dir))
+    if os.path.isdir(out_dir):
+        form.settings['out_dir'] = out_dir
+    else:
+        try:
+            os.mkdir(out_dir)
+            print('Created output directory: ' + out_dir)
+            form.settings['out_dir'] = out_dir
+        except PermissionError as err:
+            print('*** Error *** Could not create output directory: ' + out_dir + ' will use ' + curr_out_dir)
 
-        mess += ' pools dpm: {:=8.3f} rpm: {:=8.3f} bio: {:=8.3f} hum: {:=8.3f} iom: {:=8.3f}'\
-                                    .format(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
-        sys.stdout.flush()
-        sys.stdout.write(mess)
-        last_time = new_time
-
-    return last_time
+    return
 
 

@@ -20,24 +20,28 @@ __version__ = '0.0.0'
 # ---------------
 #
 import os
+import sys
 from glob import glob
 from pandas import DataFrame, ExcelWriter, Series
 from PyQt5.QtWidgets import QApplication
 
 from openpyxl import load_workbook
-from openpyxl.chart import (LineChart, Reference)
+from openpyxl.chart import LineChart, Reference
+from openpyxl.styles import Alignment
 
 from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
                 A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification, \
                 B1CropProduction, B1cNlimitation
 
-from ora_lookup_df_fns import fetch_variable_definition
+from ora_lookup_df_fns import fetch_detail_from_varname
 
 PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py     width in EMUs
 
 from string import ascii_uppercase
-ALPHABET = list(ascii_uppercase)
-FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}      # period, year, month and crop name
+ALPHABET = list(ascii_uppercase) + ['AA','AB','AC','AD']        # TODO: may need to extend
+MAX_WDTH = 15                                   # width of column for table sheets
+FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}    # period eg "steady state", year, month and crop name
+WARNING_STR = '*** Warning *** '
 
 def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, complete_run, mngmnt_ss, mngmnt_fwd):
     '''
@@ -77,39 +81,40 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
     # use pandas to write to Excel
     # ============================
     writer = ExcelWriter(fname, engine='openpyxl')
-
-    crop_prodn_b1 = B1CropProduction(pettmp, soil_water, mngmnt_ss, mngmnt_fwd)
-    writer = _write_excel_out('B1 Crop Production', crop_prodn_b1, writer)
-
-    n_limitation_b1c = B1cNlimitation(pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd)
-    writer = _write_excel_out('B1c Nitrogen Limitation', n_limitation_b1c, writer)
+    wb_map = {}  #  build a work book map for use when writing charts
 
     som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
-    writer = _write_excel_out('A1 SOM change', som_change_a1, writer)
+    writer, wb_map = _write_excel_out('A1 SOM change', som_change_a1, writer, wb_map)
 
     mineralN_a2 = A2MineralN(pettmp, nitrogen_change)
-    writer = _write_excel_out('A2 Mineral N', mineralN_a2, writer)
+    writer, wb_map = _write_excel_out('A2 Mineral N', mineralN_a2, writer, wb_map)
 
     soilN_supply_a2a = A2aSoilNsupply(pettmp, nitrogen_change)
-    writer = _write_excel_out('A2a Soil N supply', soilN_supply_a2a, writer)
+    writer, wb_map = _write_excel_out('A2a Soil N supply', soilN_supply_a2a, writer, wb_map)
 
     cropN_uptake_a2b = A2bCropNuptake(pettmp, nitrogen_change)
-    writer = _write_excel_out('A2b Crop N uptake', cropN_uptake_a2b, writer)
+    writer, wb_map = _write_excel_out('A2b Crop N uptake', cropN_uptake_a2b, writer, wb_map)
      
     leachedN_loss_a2c = A2cLeachedNloss(pettmp, soil_water, nitrogen_change)
-    writer = _write_excel_out('A2c LeachedNloss', leachedN_loss_a2c, writer)
+    writer, wb_map = _write_excel_out('A2c LeachedNloss', leachedN_loss_a2c, writer, wb_map)
 
     denit_Nloss_a2d = A2dDenitrifiedNloss(pettmp, carbon_change, nitrogen_change, soil_water)
-    writer = _write_excel_out('A2d Denitrified N loss', denit_Nloss_a2d, writer)
+    writer, wb_map = _write_excel_out('A2d Denitrified N loss', denit_Nloss_a2d, writer, wb_map)
 
     volat_Nloss_a2e = A2eVolatilisedNloss(pettmp, nitrogen_change)
-    writer = _write_excel_out('A2e Volatilised N loss', volat_Nloss_a2e, writer)
+    writer, wb_map = _write_excel_out('A2e Volatilised N loss', volat_Nloss_a2e, writer, wb_map)
 
     nitrif_a2f = A2fNitrification(pettmp, nitrogen_change)
-    writer = _write_excel_out('A2f Nitrification', nitrif_a2f, writer)
+    writer, wb_map = _write_excel_out('A2f Nitrification', nitrif_a2f, writer, wb_map)
 
     soil_water_a3 = A3SoilWater(pettmp, nitrogen_change, soil_water)
-    writer = _write_excel_out('A3 Soil Water', soil_water_a3, writer)
+    writer, wb_map = _write_excel_out('A3 Soil Water', soil_water_a3, writer, wb_map)
+
+    crop_prodn_b1 = B1CropProduction(pettmp, soil_water, mngmnt_ss, mngmnt_fwd)
+    writer, wb_map = _write_excel_out('B1 Crop Production', crop_prodn_b1, writer, wb_map)
+
+    n_limitation_b1c = B1cNlimitation(pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd)
+    writer, wb_map = _write_excel_out('B1c Nitrogen Limitation', n_limitation_b1c, writer, wb_map)
 
     try:
         writer.save()
@@ -119,11 +124,11 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
 
     # reopen Excel file and write charts
     # ==================================
-    _generate_metric_charts(fname, lookup_df)
+    _generate_metric_charts(fname, lookup_df, wb_map)
 
     return
 
-def _write_excel_out(sheet_name, output_obj, writer):
+def _write_excel_out(sheet_name, out_obj, writer, wb_map):
     '''
     condition data before outputting
     '''
@@ -132,11 +137,11 @@ def _write_excel_out(sheet_name, output_obj, writer):
     # create data frame from dictionary
     # =================================
     data_frame = DataFrame()
-    for var_name in output_obj.var_name_list:
+    for var_name in out_obj.var_name_list:
 
-        tmp_list = output_obj.sheet_data[var_name]
+        tmp_list = out_obj.sheet_data[var_name]
 
-        var_fmt = output_obj.var_formats[var_name]
+        var_fmt = out_obj.var_formats[var_name]
         if var_fmt[-1] == 'f':
             ndecis = int(var_fmt[:-1])
             try:
@@ -150,55 +155,72 @@ def _write_excel_out(sheet_name, output_obj, writer):
         else:
             data_frame[var_name] = Series(tmp_list)
 
+    # output frame and record number of columns
+    # =========================================
     data_frame.to_excel(writer, sheet_name, index=False, freeze_panes=(1, 1))
+    wb_map[sheet_name] = len(out_obj.var_name_list)
 
-    return writer
+    return writer, wb_map
 
-def _generate_metric_charts(fname, lookup_df):
+def _generate_metric_charts(fname, lookup_df, wb_map):
     '''
-    add charts to an existing Excel file
+    add charts to pre-existing Excel file
     '''
     func_name =  __prog__ + ' generate_charts'
 
     wb_obj = load_workbook(fname, data_only=True)
+    ipos = 1
     for sheet_name in wb_obj.sheetnames:
         sheet = wb_obj[sheet_name]
+        max_columns = wb_map[sheet_name]
 
-        # reset column width
-        # ==================
-        max_wdth = 8       # we want first column to be as wide as "steady state" i.e. 12 chars
-        for icol in range(sheet.max_column):
-            val = sheet.cell(row = 1, column = icol + 1).value
-            nchars = len(val)
-            if nchars > max_wdth:
-                max_wdth = nchars
+        # reset column width and name
+        # ===========================
+        metric_dict = {}
+        for ch in ALPHABET[4:max_columns]:
+            cell_ref = ch + '1'
+            metric = sheet[cell_ref].value
+            metric_dict[cell_ref] = metric
+            sheet.column_dimensions[ch].width = MAX_WDTH  # set the width of the column
+            defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
+            if pyora_disp == metric:
+                mess = WARNING_STR + 'column: ' + ch + '\tsheet: ' + sheet_name + '\t' + 'no lookup for metric: ' + metric
+                # print(mess, file=sys.stderr)
 
-        for ch in ALPHABET[4:]:
-            sheet.column_dimensions[ch].width = max_wdth + 2  # set the width of the column
+            sheet[cell_ref].value = pyora_disp
+            sheet[cell_ref].alignment = Alignment(wrap_text = True, horizontal = 'center', vertical = 'center')
 
         for ch in FIXED_WDTHS:
             sheet.column_dimensions[ch].width = FIXED_WDTHS[ch]
 
-        # adjust row height
-        # =================
-        for irow in range(sheet.max_row):
+        # adjust row heights
+        # ==================
+        for irow in range(sheet.max_row + 1):
             sheet.row_dimensions[irow].height = 18
+        sheet.row_dimensions[1].height = 48
+
+        # read and substitue field name
+        # =============================
 
         # chart creation
         # ==============
         sheet_ref = sheet_name.split()[0]
-        chart_sheet = wb_obj.create_sheet(sheet_ref + ' charts')
+        chart_sheet = wb_obj.create_sheet(sheet_ref + ' charts', ipos)
+        ipos += 2
         nrow_chart = 10
 
         # generate charts for all metrics except for period, month and tstep
         # ==================================================================
-        max_column = min(len(ALPHABET), sheet.max_column)
-        for col_indx in range(max_column, 4, -1):               # ignore period, month and tstep fields
+        for col_indx in range(max_columns, 4, -1):               # ignore period, month and tstep fields
             metric_chart = LineChart()
             metric_chart.style = 13
 
-            metric = sheet[ALPHABET[col_indx - 1] + '1'].value      # read field name
-            defn, units = fetch_variable_definition(lookup_df, metric)
+            cell_ref = ALPHABET[col_indx - 1] + '1'
+            metric = metric_dict[cell_ref]
+            if metric is None:
+                continue
+
+            defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
             metric_chart.title = defn
             metric_chart.y_axis.title = units
             metric_chart.x_axis.title = 'Time step'
@@ -229,28 +251,6 @@ def _generate_metric_charts(fname, lookup_df):
         print(str(err) + ' - could not save: ' + fname)
 
     QApplication.processEvents()
-
-    return
-
-def extend_out_dir(form):
-    '''
-     extend outputs directory by mirroring inputs location
-     check and if necessary create extended output directory
-    '''
-    mgmt_dir = form.w_lbl06.text()
-    dummy, short_dir = os.path.split(mgmt_dir)
-    curr_out_dir = form.w_lbl15.text()
-
-    out_dir = os.path.normpath(os.path.join(curr_out_dir, short_dir))
-    if os.path.isdir(out_dir):
-        form.settings['out_dir'] = out_dir
-    else:
-        try:
-            os.mkdir(out_dir)
-            print('Created output directory: ' + out_dir)
-            form.settings['out_dir'] = out_dir
-        except PermissionError as err:
-            print('*** Error *** Could not create output directory: ' + out_dir + ' will use ' + curr_out_dir)
 
     return
 

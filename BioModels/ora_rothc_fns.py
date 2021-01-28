@@ -23,7 +23,7 @@ from ora_water_model import get_soil_water, get_soil_water_constants
 K_DPM = 10/12;    K_RPM = 0.3/12;   K_BIO = 0.66/12;  K_HUM = 0.02/12  # per month
 
 def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
-                                                    pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom):
+                        pool_c_dpm = None, pool_c_rpm = None, pool_c_bio = None, pool_c_hum = None, pool_c_iom = None):
     '''
 
     '''
@@ -34,6 +34,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         # water content at initial and first time step
         # ============================================
         wc_t0, wc_t1 = 2 * [0]
+        inudge = 0
         c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio = 6 * [0]
 
         # use measured SOC initially for get_soil_water_constants
@@ -48,6 +49,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
             c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio \
                                                                             = carbon_change.get_last_tstep_pools()
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
+        inudge = 1
 
     ntsteps = management.ntsteps
     imnth = 1
@@ -58,7 +60,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
-        wat_soil, wc_t0, wc_t1 = get_soil_water(tstep, precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0, wc_t1)
+        wat_soil, wc_t0, wc_t1 = get_soil_water(tstep + inudge, precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0, wc_t1)
 
         rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wat_soil)
 
@@ -98,14 +100,14 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         c_input_bio = prop_bio * c_loss_total
         c_input_hum = prop_hum * c_loss_total
-        co2_release = prop_co2 * c_loss_total        # co2 due to aerobic decomp - Loss as CO2 (t ha-1)
+        co2_emiss = prop_co2 * c_loss_total        # co2 due to aerobic decomp - Loss as CO2 (t ha-1)
 
         carbon_change.append_vars(imnth, rate_mod, c_pi_mnth, cow,
                                   pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
                                   pool_c_rpm, pi_to_rpm, c_loss_rpm,
                                   pool_c_bio, c_input_bio, c_loss_bio,
                                   pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
-                                  pool_c_iom, cow_to_iom, co2_release)
+                                  pool_c_iom, cow_to_iom, co2_emiss)
 
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 

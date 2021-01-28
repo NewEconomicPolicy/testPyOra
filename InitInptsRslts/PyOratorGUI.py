@@ -21,15 +21,15 @@ from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLay
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
-from ora_excel_write import extend_out_dir, retrieve_output_xls_files
+from ora_excel_write import retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
 from ora_livestock_model import test_livestock_algorithms
 from ora_cn_model import run_soil_cn_algorithms
 from ora_excel_read import check_excel_input_file
 from ora_json_read import check_json_input_files
 from display_gui_charts import display_metric
-from ora_lookup_df_fns import fetch_variable_definition, fetch_pyora_varname_from_pyora_display
-from ora_low_level_fns import optimisation_cycle
+from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
+from ora_low_level_fns import extend_out_dir, optimisation_cycle
 from set_up_logging import OutLog
 
 class Form(QWidget):
@@ -246,7 +246,7 @@ class Form(QWidget):
         bot_hbox = QHBoxLayout()
         w_report = QTextEdit()
         w_report.verticalScrollBar().minimum()
-        w_report.setMinimumHeight(150)
+        w_report.setMinimumHeight(175)
         w_report.setMinimumWidth(1000)
         w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
         ''' 
@@ -311,7 +311,7 @@ class Form(QWidget):
         modify help text according to metric
         '''
         metric = w_combo.currentText()
-        defn, units = fetch_variable_definition(self.settings['lookup_df'], metric)
+        defn, units = fetch_defn_units_from_pyora_display(self.settings['lookup_df'], metric)
         helpText = 'Display ' + defn + ' chart'
         w_combo.setToolTip(helpText)
 

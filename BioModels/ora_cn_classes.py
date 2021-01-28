@@ -117,7 +117,7 @@ class CarbonChange(object, ):
                                         'pool_c_rpm', 'pi_to_rpm', 'c_loss_rpm',
                                         'pool_c_bio', 'c_input_bio', 'c_loss_bio',
                                         'pool_c_hum', 'cow_to_hum', 'c_input_hum', 'c_loss_hum',
-                                        'pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_release'])
+                                        'pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -152,7 +152,7 @@ class CarbonChange(object, ):
         rate_mod = self.data['rate_mod'][tstep]
         cow = self.data['cow'][tstep]
 
-        co2_release = self.data['co2_release'][tstep]
+        co2_emiss = self.data['co2_emiss'][tstep]
 
         c_loss_bio = self.data['c_loss_bio'][tstep]
 
@@ -170,7 +170,7 @@ class CarbonChange(object, ):
         cow_to_hum = self.data['cow_to_hum'][tstep]
         c_loss_hum = self.data['c_loss_hum'][tstep]
 
-        return cow, rate_mod, co2_release, \
+        return cow, rate_mod, co2_emiss, \
                             c_loss_bio, pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,  \
                             pool_c_hum, cow_to_hum, c_loss_hum, pool_c_rpm, pi_to_rpm, c_loss_rpm
 
@@ -179,7 +179,7 @@ class CarbonChange(object, ):
                                                 pool_c_rpm, pi_to_rpm, c_loss_rpm,
                                                 pool_c_bio, c_input_bio, c_loss_bio,
                                                 pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
-                                                pool_c_iom, cow_to_iom, co2_release):
+                                                pool_c_iom, cow_to_iom, co2_emiss):
         '''
         add one set of values for this timestep to each of lists
         columns refer to A1. SOM change sheet
@@ -213,7 +213,7 @@ class CarbonChange(object, ):
         # IOM pool cols X to AA
         # =====================
         tot_soc_simul = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
-        for var in ['pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_release']:
+        for var in ['pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss']:
             self.data[var].append(eval(var))
 
 class NitrogenChange(object,):
@@ -233,9 +233,9 @@ class NitrogenChange(object,):
                         'prop_yld_opt_adj', 'cumul_n_uptake', 'cumul_n_uptake_adj',
                         'no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'rate_denit_no3',
                         'no3_avail', 'no3_total_inp', 'no3_immob', 'no3_leach', 'no3_leach_adj',
-                        'no3_denit_adj', 'n2o_relse_nitrif', 'prop_n2_no3', 'prop_n2_wat',
+                        'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat',
                         'no3_denit', 'no3_cropup', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
-                        'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end',  'n2o_relse_denit',
+                        'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end',  'n2o_emiss_denit',
                         'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner',
                         'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat', 'nh4_volat_adj',
                         'nh4_cropup', 'nh4_total_loss', 'loss_adj_rat_nh4',
@@ -287,8 +287,8 @@ class NitrogenChange(object,):
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,
                     no3_avail, no3_total_inp, no3_immob, no3_leach, no3_leach_adj,
                     no3_denit, rate_denit_no3, n_denit_max, rate_denit_moist, rate_denit_bio,
-                    no3_denit_adj, n2o_relse_nitrif, prop_n2_no3, prop_n2_wat,
-                    no3_cropup, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_relse_denit,
+                    no3_denit_adj, n2o_emiss_nitrif, prop_n2_no3, prop_n2_wat,
+                    no3_cropup, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_emiss_denit,
                     nh4_start, nh4_ow_fert, nh4_inorg_fert, nh4_miner, nh4_atmos, nh4_total_inp, nh4_immob, nh4_nitrif,
                     nh4_volat, nh4_volat_adj, nh4_cropup, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
                                 n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum):
@@ -317,14 +317,14 @@ class NitrogenChange(object,):
 
         # Nitrate N (kg/ha) cols F to L
         # =============================
-        for var in ['no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'no3_total_inp', 'n2o_relse_denit',
+        for var in ['no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'no3_total_inp', 'n2o_emiss_denit',
                     'rate_denit_moist', 'rate_denit_bio', 'rate_denit_no3']:
             self.data[var].append(eval(var))
 
         # Nitrate N (kg/ha) cols H to L
         # =============================
         for var in [ 'no3_avail', 'no3_immob', 'no3_leach', 'no3_leach_adj', 'no3_denit', 'no3_end',
-                     'no3_denit_adj', 'n2o_relse_nitrif', 'prop_n2_no3', 'prop_n2_wat']:
+                     'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat']:
             self.data[var].append(eval(var))
 
         # crop uptake

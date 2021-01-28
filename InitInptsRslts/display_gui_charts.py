@@ -23,7 +23,7 @@ from PyQt5.QtChart import QChart, QValueAxis, QChartView, QLineSeries
 from random import random
 from math import floor, ceil
 
-from ora_lookup_df_fns import fetch_metric_detail
+from ora_lookup_df_fns import fetch_detail_from_varname
 
 SUBAREAS = list(['Blackburn', 'Todmorden', 'Bury', 'Oldham', 'Rochdale'])   # for generation of random data
 NTSTEPS = 240
@@ -95,17 +95,23 @@ class Second(QWidget):
 
         # Control panel for buttons and text box
         # ======================================
-        rfrshButton = QPushButton("Refresh")
-        rfrshButton.setFixedWidth(60)
-        rfrshButton.clicked.connect(self.refreshClicked)
+        w_dump = QPushButton("Dump")
+        w_dump.setFixedWidth(60)
+        helpText = 'Write table and chart to Excel spreadsheet'
+        w_dump.setToolTip(helpText)
+        w_dump.clicked.connect(self.dumpClicked)
 
-        resetButton = QPushButton("Reset")
-        resetButton.setFixedWidth(60)
-        resetButton.clicked.connect(self.resetClicked)
+        w_rfrsh = QPushButton("Refresh")
+        w_rfrsh.setFixedWidth(60)
+        w_rfrsh.clicked.connect(self.refreshClicked)
 
-        dismiss = QPushButton("Dismiss")
-        dismiss.setFixedWidth(60)
-        dismiss.clicked.connect(self.dismissClicked)
+        w_reset = QPushButton("Reset")
+        w_reset.setFixedWidth(60)
+        w_reset.clicked.connect(self.resetClicked)
+
+        w_dismiss = QPushButton("Dismiss")
+        w_dismiss.setFixedWidth(60)
+        w_dismiss.clicked.connect(self.dismissClicked)
 
         w_min_yval = QLineEdit()
         w_min_yval.setFixedWidth(60)
@@ -116,14 +122,15 @@ class Second(QWidget):
         self.w_max_yval = w_max_yval
 
         cntrl_layout = QHBoxLayout()
-        cntrl_layout.addWidget(rfrshButton)
-        cntrl_layout.addWidget(resetButton)
+        cntrl_layout.addWidget(w_dump)
+        cntrl_layout.addWidget(w_rfrsh)
+        cntrl_layout.addWidget(w_reset)
         cntrl_layout.addWidget(QLabel('   Y Min:'))
         cntrl_layout.addWidget(w_min_yval)
         cntrl_layout.addWidget(QLabel('   Y Max:'))
         cntrl_layout.addWidget(w_max_yval)
         cntrl_layout.addWidget(QLabel('\t\t'))
-        cntrl_layout.addWidget(dismiss)
+        cntrl_layout.addWidget(w_dismiss)
         cntrl_layout.addWidget(QLabel(), 1)
 
         # RH box consists of chart and grid boxes
@@ -199,6 +206,10 @@ class Second(QWidget):
         self.ndecimals = ndecimals
         self.pyora_display = pyora_display
 
+    def dumpClicked(self):
+
+        print('Not active')
+
     def dismissClicked(self):
 
         self.close()
@@ -265,7 +276,7 @@ def _select_data_for_display(form, category, metric):
         # ===========
         all_runs_output = form.all_runs_output
         subareas = list(all_runs_output.keys())
-        description, units, out_format, pyora_display = fetch_metric_detail(form.settings['lookup_df'], metric)
+        description, units, out_format, pyora_display = fetch_detail_from_varname(form.settings['lookup_df'], metric)
 
         yaxis_min =  LRGE_NUM
         yaxis_max = -LRGE_NUM

@@ -77,8 +77,8 @@ def add_pet_to_weather(latitude, pettmp_grid_cell):
     # =====================
     nyears = int(len(pettmp_grid_cell['precip'])/12)
     pettmp_reform = {}
-    for metric in list(['precip','tair','pet']):
-        pettmp_reform[metric] = []
+    for var in list(['precip','tair','pet']):
+        pettmp_reform[var] = []
 
     precip = pettmp_grid_cell['precip']         #
     temper = pettmp_grid_cell['tair']
