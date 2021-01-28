@@ -58,7 +58,7 @@ class  B1CropProduction(object, ):
         '''
         self.title = 'Crop Production'
 
-        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
                         'wat_soil': '2f', 'tair': '2f', 'npp_miami':'2f', 'prodn_miami':'2f', 'yld_miami':'2f',
                         'grow_dds':'2f', 'aet':'2f', 'pet':'2f', 'npp_zaks':'2f', 'prodn_zaks':'2f', 'yld_zaks':'2f'}
 
@@ -87,7 +87,7 @@ class  B1cNlimitation(object, ):
         '''
         self.title = 'Nitrogen limitation'
 
-        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
                            'soil_n_sply':'2f', 'nut_n_fert':'2f',
                            'n_sply_scld':'2f', 'yld_scld':'2f', 'yld_scld_adj':'2f', 'yld_n_lim':'2f', 'prodn_ss':'2f' }
 
@@ -112,7 +112,7 @@ class  A2fNitrification(object, ):
         '''
         self.title = 'Nitrification'
 
-        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
                            'nh4_start':'2f', 'nh4_total_inp':'2f', 'nh4_nitrif':'2f', 'nh4_nitrif_adj':'2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
@@ -135,7 +135,7 @@ class  A2eVolatilisedNloss(object, ):
         '''
         self.title = 'Volatilised N loss'
 
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': '2f', 'precip': '2f',
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'precip': '2f',
                            'nh4_ow_fert': '2f', 'nh4_inorg_fert': '2f', 'total_n_appld': '2f',
                            'nh4_volat': '2f', 'nh4_volat_adj': '2f'}
 
@@ -167,7 +167,7 @@ class A2dDenitrifiedNloss(object, ):
         '''
         self.title = 'Denitrified N loss'
 
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',
                'no3_avail': '2f', 'n_denit_max': '2f', 'rate_denit_no3': '2f',
                'wc_pwp': '2f', 'wat_soil': '2f', 'wc_fld_cap': '2f', 'rate_denit_moist': '2f',
                'co2_emiss': '2f', 'rate_denit_bio': '2f', 'no3_denit': '2f', 'no3_denit_adj': '2f',
@@ -200,7 +200,7 @@ class  A2cLeachedNloss(object, ):
         '''
         self.title = 'Leached N loss'
 
-        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
                            'wat_soil': '2f', 'wat_hydro_eff': '2f', 'no3_start': '2f',
                            'wat_drain': '2f', 'no3_leach': '2f', 'no3_leach_adj': '2f'}
 
@@ -226,7 +226,7 @@ class  A2bCropNuptake(object, ):
         '''
         self.title = 'Crop N uptake'
 
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': '2f',
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',
                            'prop_yld_opt': '2f', 'n_crop_dem': '2f', 'n_crop_dem_adj': '2f',
                            'prop_yld_opt_adj': '2f', 'cumul_n_uptake': '2f', 'cumul_n_uptake_adj': '2f'}
 
@@ -250,7 +250,7 @@ class  A2aSoilNsupply(object, ):
         '''
         self.title = 'Soil N supply'
 
-        var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'crop_name':'2f',
+        var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'crop_name': 's',
                            'c_n_rat_dpm': '2f', 'c_n_rat_rpm': '2f', 'c_n_rat_hum': '2f',
                            'n_release': '2f', 'n_adjust': '2f','soil_n_sply': '2f'}
 
@@ -273,7 +273,7 @@ class A2MineralN(object,):
         '''
         self.title = 'Mineral N'
 
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'tair': '2f',
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'tair': '2f',
                 'no3_start':'2f', 'no3_atmos':'2f', 'no3_inorg_fert':'2f', 'no3_nitrif':'2f', 'no3_total_inp':'2f',
                 'no3_immob':'2f', 'no3_leach':'2f', 'no3_denit':'2f', 'no3_cropup':'2f', 'no3_total_loss':'2f',
                 'loss_adj_rat_no3':'2f', 'no3_end':'2f', 'nh4_start':'2f', 'nh4_atmos':'2f',
@@ -302,7 +302,7 @@ class A3SoilWater(object, ):
         self.title = 'Soil water'
 
         # TODO: rooting depth
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 'd', 'pet': '2f', 'pcnt_c': '2f',
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'pet': '2f', 'pcnt_c': '2f',
                            'max_root_dpth': '2f', 'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_soil': '2f',
                            'aet': '2f', 'irrig': '2f','wc_soil_irri_root_zone': '2f',           # cols L, M, N
                            'aet_irri': '2f', 'wc_soil_irri': '2f', 'wat_drain': '2f',           # cols O, P, Q
@@ -330,7 +330,7 @@ class A1SomChange(object, ):
         A1. Change in soil organic matter
         '''
         self.title = 'SOM_change'
-
+        # 'crop_name': 's',
         var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'tair':'2f',
                    'wat_soil':'2f', 'rate_mod':'2f', 'c_pi_mnth':'2f', 'cow':'2f',
                    'pool_c_dpm':'2f', 'c_input_dpm':'2f', 'c_loss_dpm':'2f',

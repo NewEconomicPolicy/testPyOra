@@ -266,7 +266,7 @@ class NitrogenChange(object,):
                 tmp_list.append(n_crop_dem_adj/n_crop_dem)
             else:
                 tmp_list.append(0)
-            self.data['prop_yld_opt_adj'] = tmp_list
+            self.data['prop_yld_opt_adj'] = tmp_list        # Yield scaled wrt optimum adjusted for other losses
 
             if crop_name is None:
                 cumul_n_uptake = 0
