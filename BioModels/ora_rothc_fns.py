@@ -33,9 +33,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         # water content at initial and first time step
         # ============================================
-        wc_t0, wc_t1 = 2 * [0]
-        inudge = 0
-        c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio = 6 * [0]
+        c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, wc_t0 = 7*[0]
 
         # use measured SOC initially for get_soil_water_constants
         # =======================================================
@@ -44,12 +42,10 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         # retrieve values from previous time step
         # =======================================
         wc_t0 = soil_water.data['wat_soil'][-1]
-        wc_t1 = wc_t0
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
             c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio \
                                                                             = carbon_change.get_last_tstep_pools()
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
-        inudge = 1
 
     ntsteps = management.ntsteps
     imnth = 1
@@ -60,9 +56,9 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
-        wat_soil, wc_t0, wc_t1 = get_soil_water(tstep + inudge, precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0, wc_t1)
+        wc_t1 = get_soil_water(tstep, precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
 
-        rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wat_soil)
+        rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wc_t1)
 
         # plant inputs and losses (t ha-1) passed to the DPM pool
         # =======================================================
@@ -111,8 +107,9 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 
-        soil_water.append_vars(imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wat_soil,
+        soil_water.append_vars(imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
                                                                                                 wc_fld_cap, pcnt_c)
+        wc_t0 = wc_t1
 
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow)       # add npp by zaks to management
 

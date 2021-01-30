@@ -325,13 +325,13 @@ class A3SoilWater(object, ):
 
 class A1SomChange(object, ):
 
-    def __init__(self, pettmp, carbon_obj, soil_water):
+    def __init__(self, pettmp, carbon_obj, soil_water, mngmnt_ss, mngmnt_fwd):
         '''
         A1. Change in soil organic matter
         '''
         self.title = 'SOM_change'
         # 'crop_name': 's',
-        var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'tair':'2f',
+        var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'crop_name': 's', 'tair':'2f',
                    'wat_soil':'2f', 'rate_mod':'2f', 'c_pi_mnth':'2f', 'cow':'2f',
                    'pool_c_dpm':'2f', 'c_input_dpm':'2f', 'c_loss_dpm':'2f',
                    'pool_c_rpm':'2f', 'pi_to_rpm':'2f', 'c_loss_rpm':'2f',
@@ -342,13 +342,14 @@ class A1SomChange(object, ):
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
         for key_name in var_format_dict:
-            if key_name in exclusion_list + list(['tair', 'wat_soil', 'c_input_dpm']):
+            if key_name in exclusion_list + list(['tair', 'wat_soil', 'c_input_dpm', 'crop_name']):
                 continue
 
             sheet_data[key_name] = carbon_obj.data[key_name]
 
         # extra columns
         # =============
+        sheet_data['crop_name'] = mngmnt_ss.crop_names + mngmnt_fwd.crop_names
         sheet_data['wat_soil'] = soil_water.data['wat_soil']  # col F
         sheet_data['tair'] = pettmp['tair']
 

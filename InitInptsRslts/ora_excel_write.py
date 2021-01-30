@@ -83,7 +83,7 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
     writer = ExcelWriter(fname, engine='openpyxl')
     wb_map = {}  #  build a work book map for use when writing charts
 
-    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water)
+    som_change_a1 = A1SomChange(pettmp, carbon_change, soil_water, mngmnt_ss, mngmnt_fwd)
     writer, wb_map = _write_excel_out('A1 SOM change', som_change_a1, writer, wb_map)
 
     mineralN_a2 = A2MineralN(pettmp, nitrogen_change)
@@ -177,7 +177,7 @@ def _generate_metric_charts(fname, lookup_df, wb_map):
         # reset column width and name
         # ===========================
         metric_dict = {}
-        for ch in ALPHABET[4:max_columns]:
+        for ch in ALPHABET[3:max_columns]:
             cell_ref = ch + '1'
             metric = sheet[cell_ref].value
             metric_dict[cell_ref] = metric

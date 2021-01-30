@@ -36,17 +36,28 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
                                                                                             get_n_parameters(n_parms)
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
-    # ensure continuity with steady state run
-    # =======================================
+
     len_n_change = len(nitrogen_change.data['no3_end'])
     if len_n_change > 0:
+        # forward run: ensure continuity with steady state
+        # ================================================
         no3_start = nitrogen_change.data['no3_end'][-1]
         nh4_start = nitrogen_change.data['nh4_end'][-1]
         c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
+        indx_prev = len_n_change - 1
     else:
+        # steady state initialisation
+        # ===========================
         no3_start = no3_atmos
         nh4_start = nh4_atmos
         c_n_rat_hum_prev = 8.5  # (8.5 after Bradbury et al., 1993)
+        indx_prev = 0
+
+    # use first value for steady state or value for previous time step for forward run
+    # ================================================================================
+    dum, dum, dum, dum, pool_c_dpm_prev, dum, dum, dum, pool_c_hum_prev, \
+                                    dum, dum, pool_c_rpm_prev, dum, dum = carbon_obj.get_cvals_for_tstep(indx_prev)
+    wc_start, dum, dum = soil_water_obj.get_wvals_for_tstep(indx_prev)
 
     # main temporal loop
     # ==================
@@ -57,6 +68,8 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         crop_curr = management.crop_currs[tstep]
         crop_name = management.crop_names[tstep]
         c_n_rat_pi = crop_vars[crop_curr]['c_n_rat_pi']
+        if tstep == 0:
+            c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2*[c_n_rat_pi]
 
         # for no3_inorg_fert see manual under Inputs of nitrate, fertiliser inputs on P.11 under 2.4. Soil nitrogen
         # =========================================================================================================
@@ -67,12 +80,6 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
                             pool_c_hum, cow_to_hum, c_loss_hum, pool_c_rpm, pi_to_rpm, c_loss_rpm = \
                                                                 carbon_obj.get_cvals_for_tstep(tstep + len_n_change)
         wat_soil, wc_pwp, wc_fld_cap = soil_water_obj.get_wvals_for_tstep(tstep + len_n_change)
-        if tstep == 0:
-            wc_start = wat_soil
-            pool_c_dpm_prev = pool_c_dpm
-            pool_c_rpm_prev = pool_c_rpm
-            pool_c_hum_prev = pool_c_hum
-            c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2 * [c_n_rat_pi]
 
         # C to N ratios A2a soil N supply
         # ===============================

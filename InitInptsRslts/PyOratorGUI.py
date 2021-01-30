@@ -312,7 +312,7 @@ class Form(QWidget):
         '''
         metric = w_combo.currentText()
         defn, units = fetch_defn_units_from_pyora_display(self.settings['lookup_df'], metric)
-        helpText = 'Display ' + defn + ' chart'
+        helpText = 'Display ' + defn
         w_combo.setToolTip(helpText)
 
     def displayMetric(self, w_combo, group):

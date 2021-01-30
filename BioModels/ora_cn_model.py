@@ -99,6 +99,7 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     '''
     pettmp = weather.pettmp_fwd
+    management.pet_prev = weather.pettmp_ss['pet'][-1]    # TODO: ugly patch to ensure smooth tranistion in RothC
     generate_miami_dyce_npp(pettmp, management)
 
     # run RothC

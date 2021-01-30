@@ -210,9 +210,12 @@ def get_values_for_tstep(pettmp, management, parameters, tstep):
     pet = pettmp['pet'][tstep]
 
     if tstep == 0:
-        pet_prev = pet
+        if hasattr(management, 'pet_prev'):
+            pet_prev = management.pet_prev
+        else:
+            pet_prev = pet
     else:
-        pet_prev = pettmp['pet'][tstep - 0]
+        pet_prev = pettmp['pet'][tstep]
 
     irrig = management.irrig[tstep]
     c_pi_mnth = management.pi_tonnes[tstep]
