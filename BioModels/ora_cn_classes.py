@@ -139,9 +139,10 @@ class CarbonChange(object, ):
         c_loss_rpm = self.data['c_loss_rpm'][-1]
         c_loss_hum = self.data['c_loss_hum'][-1]
         c_loss_bio = self.data['c_loss_bio'][-1]
+        tot_soc = self.data['tot_soc_simul'][-1]
 
         last_tstep_vars = (pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
-                                        c_input_bio , c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio)
+                            c_input_bio , c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc)
 
         return last_tstep_vars
 
@@ -216,7 +217,7 @@ class CarbonChange(object, ):
         for var in ['pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss']:
             self.data[var].append(eval(var))
 
-class NitrogenChange(object,):
+class NitrogenChange(object, ):
     '''
 
     '''
@@ -230,7 +231,6 @@ class NitrogenChange(object,):
         # Nitrate and Ammonium N (kg/ha) inputs and losses
         # ================================================
         var_name_list = list(['imnth', 'crop_name',  'soil_n_sply', 'prop_yld_opt', 'prop_n_opt',
-                        'prop_yld_opt_adj', 'cumul_n_uptake', 'cumul_n_uptake_adj',
                         'no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'rate_denit_no3',
                         'no3_avail', 'no3_total_inp', 'no3_immob', 'no3_leach', 'no3_leach_adj',
                         'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat',
@@ -239,49 +239,14 @@ class NitrogenChange(object,):
                         'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner',
                         'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat', 'nh4_volat_adj',
                         'nh4_cropup', 'nh4_total_loss', 'loss_adj_rat_nh4',
-                        'nh4_loss_adj', 'nh4_end',
-                        'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
-                                                                        'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum'])
+                        'nh4_loss_adj', 'nh4_end', 'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
+                        'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum',
+                                        'prop_yld_opt_adj', 'cumul_n_uptake', 'cumul_n_uptake_adj', 'nut_n_fert'])
 
         for var_name in var_name_list:
             self.data[var_name] = []
 
         self.var_name_list = var_name_list
-
-
-    def additional_n_variables(self):
-        '''
-        populate additional fields from existing data
-
-        '''
-
-        # cumulative N uptake - sheets A2 and A2b
-        # =======================================
-        tmp_list = []
-        cumul_n_uptake = 0
-        cumul_n_uptake_adj = 0
-        for crop_name, n_crop_dem, n_crop_dem_adj in zip(self.data['crop_name'], self.data['n_crop_dem'],
-                                                                                    self.data['n_crop_dem_adj']):
-            if n_crop_dem_adj > 0.0:
-                tmp_list.append(n_crop_dem_adj/n_crop_dem)
-            else:
-                tmp_list.append(0)
-            self.data['prop_yld_opt_adj'] = tmp_list        # Yield scaled wrt optimum adjusted for other losses
-
-            if crop_name is None:
-                cumul_n_uptake = 0
-                cumul_n_uptake_adj = 0
-            else:
-                cumul_n_uptake += n_crop_dem
-                cumul_n_uptake_adj += n_crop_dem_adj
-
-            self.data['cumul_n_uptake'].append(cumul_n_uptake)
-            self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
-
-        # nitrified N adjusted for other losses - sheet A2f
-        # =================================================
-        self.data['nh4_nitrif_adj'] = list(map(mul, self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4']))
-        self.data['nut_n_fert'] = list(map(add, self.data['nh4_ow_fert'], self.data['nh4_inorg_fert']))
 
     def append_vars(self, imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,
@@ -337,3 +302,39 @@ class NitrogenChange(object,):
         # ===========
         for var in ['n_release', 'n_adjust', 'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum']:
             self.data[var].append(eval(var))
+
+        return
+
+    def additional_n_variables(self):
+        '''
+        populate additional fields from existing data
+        '''
+
+        # cumulative N uptake - sheets A2 and A2b
+        # =======================================
+        tmp_list = []
+        cumul_n_uptake = 0
+        cumul_n_uptake_adj = 0
+        for crop_name, n_crop_dem, n_crop_dem_adj in zip(self.data['crop_name'], self.data['n_crop_dem'],
+                                                         self.data['n_crop_dem_adj']):
+            if n_crop_dem_adj > 0.0:
+                tmp_list.append(n_crop_dem_adj / n_crop_dem)
+            else:
+                tmp_list.append(0)
+
+            self.data['prop_yld_opt_adj'] = tmp_list  # Yield scaled wrt optimum adjusted for other losses
+
+            if crop_name is None:
+                cumul_n_uptake = 0
+                cumul_n_uptake_adj = 0
+            else:
+                cumul_n_uptake += n_crop_dem
+                cumul_n_uptake_adj += n_crop_dem_adj
+
+            self.data['cumul_n_uptake'].append(cumul_n_uptake)
+            self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+
+        # nitrified N adjusted for other losses - sheet A2f
+        # =================================================
+        self.data['nh4_nitrif_adj'] = list(map(mul, self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4']))
+        self.data['nut_n_fert'] = list(map(add, self.data['nh4_ow_fert'], self.data['nh4_inorg_fert']))

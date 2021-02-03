@@ -37,6 +37,27 @@ REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms
 
 ERR_MESS_SHEET = '*** Error *** reading sheet '
 
+def check_excel_livestock_file(form):
+    '''
+    validate existence of livestock Excel file
+    '''
+    form.w_livestock.setEnabled(False)
+    form.settings['livestock_fname'] = None
+
+    inp_dir = form.settings['inp_dir']
+    if not os.path.isdir(inp_dir):
+        return
+
+    fnames = glob(inp_dir +  '\\*livestock*.xls*')
+    if len(fnames) == 0:
+        return
+
+    form.w_livestock.setEnabled(True)
+    form.settings['livestock_fname'] = fnames[0]
+    print('Livestock Excel file : ' + fnames[0])
+    
+    return
+
 def check_excel_input_file(form, xls_inp_fname):
     '''
     validate selected Excel file

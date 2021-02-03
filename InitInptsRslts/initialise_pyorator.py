@@ -24,7 +24,7 @@ import sys
 from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
-from ora_excel_read import check_excel_input_file, ReadStudy
+from ora_excel_read import check_excel_input_file, check_excel_livestock_file, ReadStudy
 from ora_excel_write import retrieve_output_xls_files
 from ora_low_level_fns import extend_out_dir
 from ora_json_read import check_json_input_files
@@ -240,7 +240,7 @@ def read_config_file(form):
         form.w_make_xls.setCheckState(0)
 
     # populate popup lists
-    # ===================
+    # ====================
     lookup_df = form.settings['lookup_df']
     carbon_change = CarbonChange()
     display_names = fetch_display_names_from_metrics(lookup_df, carbon_change)
@@ -257,12 +257,13 @@ def read_config_file(form):
     for display_name in display_names:
             form.w_combo09.addItem(display_name)
 
-
     # enable users to view outputs from previous run
     # ==============================================
     study = ReadStudy(inp_xls, out_dir)
     extend_out_dir(form)
     retrieve_output_xls_files(form, study.study_name)
+
+    check_excel_livestock_file(form)
 
     return True
 

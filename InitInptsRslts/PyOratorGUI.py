@@ -23,7 +23,7 @@ from subprocess import Popen, DEVNULL
 from initialise_pyorator import read_config_file, initiation, write_config_file
 from ora_excel_write import retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
-from ora_livestock_model import test_livestock_algorithms
+from livestock_output_data import write_charts
 from ora_cn_model import run_soil_cn_algorithms
 from ora_excel_read import check_excel_input_file
 from ora_json_read import check_json_input_files
@@ -195,7 +195,6 @@ class Form(QWidget):
         w_livestock = QPushButton('Livestock')
         helpText = 'Runs ORATOR livestock model'
         w_livestock.setToolTip(helpText)
-        # w_livestock.setEnabled(False)
         w_livestock.clicked.connect(self.runLivestockClicked)
         grid.addWidget(w_livestock, 19, 1)
         self.w_livestock = w_livestock
@@ -249,13 +248,6 @@ class Form(QWidget):
         w_report.setMinimumHeight(175)
         w_report.setMinimumWidth(1000)
         w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
-        ''' 
-        w_report.setStyleSheet('font: 9pt Courier')
-        w_report.setStyleSheet('font: normal 12px Calabri; color: blue;'
-                               'background-color: yellow;'
-                               'selection-color: yellow;'
-                               'selection-background-color: blue;')
-        '''
         bot_hbox.addWidget(w_report, 1)
         self.w_report = w_report
         sys.stdout = OutLog(self.w_report, sys.stdout)
@@ -342,7 +334,7 @@ class Form(QWidget):
 
     def runLivestockClicked(self):
 
-        test_livestock_algorithms(self)
+        write_charts(self)
 
     def runSoilCnClicked(self):
 

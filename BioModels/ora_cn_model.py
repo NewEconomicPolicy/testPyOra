@@ -87,12 +87,11 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
             break
 
     if not converge_flag:
-        carbon_change, nitrogen_change, soil_water = 3*[None]
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), tot_soc_meas, iteration + 1))
 
     QApplication.processEvents()    # allow event loop to update unprocessed events
-    return carbon_change, nitrogen_change, soil_water
+    return carbon_change, nitrogen_change, soil_water, converge_flag
 
 def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):
     '''
@@ -145,9 +144,9 @@ def run_soil_cn_algorithms(form):
 
         mngmnt_ss = MngmntSubarea(ora_subareas.crop_mngmnt_ss[subarea], ora_parms)
 
-        carbon_change, nitrogen_change, soil_water = \
+        carbon_change, nitrogen_change, soil_water, converge_flag = \
                                         _cn_steady_state(form, ora_parms, ora_weather, mngmnt_ss, soil_vars, subarea)
-        if carbon_change is None:
+        if converge_flag is None:
             print('Skipping forward run for ' + subarea)
             continue
 

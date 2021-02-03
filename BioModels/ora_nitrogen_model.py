@@ -36,7 +36,6 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
                                                                                             get_n_parameters(n_parms)
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
-
     len_n_change = len(nitrogen_change.data['no3_end'])
     if len_n_change > 0:
         # forward run: ensure continuity with steady state

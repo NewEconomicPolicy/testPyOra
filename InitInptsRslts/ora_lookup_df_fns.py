@@ -38,7 +38,7 @@ def fetch_display_names_from_metrics(lookup_df, category_change):
     '''
     metric_list = []
     for metric in category_change.data.keys():
-        if metric == 'imnth' or metric == 'tstep':
+        if metric == 'imnth' or metric == 'tstep' or metric == 'crop_name':
             continue
         else:
             metric_list.append(metric)

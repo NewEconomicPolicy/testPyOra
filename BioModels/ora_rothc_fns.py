@@ -33,7 +33,8 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         # water content at initial and first time step
         # ============================================
-        c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, wc_t0 = 7*[0]
+        c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio = 6*[0]
+        wc_t0 = None
 
         # use measured SOC initially for get_soil_water_constants
         # =======================================================
@@ -43,9 +44,8 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         # =======================================
         wc_t0 = soil_water.data['wat_soil'][-1]
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
-            c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio \
+            c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc \
                                                                             = carbon_change.get_last_tstep_pools()
-        tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 
     ntsteps = management.ntsteps
     imnth = 1
@@ -56,7 +56,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
-        wc_t1 = get_soil_water(tstep, precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
+        wc_t1 = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
 
         rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wc_t1)
 

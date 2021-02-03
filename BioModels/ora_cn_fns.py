@@ -288,14 +288,14 @@ def plant_inputs_crops_distribution(t_grow, c_pi_yr = None):
     pi_proportions = [c_pi / sum(pi_tonnes) for c_pi in pi_tonnes]
     return pi_tonnes, pi_proportions
 
-def inert_organic_carbon(prop_iom_in_ow, cow):
+def inert_organic_carbon(prop_iom_ow, cow):
     '''
     calculates the amount of organic waste passed to the IOM pool in this time-step (t ha-1)
 
     carbon in the IOM is assumed to be inert, and does not change unless organic waste containing IOM is added to the
     soil
     '''
-    cow_to_iom = prop_iom_in_ow*cow   # (eq.2.1.16)
+    cow_to_iom = prop_iom_ow*cow   # (eq.2.1.16)
 
     return cow_to_iom
 

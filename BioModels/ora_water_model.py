@@ -108,11 +108,11 @@ def add_pet_to_weather(latitude, pettmp_grid_cell):
 
     return pettmp_reform
 
-def get_soil_water(ntstep, precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
+def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
 
     # Initialisation and subsequent calculation of soil water
     # =======================================================
-    if ntstep == 0:
+    if wc_t0 is None:
         wat_soil = (wc_fld_cap + wc_pwp)/2     # see Initialisation of soil water in 2.2. Soil water
     else:
         wat_soil = max( wc_pwp, min((wc_t0 + precip - pet + irrigation), wc_fld_cap) ) # (eq.2.2.14)

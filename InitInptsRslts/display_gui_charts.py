@@ -31,6 +31,26 @@ NTSTEPS = 240
 SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2}    # lookup table for data object
 WARNING_STR = '*** Warning *** '
 LRGE_NUM = 99999999
+THRESHOLD = 1e-10
+
+def _check_yaxis_extent(ymin, ymax):
+    '''
+    adjust Y extent to sensible values
+    '''
+    if ymin > ymax:
+        ytmp = ymin
+        ymin = ymax
+        ymax = ytmp
+
+    # adjust by 5% each way when extent is almost zero
+    # ================================================
+    diff = ymax - ymin
+    if diff < THRESHOLD:
+        frac5 = 0.05*abs(max(0.1, diff))
+        ymax += frac5
+        ymin -= frac5
+
+    return ymin, ymax
 
 def display_metric(form, category, metric):
 
@@ -192,6 +212,8 @@ class Second(QWidget):
         for subarea in subareas:
             self.w_chart.setAxisX(axis, line_series[subarea])
 
+        yaxis_min, yaxis_max = _check_yaxis_extent(yaxis_min, yaxis_max)
+
         self.w_chart.axisY(lseries).setRange(yaxis_min, yaxis_max)
         self.w_chart.axisY(lseries).setTitleText(pyora_display + ' ' + units)
 
@@ -231,14 +253,6 @@ class Second(QWidget):
         if ymin is None or ymax is None:
             self.post_line_series(self.ymin_orig, self.ymax_orig)
         else:
-            if ymin > ymax:
-                ytmp = ymin
-                ymin = ymax
-                ymax = ytmp
-
-            if ymin == ymax:
-                ymax += 10.0
-
             self.post_line_series(ymin, ymax)
 
     def resetClicked(self):
