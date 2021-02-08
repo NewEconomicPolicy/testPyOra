@@ -29,7 +29,7 @@ from ora_excel_read import check_excel_input_file
 from ora_json_read import check_json_input_files
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
-from ora_low_level_fns import extend_out_dir, optimisation_cycle
+from ora_low_level_fns import extend_out_dir, gui_optimisation_cycle
 from set_up_logging import OutLog
 
 class Form(QWidget):
@@ -178,7 +178,7 @@ class Form(QWidget):
 
         # user feedback
         # =============
-        w_opt_cycle = QLabel(optimisation_cycle(self))
+        w_opt_cycle = QLabel(gui_optimisation_cycle(self))
         grid.addWidget(w_opt_cycle, 18, 1, 1, 6)
         self.w_opt_cycle = w_opt_cycle
 

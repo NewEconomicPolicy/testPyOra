@@ -57,8 +57,8 @@ def _dump_summary(sum_tbl):
             line += '{:13.3f}'.format(sum_tbl[key][iline])
         print(line)
 
-def summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, pi_tonnes,
-                      summary_table = None):
+def gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, pi_tonnes,
+                          summary_table = None):
     '''
     create or add to summary table
     =============================
@@ -141,7 +141,7 @@ def average_weather(latitude, precip, tair):
 
     return ave_precip, ave_tmean, pet
 
-def optimisation_cycle(form, subarea = None, iteration = None):
+def gui_optimisation_cycle(form, subarea = None, iteration = None):
     """
     Update progress bar
     """

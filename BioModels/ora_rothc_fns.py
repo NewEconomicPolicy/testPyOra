@@ -22,7 +22,7 @@ from ora_water_model import get_soil_water, get_soil_water_constants
 # ===========================================
 K_DPM = 10/12;    K_RPM = 0.3/12;   K_BIO = 0.66/12;  K_HUM = 0.02/12  # per month
 
-def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
+def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0,
                         pool_c_dpm = None, pool_c_rpm = None, pool_c_bio = None, pool_c_hum = None, pool_c_iom = None):
     '''
 
@@ -34,7 +34,6 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         # water content at initial and first time step
         # ============================================
         c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio = 6*[0]
-        wc_t0 = None
 
         # use measured SOC initially for get_soil_water_constants
         # =======================================================
@@ -42,7 +41,6 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
     else:
         # retrieve values from previous time step
         # =======================================
-        wc_t0 = soil_water.data['wat_soil'][-1]
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
             c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc \
                                                                             = carbon_change.get_last_tstep_pools()

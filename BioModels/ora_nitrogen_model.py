@@ -23,9 +23,11 @@ from ora_no3_nh4_fns import no3_nh4_crop_uptake, get_n_parameters, no3_immobilis
                     no3_leaching, loss_adjustment_ratio, prop_n_opt_from_soil_n_supply, \
                     nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_lost_nitrif
 
-def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, soil_vars, nitrogen_change):
+def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, soil_vars, nitrogen_change,
+                                                        no3_start, nh4_start, c_n_rat_hum_prev = 8.5 ):
     '''
     The soil organic matter pools (BIO and HUM-N) are assumed to have a constant C:N ratio (8.5 after Bradbury et al., 1993)
+    also default for c_n_rat_hum_prev
     '''
     n_parms = parameters.n_parms
     crop_vars = parameters.crop_vars
@@ -34,23 +36,17 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
     # ==============================
     no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_som, precip_critic, prop_volat = \
                                                                                             get_n_parameters(n_parms)
+    if no3_start is None:
+        no3_start = no3_atmos
+        nh4_start = nh4_atmos
+
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
     len_n_change = len(nitrogen_change.data['no3_end'])
     if len_n_change > 0:
-        # forward run: ensure continuity with steady state
-        # ================================================
-        no3_start = nitrogen_change.data['no3_end'][-1]
-        nh4_start = nitrogen_change.data['nh4_end'][-1]
-        c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
-        indx_prev = len_n_change - 1
+        indx_prev = len_n_change - 1            # forward run: ensure continuity with steady state
     else:
-        # steady state initialisation
-        # ===========================
-        no3_start = no3_atmos
-        nh4_start = nh4_atmos
-        c_n_rat_hum_prev = 8.5  # (8.5 after Bradbury et al., 1993)
-        indx_prev = 0
+        indx_prev = 0       # steady state initialisation
 
     # use first value for steady state or value for previous time step for forward run
     # ================================================================================

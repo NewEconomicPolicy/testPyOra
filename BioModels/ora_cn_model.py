@@ -26,7 +26,7 @@ __version__ = '0.0.0'
 import os
 from PyQt5.QtWidgets import QApplication
 
-from ora_low_level_fns import summary_table_add, optimisation_cycle, extend_out_dir
+from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange
 from ora_water_model import SoilWaterChange, fix_soil_water
@@ -49,9 +49,11 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
     t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
     pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = init_ss_carbon_pools(tot_soc_meas)
+    wc_t0 = None
+    no3_start = None
+    nh4_start = None
 
-    summary_table = summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, management.pi_tonnes)
-
+    summary_table = gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, management.pi_tonnes)
     converge_flag = False
     for iteration in range(MAX_ITERS):
         carbon_change = CarbonChange()
@@ -60,14 +62,18 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
         # run RothC
         # =========
-        optimisation_cycle(form, subarea, iteration)
+        gui_optimisation_cycle(form, subarea, iteration)
 
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = \
-                        run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water,
-                                  pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
+                        run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0,
+                                                        pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
         fix_soil_water(soil_water)  # make sure data metrics have same length
-        nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp,
-                                                                                management, soil_vars, nitrogen_change)
+        wc_t0 = soil_water.data['wat_soil'][-1]     # carry forward to next iteration
+
+        nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
+                                        soil_vars, nitrogen_change, no3_start, nh4_start)
+        no3_start = nitrogen_change.data['no3_end'][-1]
+        nh4_start = nitrogen_change.data['nh4_end'][-1]
 
         # after steady state period has completed adjust plant inputs
         # ===========================================================
@@ -81,8 +87,8 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         if  diff_abs < SOC_MIN_DIFF:
             print('\nSimulated and measured SOC: {}\t*** converged *** after {} iterations'
                                                             .format(round(tot_soc_simul, 3), iteration + 1))
-            summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
-                                                                                management.pi_tonnes, summary_table)
+            gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
+                                                                            management.pi_tonnes, summary_table)
             converge_flag = True
             break
 
@@ -103,10 +109,14 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     # run RothC
     # =========
-    pools_set = run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water)
+    wc_t0 = soil_water.data['wat_soil'][-1]  # from steady state
+    pools_set = run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0)
 
-    nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
-                                                                                        soil_vars, nitrogen_change)
+    no3_start = nitrogen_change.data['no3_end'][-1]
+    nh4_start = nitrogen_change.data['nh4_end'][-1]
+    c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
+    nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars,
+                                                            nitrogen_change, no3_start, nh4_start, c_n_rat_hum_prev)
     return (carbon_change, nitrogen_change, soil_water)
 
 def run_soil_cn_algorithms(form):
