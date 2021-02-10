@@ -47,11 +47,12 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     pettmp = weather.pettmp_ss
     generate_miami_dyce_npp(pettmp, management)
 
-    t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
+    dum, dum, dum, dum, tot_soc_meas, dum, dum, dum = get_soil_vars(soil_vars, subarea, write_flag = True)
     pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = init_ss_carbon_pools(tot_soc_meas)
     wc_t0 = None
     no3_start = None
     nh4_start = None
+    wat_strss_indx = 1.0
 
     summary_table = gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, management.pi_tonnes)
     converge_flag = False
@@ -66,9 +67,11 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = \
                         run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0,
-                                                        pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
+                                            wat_strss_indx, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
         fix_soil_water(soil_water)  # make sure data metrics have same length
         wc_t0 = soil_water.data['wat_soil'][-1]     # carry forward to next iteration
+        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
+        aet = soil_water.data['aet'][-1]
 
         nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
                                         soil_vars, nitrogen_change, no3_start, nh4_start)

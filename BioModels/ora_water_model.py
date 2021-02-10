@@ -115,7 +115,7 @@ def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
     if wc_t0 is None:
         wat_soil = (wc_fld_cap + wc_pwp)/2     # see Initialisation of soil water in 2.2. Soil water
     else:
-        wat_soil = max( wc_pwp, min((wc_t0 + precip - pet + irrigation), wc_fld_cap) ) # (eq.2.2.14)
+        wat_soil = max(wc_pwp, min((wc_t0 + precip - pet + irrigation), wc_fld_cap)) # (eq.2.2.14)
 
     return wat_soil
 
@@ -125,9 +125,6 @@ def fix_soil_water(soil_water):
     '''
     aet = soil_water.data['aet'][-1]
     soil_water.data['aet'].append(aet)
-
-    aet = soil_water.data['aet_prentice'][-1]
-    soil_water.data['aet_prentice'].append(aet)
 
     return
 
@@ -146,7 +143,7 @@ class SoilWaterChange(object, ):
         self.irrig = 0  # D1. Water use
 
         self.data = {}
-        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'aet_prentice','irrig',
+        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
                 'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff', 'pcnt_c',
                                                                                                     'max_root_dpth'])
         for var_name in var_name_list:
@@ -167,11 +164,10 @@ class SoilWaterChange(object, ):
         wc_soil_irri = self.data['wc_soil_irri'][tstep]
         wat_drain = self.data['wat_drain'][tstep]
 
-        # return wc_pwp, wat_soil, wc_fld_cap, aet, irrig, wc_soil_irri_root_zone, aet_irri, wc_soil_irri, wat_drain
         return wat_soil, wc_pwp, wc_fld_cap
 
     def append_vars(self, imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap,
-                                                                                                            pcnt_c):
+                                                                                                pcnt_c, wat_strss_indx):
         '''
 
         '''
@@ -181,17 +177,16 @@ class SoilWaterChange(object, ):
         # ===========
         if len(self.data['wat_drain']) > 0:
 
-            # (eq.3.2.4) and prentice (eq.3.2.5) col L - AET to rooting depth before irrigation (mm)
-            # ======================================================================================
-            aet = min(pet, 5*days_in_mnth, (wat_soil - wc_pwp))
+            # (eq.3.2.4) col L - AET to rooting depth before irrigation (mm)
+            # =============================================================
+            aet = min(pet_prev, 5*days_in_mnth, (wat_soil - wc_pwp))
             self.data['aet'].append(aet)
-            self.data['aet_prentice'].append(min(pet, 5*days_in_mnth*(wat_soil - wc_pwp)/(wc_fld_cap - wc_pwp)) )
 
             self.data['wat_strss_indx'].append(self.data['aet'][-1]/pet_prev)
             wat_soil_prev = self.data['wat_soil'][-1]
         else:
-            self.data['wat_strss_indx'].append(1.0)
-            aet = pet
+            self.data['wat_strss_indx'].append(wat_strss_indx)
+            aet = 0
             wat_soil_prev = 0
 
         self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth (mm)

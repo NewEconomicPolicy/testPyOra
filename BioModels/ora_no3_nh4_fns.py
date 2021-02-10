@@ -29,8 +29,55 @@ __version__ = '0.0.0'
 from math import exp
 from calendar import monthrange
 
-
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
+
+def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
+        cow_to_dpm, pi_to_dpm, pool_c_dpm_prev, c_loss_dpm, c_n_rat_dpm_prev,
+                    pi_to_rpm, pool_c_rpm_prev, c_loss_rpm, c_n_rat_rpm_prev,
+        cow_to_hum,            pool_c_hum_prev, c_loss_hum, c_n_rat_hum_prev, c_loss_bio):
+    '''
+    equations 3.3.7 to 3.3.12
+    '''
+    
+    # C to N ratios A2a soil N supply
+    # ===============================
+    c_input_dpm = pi_to_dpm + cow_to_dpm
+    denom = (pool_c_dpm_prev/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
+    c_n_rat_dpm = (pool_c_dpm_prev + c_input_dpm)/denom  # (eq.3.3.10)
+
+    c_n_rat_rpm = (pool_c_rpm_prev + pi_to_rpm)/((pool_c_rpm_prev/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))  # (eq.3.3.11)
+
+    c_n_rat_hum = (pool_c_hum_prev + cow_to_hum)/((pool_c_hum_prev/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow))  # (eq.3.3.12)
+
+    # (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
+    # ====================================================================================================
+    n_release = prop_co2*1000*(c_loss_dpm/c_n_rat_dpm + c_loss_rpm/c_n_rat_rpm + c_loss_bio/c_n_rat_som +
+                                                                                            c_loss_hum/c_n_rat_hum)
+    # (eq.3.3.9) N adjustment is difference in the stable C:N ratio of the soil and
+    #            C material being transformed into BIO and HUM from DPM and RPM pools
+    # ===============================================================================
+    n_adjust = 1000*prop_bio*(c_loss_dpm*(1/c_n_rat_som - 1/c_n_rat_dpm) +
+                                  c_loss_rpm*(1/c_n_rat_som - 1/c_n_rat_rpm)) + \
+               1000*prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) +
+                                  c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))  # (kg ha-1)
+
+    soil_n_sply = n_release - n_adjust  # (eq.3.3.7)
+
+    return soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum
+
+def c_n_rat_hum_from_prev(pool_c_hum_prev, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow):
+    '''
+    not used: deconstruction of (eq.3.3.12)
+    '''
+
+    numer =   pool_c_hum_prev + cow_to_hum
+    denom1 = pool_c_hum_prev/c_n_rat_hum_prev
+    denom2 = cow_to_hum/c_n_rat_ow
+    denom = denom1 + denom2
+
+    c_n_rat_hum = numer/denom
+
+    return c_n_rat_hum
 
 def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
     '''
@@ -45,8 +92,8 @@ def prop_n_optimal_from_yield(prop_yld_opt, crop_vars):
     calculate proportion of the optimum supply of N in the soil using fitted curve coefficients
     pXopt = a pYldopt3 + b pYldopt2 + c pYldopt + d
     '''
-    prop_n_opt = crop_vars['n_rcoef_a'] * prop_yld_opt**3 + crop_vars['n_rcoef_b'] * prop_yld_opt**2 + \
-                                                    crop_vars['n_rcoef_c'] * prop_yld_opt + crop_vars['n_rcoef_d']
+    prop_n_opt = crop_vars['n_rcoef_a']*prop_yld_opt**3 + crop_vars['n_rcoef_b']*prop_yld_opt**2 + \
+                                                    crop_vars['n_rcoef_c']*prop_yld_opt + crop_vars['n_rcoef_d']
     return prop_n_opt
 
 
@@ -58,8 +105,8 @@ def get_n_parameters(n_parms):
     atmos_n_depos = n_parms['atmos_n_depos']
     prop_atmos_dep_no3 = n_parms['prop_atmos_dep_no3']  # typically 0.5
 
-    no3_atmos = prop_atmos_dep_no3 * atmos_n_depos/12  # atmospheric deposition of N to the soil (eq.2.4.2)
-    nh4_atmos = (1 - prop_atmos_dep_no3) * atmos_n_depos/12  # (eq.2.4.19)
+    no3_atmos = prop_atmos_dep_no3*atmos_n_depos/12  # atmospheric deposition of N to the soil (eq.2.4.2)
+    nh4_atmos = (1 - prop_atmos_dep_no3)*atmos_n_depos/12  # (eq.2.4.19)
     k_nitrif = n_parms['k_nitrif']
     min_no3_nh4 = n_parms['no3_min']
     n_d50 = n_parms['n_d50']
@@ -75,7 +122,7 @@ def _fertiliser_inputs(fert_amount):
     to the soil to produce ammonium, therefore, the proportion of nitrate added in the fertiliser is zero (eq.2.3.5)
     '''
     prop_no3_to_fert = 0
-    fert_to_no3_pool = prop_no3_to_fert * fert_amount
+    fert_to_no3_pool = prop_no3_to_fert*fert_amount
 
     return fert_to_no3_pool
 
@@ -93,7 +140,7 @@ def loss_adjustment_ratio(n_start, n_sum_inputs, n_sum_losses):
     if n_sum_losses <= n_start + n_sum_inputs:
         loss_adj_rat = 1
     else:
-        loss_adj_rat = (n_start + n_sum_inputs) / n_sum_losses
+        loss_adj_rat = (n_start + n_sum_inputs)/n_sum_losses
 
     return loss_adj_rat
 
@@ -132,12 +179,12 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
     heterotrophic bacteria although autotrophic denitrifiers have also been identified
     based on the simple approach used in ECOSSE
     '''
-    no3_d50 = n_d50 * t_depth     # soil nitrate-N content at which denitrification is 50% of its full potential (kg ha-1)
+    no3_d50 = n_d50*t_depth     # soil nitrate-N content at which denitrification is 50% of its full potential (kg ha-1)
     dummy, days_in_mnth = monthrange(2011, imnth)   # TODO: ignores leap year, is this correct?
 
     # (eq.2.4.9) maximum potential rate of denitrification (kg ha-1 month-1)
     # ======================================================================
-    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX*days_in_mnth * (t_depth/5))
+    n_denit_max = min(no3_avail, N_DENITR_DAY_MAX*days_in_mnth*(t_depth/5))
 
     rate_denit_no3 = no3_avail/(no3_d50 + no3_avail)    # (eq.2.4.10) nitrate rate modifier
 
@@ -154,9 +201,9 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
 
     # use the amount of CO2 produced by aerobic decomposition as a surrogate for biological activity
     # ==============================================================================================
-    rate_denit_bio =  min(1, co2_aerobic_decomp * 0.1)    # (eq.2.4.12)
+    rate_denit_bio =  min(1, co2_aerobic_decomp*0.1)    # (eq.2.4.12)
 
-    n_denit = n_denit_max * rate_denit_no3 * rate_denit_moist * rate_denit_bio   # (eq.2.4.8)
+    n_denit = n_denit_max*rate_denit_no3*rate_denit_moist*rate_denit_bio   # (eq.2.4.8)
 
     return n_denit, n_denit_max, rate_denit_no3, rate_denit_moist, rate_denit_bio, prop_n2_wat, prop_n2_no3
 
@@ -178,7 +225,7 @@ def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, nut_n_opt, t_grow, no3_avail,
         prop_yld_opt = max(min(prop_yld_opt, 1), 0.1)                      # see section 3.3
 
         n_crop_dem = nut_n_opt/t_grow    # N demand in each month without other losses
-        n_crop_dem_adj = prop_n_opt * n_crop_dem  # (eq.2.4.17) N demand adjusted for other losses
+        n_crop_dem_adj = prop_n_opt*n_crop_dem  # (eq.2.4.17) N demand adjusted for other losses
         no3_crop_dem = n_crop_dem*(no3_avail/(no3_avail + nh4_avail))  # (eq.2.4.18) crop N demand from the nitrate pool
 
         '''
@@ -186,7 +233,7 @@ def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, nut_n_opt, t_grow, no3_avail,
         available nitrate and ammonium
         n_crop_dem: N demand of the crop in each month
         '''
-        nh4_crop_dem = n_crop_dem * (nh4_avail / (no3_avail + nh4_avail))  # (eq.2.4.26)
+        nh4_crop_dem = n_crop_dem*(nh4_avail/(no3_avail + nh4_avail))  # (eq.2.4.26)
 
     return n_crop_dem, n_crop_dem_adj, no3_crop_dem, nh4_crop_dem, prop_yld_opt
 
@@ -227,8 +274,8 @@ def n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
     60% s N2O, and 2% of the partially nitrified N is assumed to be lost as gas at field capacity, with a linear
     decrease in this loss as water declines to wilting point
     '''
-    n2o_emiss_nitrif = nh4_nitrif * ( (n_parms['prop_n2o_fc'] * (wat_soil / wc_fld_cap)) +
-                                      (n_parms['prop_nitrif_gas'] * (1 - n_parms['prop_nitrif_no'])))  # (eq.2.4.24)
+    n2o_emiss_nitrif = nh4_nitrif*( (n_parms['prop_n2o_fc']*(wat_soil/wc_fld_cap)) +
+                                      (n_parms['prop_nitrif_gas']*(1 - n_parms['prop_nitrif_no'])))  # (eq.2.4.24)
     return n2o_emiss_nitrif
 
 def nh4_immobilisation(soil_n_sply, nh4_min):
@@ -250,7 +297,7 @@ def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif):
     '''
     rate_inhibit = 1     # inhibition rate modifier TODO - see manual
 
-    tmp_var = nh4 * (1 - exp(-k_nitrif*rate_mod*rate_inhibit))
+    tmp_var = nh4*(1 - exp(-k_nitrif*rate_mod*rate_inhibit))
 
     nh4_nitrif = min(tmp_var, nh4 - nh4_min)  # (eq.2.4.23)
 

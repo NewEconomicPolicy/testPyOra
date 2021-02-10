@@ -19,7 +19,7 @@ __version__ = '0.0.0'
 # ---------------
 #
 from ora_cn_fns import get_fert_vals_for_tstep, get_soil_vars
-from ora_no3_nh4_fns import no3_nh4_crop_uptake, get_n_parameters, no3_immobilisation, no3_denitrific, \
+from ora_no3_nh4_fns import soil_nitrogen_supply, no3_nh4_crop_uptake, get_n_parameters, no3_immobilisation, no3_denitrific, \
                     no3_leaching, loss_adjustment_ratio, prop_n_opt_from_soil_n_supply, \
                     nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_lost_nitrif
 
@@ -40,7 +40,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         no3_start = no3_atmos
         nh4_start = nh4_atmos
 
-    t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
+    t_depth, dum, dum, dum, dum, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
     len_n_change = len(nitrogen_change.data['no3_end'])
     if len_n_change > 0:
@@ -66,8 +66,8 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         if tstep == 0:
             c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2*[c_n_rat_pi]
 
-        # for no3_inorg_fert see manual under Inputs of nitrate, fertiliser inputs on P.11 under 2.4. Soil nitrogen
-        # =========================================================================================================
+        # for no3_inorg_fert see manual under Inputs of nitrate, fertiliser inputs under 2.4. Soil nitrogen
+        # =================================================================================================
         nh4_ow_fert, nh4_inorg_fert, no3_inorg_fert, c_n_rat_ow, pi_tonnes = \
                                                                 get_fert_vals_for_tstep(management, parameters, tstep)
 
@@ -76,29 +76,13 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
                                                                 carbon_obj.get_cvals_for_tstep(tstep + len_n_change)
         wat_soil, wc_pwp, wc_fld_cap = soil_water_obj.get_wvals_for_tstep(tstep + len_n_change)
 
-        # C to N ratios A2a soil N supply
-        # ===============================
-        c_input_dpm = pi_to_dpm + cow_to_dpm
-        denom = (pool_c_dpm_prev/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
-        c_n_rat_dpm = (pool_c_dpm_prev + c_input_dpm)/denom                                                            # (eq.3.3.10)
-        c_n_rat_rpm = (pool_c_rpm_prev + pi_to_rpm)/((pool_c_rpm_prev/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))   # (eq.3.3.11)
-        c_n_rat_hum = (pool_c_hum_prev + cow_to_hum)/((pool_c_hum_prev/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow)) # (eq.3.3.12)
-        c_n_rat_dpm_prev = c_n_rat_dpm
-        c_n_rat_rpm_prev = c_n_rat_rpm
-        c_n_rat_hum_prev = c_n_rat_hum
-
-        # (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
-        # ====================================================================================================
-        n_release = prop_co2*1000*(c_loss_dpm/c_n_rat_dpm + c_loss_rpm/c_n_rat_rpm + c_loss_bio/c_n_rat_som +
-                                                                                            c_loss_hum/c_n_rat_hum)
-        # (eq.3.3.9) N adjustment is difference in the stable C:N ratio of the soil and
-        #            C material being transformed into BIO and HUM from DPM and RPM pools
-        # ===============================================================================
-        n_adjust = 1000 * prop_bio*(c_loss_dpm*(1/c_n_rat_som - 1/c_n_rat_dpm) +
-                                        c_loss_rpm*(1/c_n_rat_som - 1/c_n_rat_rpm)) \
-                            + prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) +
-                                        c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))  # (kg ha-1)
-        soil_n_sply = n_release - n_adjust    # (eq.3.3.7)
+        # equs 3.3.7 to 3.3.12
+        # ====================
+        soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum = \
+            soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
+                                    cow_to_dpm, pi_to_dpm, pool_c_dpm_prev, c_loss_dpm, c_n_rat_dpm_prev,
+                                                pi_to_rpm, pool_c_rpm_prev, c_loss_rpm, c_n_rat_rpm_prev,
+                                    cow_to_hum,            pool_c_hum_prev, c_loss_hum, c_n_rat_hum_prev, c_loss_bio)
 
         # proportion of the optimum supply of N in the soil
         # =================================================
@@ -170,6 +154,10 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         pool_c_dpm_prev = pool_c_dpm
         pool_c_rpm_prev = pool_c_rpm
         pool_c_hum_prev = pool_c_hum
+        c_n_rat_dpm_prev = c_n_rat_dpm
+        c_n_rat_rpm_prev = c_n_rat_rpm
+        c_n_rat_hum_prev = c_n_rat_hum
+
         wc_start = wat_soil
         no3_start = no3_end
         nh4_start = nh4_end

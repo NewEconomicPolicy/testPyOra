@@ -23,11 +23,12 @@ from ora_water_model import get_soil_water, get_soil_water_constants
 K_DPM = 10/12;    K_RPM = 0.3/12;   K_BIO = 0.66/12;  K_HUM = 0.02/12  # per month
 
 def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0,
+                        wat_strss_indx = None,
                         pool_c_dpm = None, pool_c_rpm = None, pool_c_bio = None, pool_c_hum = None, pool_c_iom = None):
     '''
 
     '''
-    t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
+    t_depth, dum, t_pH_h2o, t_salinity, dum, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
     if len(carbon_change.data['pool_c_dpm']) == 0:
 
@@ -106,7 +107,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 
         soil_water.append_vars(imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
-                                                                                                wc_fld_cap, pcnt_c)
+                                                                    wc_fld_cap, pcnt_c, wat_strss_indx)
         wc_t0 = wc_t1
 
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow)       # add npp by zaks to management

@@ -123,9 +123,9 @@ def generate_miami_dyce_npp(pettmp, management):
 
     return
 
-def get_soil_vars(soil_vars):
+def get_soil_vars(soil_vars, subarea = None, write_flag = False):
     '''
-
+    required by nitrogen model, RothC and steady state function
     '''
     t_bulk = soil_vars.t_bulk
     t_clay = soil_vars.t_clay
@@ -140,6 +140,10 @@ def get_soil_vars(soil_vars):
     prop_hum = (1 / denom) / (1 + 0.85)     # (eq.2.1.7)
     prop_bio = (1 / denom) - prop_hum       # (eq.2.1.8)
     prop_co2 = 1 - prop_bio - prop_hum      # (eq.2.1.9)
+
+    if write_flag:
+        mess = 'Proportions of C lost from each pool in sub area: ' + subarea
+        print(mess + '\tHUM: {}\tBIO: {}\tCO2: {}'.format(round(prop_hum, 3), round(prop_bio, 3), round(prop_co2, 3)))
 
     return t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2
 
