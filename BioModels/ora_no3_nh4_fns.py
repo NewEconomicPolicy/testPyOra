@@ -207,11 +207,11 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
 
     return n_denit, n_denit_max, rate_denit_no3, rate_denit_moist, rate_denit_bio, prop_n2_wat, prop_n2_no3
 
-def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, nut_n_opt, t_grow, no3_avail, nh4_avail, pi_tonnes):
+def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, n_crop_dem, no3_avail, nh4_avail, pi_tonnes):
     '''
     crop N demand is calculated from proportion of optimum yield estimated assuming no other losses of mineral N
         0 <= prop_n_opt <= 1
-        nut_n_opt:  N supply required for the optimum yield
+        n_crop_dem:  N supply required for the optimum yield
         t_grow:     number of months in the growing season
         pi_tonnes:  used as a proxy to indicate if time step is in a growing season
     '''
@@ -224,18 +224,15 @@ def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, nut_n_opt, t_grow, no3_avail,
         prop_yld_opt = (1 + cn)*prop_n_opt**cn - cn*(prop_n_opt)**(1 + cn) # (eq.2.4.16) and (eq.3.3.2)
         prop_yld_opt = max(min(prop_yld_opt, 1), 0.1)                      # see section 3.3
 
-        n_crop_dem = nut_n_opt/t_grow    # N demand in each month without other losses
         n_crop_dem_adj = prop_n_opt*n_crop_dem  # (eq.2.4.17) N demand adjusted for other losses
         no3_crop_dem = n_crop_dem*(no3_avail/(no3_avail + nh4_avail))  # (eq.2.4.18) crop N demand from the nitrate pool
-
         '''
         as for nitrate, it is assumed that the crop N demand from the ammonium pool is shared equally between
         available nitrate and ammonium
-        n_crop_dem: N demand of the crop in each month
         '''
         nh4_crop_dem = n_crop_dem*(nh4_avail/(no3_avail + nh4_avail))  # (eq.2.4.26)
 
-    return n_crop_dem, n_crop_dem_adj, no3_crop_dem, nh4_crop_dem, prop_yld_opt
+    return n_crop_dem_adj, no3_crop_dem, nh4_crop_dem, prop_yld_opt
 
 '''
      =====================================

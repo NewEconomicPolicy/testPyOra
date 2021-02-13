@@ -234,11 +234,11 @@ class NitrogenChange(object, ):
                         'no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'rate_denit_no3',
                         'no3_avail', 'no3_total_inp', 'no3_immob', 'no3_leach', 'no3_leach_adj',
                         'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat',
-                        'no3_denit', 'no3_cropup', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
+                        'no3_denit', 'no3_crop_dem', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
                         'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end',  'n2o_emiss_denit',
-                        'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner',
+                        'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_avail',
                         'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat', 'nh4_volat_adj',
-                        'nh4_cropup', 'nh4_total_loss', 'loss_adj_rat_nh4',
+                        'nh4_crop_dem', 'nh4_total_loss', 'loss_adj_rat_nh4',
                         'nh4_loss_adj', 'nh4_end', 'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
                         'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum',
                                         'prop_yld_opt_adj', 'cumul_n_uptake', 'cumul_n_uptake_adj', 'nut_n_fert'])
@@ -253,9 +253,10 @@ class NitrogenChange(object, ):
                     no3_avail, no3_total_inp, no3_immob, no3_leach, no3_leach_adj,
                     no3_denit, rate_denit_no3, n_denit_max, rate_denit_moist, rate_denit_bio,
                     no3_denit_adj, n2o_emiss_nitrif, prop_n2_no3, prop_n2_wat,
-                    no3_cropup, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_emiss_denit,
-                    nh4_start, nh4_ow_fert, nh4_inorg_fert, nh4_miner, nh4_atmos, nh4_total_inp, nh4_immob, nh4_nitrif,
-                    nh4_volat, nh4_volat_adj, nh4_cropup, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
+                    no3_crop_dem, no3_total_loss, no3_loss_adj, loss_adj_rat_no3, no3_end, n2o_emiss_denit,
+                    nh4_start, nh4_ow_fert, nh4_inorg_fert, nh4_miner, nh4_atmos, nh4_avail, nh4_total_inp,
+                    nh4_immob, nh4_nitrif,
+                    nh4_volat, nh4_volat_adj, nh4_crop_dem, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
                                 n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum):
         '''
         add one set of values for this timestep to each of lists
@@ -271,12 +272,13 @@ class NitrogenChange(object, ):
 
         # Ammonium N (kg/ha) cols R to W
         # ==============================
-        for var in ['nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_start']:
+        for var in ['nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_avail', 'nh4_total_inp',
+                                                                        'nh4_immob', 'nh4_nitrif', 'nh4_start']:
             self.data[var].append(eval(var))
 
         # Ammonium N cols X to AB
         # =======================
-        for var in ['nh4_ow_fert', 'nh4_volat', 'nh4_volat_adj', 'nh4_cropup',
+        for var in ['nh4_ow_fert', 'nh4_volat', 'nh4_volat_adj', 'nh4_crop_dem',
                                                                         'nh4_total_loss', 'nh4_loss_adj', 'nh4_end']:
             self.data[var].append(eval(var))
 
@@ -294,7 +296,7 @@ class NitrogenChange(object, ):
 
         # crop uptake
         # ===========
-        for var in ['no3_cropup', 'n_denit_max', 'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3',
+        for var in ['no3_crop_dem', 'n_denit_max', 'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3',
                                                                                             'loss_adj_rat_nh4']:
             self.data[var].append(eval(var))
 

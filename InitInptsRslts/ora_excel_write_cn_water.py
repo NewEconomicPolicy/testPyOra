@@ -33,10 +33,10 @@ LINE_COLORS = list(['FF0000', '00FF00','0000FF'])
 LINE_COLORS2 = list(['FF0000', '00FF00','0000FF', '0FF000', '000FF0'])
 
 Y_AXIS_LABELS = {'co2_emiss':'Carbon (t/ha)',
-                 'soil_n_sply':'Soil N supply (kg/ha)', 'no3_cropup':'Crop N demand from N pool (kg/ha)',
+                 'soil_n_sply':'Soil N supply (kg/ha)', 'no3_crop_dem':'Crop N demand from N pool (kg/ha)',
                            'no3_nitrif':'Nitrified N (kg/ha)',
                 'no3_leach':'Leached nitrate (kg/ha)', 'no3_denit':' Denitrified nitrate (kg/ha)',
-                'nh4_cropup':'Crop N demand from ammonium (kg/ha)', 'nh4_volat':'Volatilised ammonium (kg/ha)',
+                'nh4_crop_dem':'Crop N demand from ammonium (kg/ha)', 'nh4_volat':'Volatilised ammonium (kg/ha)',
                  'wc_pwp':'', 'wat_soil':'', 'wc_fld_cap':'Water content of root zone at field capacity (mm)',
                  'wat_strss_indx':'', 'aet':'AET to rooting depth before irrigation (mm)', 'irrig':'',
                  'wc_soil_irri_root_zone':'Soil water content of root zone after irrigation (mm)',
@@ -48,8 +48,8 @@ Y_AXIS_LABELS = {'co2_emiss':'Carbon (t/ha)',
 CHANGE_VARS = {}
 CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
                                                                                 'tot_soc_simul',  'co2_emiss'])
-CHANGE_VARS['nitrogen'] = list(['soil_n_sply', 'no3_cropup', 'no3_nitrif', 'no3_leach', 'no3_denit',
-                                                                            'nh4_cropup', 'nh4_volat'])
+CHANGE_VARS['nitrogen'] = list(['soil_n_sply', 'no3_crop_dem', 'no3_nitrif', 'no3_leach', 'no3_denit',
+                                                                            'nh4_crop_dem', 'nh4_volat'])
 CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
                              'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'pcnt_c'])
 

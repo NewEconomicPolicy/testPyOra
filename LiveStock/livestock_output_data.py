@@ -20,7 +20,7 @@ from livestock_class import Livestock
 # from livestock_class import Livestock, livestock_list
 livestock_list = []
 
-def write_charts(form):
+def write_livestock_charts(form):
 
     # read inputs and create folder to store graphs in
     # =================================================

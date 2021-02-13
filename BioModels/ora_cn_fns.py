@@ -24,6 +24,22 @@ from time import sleep
 
 sleepTime = 5
 
+def get_crop_vars(management, crop_vars, tstep):
+
+    crop_curr = management.crop_currs[tstep]
+    crop_name = management.crop_names[tstep]
+    if crop_name is None:
+        n_crop_dem = 0
+    else:
+        t_grow = crop_vars[crop_curr]['t_grow']
+        n_crop_dem = crop_vars[crop_curr]['n_sply_opt']/t_grow      # per month - was nut_n_opt
+
+    nut_n_min = crop_vars[crop_curr]['n_sply_min']
+    n_respns_coef = crop_vars[crop_curr]['n_respns_coef']
+    c_n_rat_pi = crop_vars[crop_curr]['c_n_rat_pi']
+
+    return crop_name, nut_n_min, n_crop_dem, n_respns_coef, c_n_rat_pi
+
 def npp_zaks_grow_season(management):
     '''
     '''

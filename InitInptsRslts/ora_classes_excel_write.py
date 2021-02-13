@@ -87,8 +87,9 @@ class  B1cNlimitation(object, ):
         '''
         self.title = 'Nitrogen limitation'
 
+
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
-                           'soil_n_sply':'2f', 'nut_n_fert':'2f',
+                           'plant_n_avail':'2f', 'nut_n_fert':'2f',   # TODO: was 'soil_n_sply':'2f', 'nut_n_fert':'2f',
                            'n_sply_scld':'2f', 'yld_scld':'2f', 'yld_scld_adj':'2f', 'yld_n_lim':'2f', 'prodn_ss':'2f' }
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
@@ -100,6 +101,10 @@ class  B1cNlimitation(object, ):
             if key_name in nitrogen_change.data:
                 sheet_data[key_name] = nitrogen_change.data[key_name]
 
+        # use operator module for clarity and reduce code
+        # =======================================================================
+        sheet_data['plant_n_avail'] = list(map(add, nitrogen_change.data['no3_avail'],
+                                                                                    nitrogen_change.data['nh4_avail']))
         self.sheet_data = sheet_data
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
@@ -275,10 +280,10 @@ class A2MineralN(object,):
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'tair': '2f',
                 'no3_start':'2f', 'no3_atmos':'2f', 'no3_inorg_fert':'2f', 'no3_nitrif':'2f', 'no3_total_inp':'2f',
-                'no3_immob':'2f', 'no3_leach':'2f', 'no3_denit':'2f', 'no3_cropup':'2f', 'no3_total_loss':'2f',
+                'no3_immob':'2f', 'no3_leach':'2f', 'no3_denit':'2f', 'no3_crop_dem':'2f', 'no3_total_loss':'2f',
                 'loss_adj_rat_no3':'2f', 'no3_end':'2f', 'nh4_start':'2f', 'nh4_atmos':'2f',
                 'nh4_inorg_fert':'2f', 'nh4_miner':'2f', 'nh4_total_inp':'2f', 'nh4_immob':'2f',  'nh4_nitrif':'2f',
-                'nh4_volat':'2f', 'nh4_cropup':'2f', 'nh4_total_loss':'2f', 'loss_adj_rat_nh4':'2f', 'nh4_end':'2f'}
+                'nh4_volat':'2f', 'nh4_crop_dem':'2f', 'nh4_total_loss':'2f', 'loss_adj_rat_nh4':'2f', 'nh4_end':'2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
