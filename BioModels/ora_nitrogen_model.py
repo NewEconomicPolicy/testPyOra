@@ -50,8 +50,6 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
 
     # use first value for steady state or value for previous time step for forward run
     # ================================================================================
-    dum, dum, dum, dum, pool_c_dpm_prev, dum, dum, dum, pool_c_hum_prev, \
-                                    dum, dum, pool_c_rpm_prev, dum, dum = carbon_obj.get_cvals_for_tstep(indx_prev)
     wc_start, dum, dum = soil_water_obj.get_wvals_for_tstep(indx_prev)
 
     # main temporal loop
@@ -62,7 +60,11 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         pet = pettmp['pet'][tstep]
         crop_name, nut_n_min, n_crop_dem, n_respns_coef, c_n_rat_pi = get_crop_vars(management, crop_vars, tstep)
         if tstep == 0:
-            c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2*[c_n_rat_pi]
+            if len_n_change > 0:
+                c_n_rat_dpm_prev = nitrogen_change.data['c_n_rat_dpm'][-1]
+                c_n_rat_rpm_prev = nitrogen_change.data['c_n_rat_rpm'][-1]
+            else:
+                c_n_rat_dpm_prev, c_n_rat_rpm_prev = 2*[c_n_rat_pi]
 
         # for no3_inorg_fert see manual under Inputs of nitrate, fertiliser inputs under 2.4. Soil nitrogen
         # =================================================================================================
@@ -78,9 +80,9 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         # ====================
         soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum = \
             soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
-                                    cow_to_dpm, pi_to_dpm, pool_c_dpm_prev, c_loss_dpm, c_n_rat_dpm_prev,
-                                                pi_to_rpm, pool_c_rpm_prev, c_loss_rpm, c_n_rat_rpm_prev,
-                                    cow_to_hum,            pool_c_hum_prev, c_loss_hum, c_n_rat_hum_prev, c_loss_bio)
+                                    cow_to_dpm, pi_to_dpm, pool_c_dpm, c_loss_dpm, c_n_rat_dpm_prev,
+                                                pi_to_rpm, pool_c_rpm, c_loss_rpm, c_n_rat_rpm_prev,
+                                    cow_to_hum,            pool_c_hum, c_loss_hum, c_n_rat_hum_prev, c_loss_bio)
 
         # proportion of the optimum supply of N in the soil
         # =================================================
@@ -146,9 +148,6 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
                     nh4_volat, nh4_volat_adj, nh4_crop_dem, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
                                 n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum)
 
-        pool_c_dpm_prev = pool_c_dpm
-        pool_c_rpm_prev = pool_c_rpm
-        pool_c_hum_prev = pool_c_hum
         c_n_rat_dpm_prev = c_n_rat_dpm
         c_n_rat_rpm_prev = c_n_rat_rpm
         c_n_rat_hum_prev = c_n_rat_hum

@@ -71,7 +71,6 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         fix_soil_water(soil_water)  # make sure data metrics have same length
         wc_t0 = soil_water.data['wat_soil'][-1]     # carry forward to next iteration
         wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
-        aet = soil_water.data['aet'][-1]
 
         nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
                                         soil_vars, nitrogen_change, no3_start, nh4_start)

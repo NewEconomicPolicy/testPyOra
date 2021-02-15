@@ -32,9 +32,9 @@ from calendar import monthrange
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
 def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
-        cow_to_dpm, pi_to_dpm, pool_c_dpm_prev, c_loss_dpm, c_n_rat_dpm_prev,
-                    pi_to_rpm, pool_c_rpm_prev, c_loss_rpm, c_n_rat_rpm_prev,
-        cow_to_hum,            pool_c_hum_prev, c_loss_hum, c_n_rat_hum_prev, c_loss_bio):
+        cow_to_dpm, pi_to_dpm, pool_c_dpm, c_loss_dpm, c_n_rat_dpm_prev,
+                    pi_to_rpm, pool_c_rpm, c_loss_rpm, c_n_rat_rpm_prev,
+        cow_to_hum,            pool_c_hum, c_loss_hum, c_n_rat_hum_prev, c_loss_bio):
     '''
     equations 3.3.7 to 3.3.12
     '''
@@ -42,12 +42,12 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
     # C to N ratios A2a soil N supply
     # ===============================
     c_input_dpm = pi_to_dpm + cow_to_dpm
-    denom = (pool_c_dpm_prev/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
-    c_n_rat_dpm = (pool_c_dpm_prev + c_input_dpm)/denom  # (eq.3.3.10)
+    denom = (pool_c_dpm/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
+    c_n_rat_dpm = (pool_c_dpm + c_input_dpm)/denom  # (eq.3.3.10)
 
-    c_n_rat_rpm = (pool_c_rpm_prev + pi_to_rpm)/((pool_c_rpm_prev/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))  # (eq.3.3.11)
+    c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/((pool_c_rpm/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))  # (eq.3.3.11)
 
-    c_n_rat_hum = (pool_c_hum_prev + cow_to_hum)/((pool_c_hum_prev/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow))  # (eq.3.3.12)
+    c_n_rat_hum = (pool_c_hum + cow_to_hum)/((pool_c_hum/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow))  # (eq.3.3.12)
 
     # (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
     # ====================================================================================================
@@ -57,21 +57,21 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
     #            C material being transformed into BIO and HUM from DPM and RPM pools
     # ===============================================================================
     n_adjust = 1000*prop_bio*(c_loss_dpm*(1/c_n_rat_som - 1/c_n_rat_dpm) +
-                                  c_loss_rpm*(1/c_n_rat_som - 1/c_n_rat_rpm)) + \
+                                                                        c_loss_rpm*(1/c_n_rat_som - 1/c_n_rat_rpm)) + \
                1000*prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) +
-                                  c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))  # (kg ha-1)
+                                                                        c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))
 
     soil_n_sply = n_release - n_adjust  # (eq.3.3.7)
 
     return soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum
 
-def c_n_rat_hum_from_prev(pool_c_hum_prev, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow):
+def c_n_rat_hum_from_prev(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow):
     '''
     not used: deconstruction of (eq.3.3.12)
     '''
 
-    numer =   pool_c_hum_prev + cow_to_hum
-    denom1 = pool_c_hum_prev/c_n_rat_hum_prev
+    numer =   pool_c_hum + cow_to_hum
+    denom1 = pool_c_hum/c_n_rat_hum_prev
     denom2 = cow_to_hum/c_n_rat_ow
     denom = denom1 + denom2
 
