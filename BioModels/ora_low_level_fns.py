@@ -57,15 +57,15 @@ def _dump_summary(sum_tbl):
             line += '{:13.3f}'.format(sum_tbl[key][iline])
         print(line)
 
-def gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, pi_tonnes,
-                          summary_table = None):
+def gui_summary_table_add(continuity, pi_tonnes, summary_table = None):
     '''
     create or add to summary table
     =============================
     '''
-    totsoc = sum([pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom])
+    dum, dum, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = continuity.get_rothc_vars()
+    totsoc = continuity.sum_c_pools()
     pi_tonnes_sum = sum(pi_tonnes)
-    data_list = list([pi_tonnes_sum, pool_c_dpm, pool_c_rpm,pool_c_bio,pool_c_hum,pool_c_iom, totsoc])
+    data_list = list([pi_tonnes_sum, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, totsoc])
 
     if summary_table is None:
         val_list = ['Starting conditions'] + data_list

@@ -5,10 +5,10 @@
 # Created:     26/12/2019
 # Licence:     <your licence>
 # Definitions:
-#   spin_up
+#
 #
 # Description:
-#   three classes: CarbonChange, NitrogenChange, SoilWaterChange
+#   classes defined: EnsureContinuity, MngmntSubarea, CarbonChange, NitrogenChange
 #
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
@@ -22,6 +22,93 @@ __version__ = '0.0.0'
 from math import ceil
 from operator import add, mul
 from ora_low_level_fns import populate_org_fert
+from ora_cn_fns import init_ss_carbon_pools
+
+class EnsureContinuity(object, ):
+    '''
+    ensure continuity during equilibrium phase then between steady state and forward run
+    '''
+    def __init__(self, tot_soc_meas = None):
+        '''
+
+        '''
+        if tot_soc_meas is None:
+            self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = 5*[None]
+        else:
+            self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = \
+                                                                                    init_ss_carbon_pools(tot_soc_meas)
+        self.wc_t0 = None
+        self.no3_start = None
+        self.nh4_start = None
+        self.wat_strss_indx = 1.0
+        self.c_n_rat_hum_prev = 8.5
+
+    def adjust_soil_water(self, soil_water):
+        '''
+
+        '''
+        self.wc_t0 = soil_water.data['wat_soil'][-1]  # carry forward to next iteration
+        self.wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
+
+    def adjust_soil_n_change(self, nitrogen_change):
+        '''
+
+        '''
+        self.no3_start = nitrogen_change.data['no3_end'][-1]
+        self.nh4_start = nitrogen_change.data['nh4_end'][-1]
+
+    def sum_c_pools(self):
+        '''
+
+        '''
+        tot_soc_simul = self.pool_c_dpm + self.pool_c_rpm + self.pool_c_bio + self.pool_c_hum + self.pool_c_iom
+        return tot_soc_simul
+
+    def write_c_pools(self, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom):
+        '''
+
+        '''
+        self.pool_c_dpm = pool_c_dpm
+        self.pool_c_rpm = pool_c_rpm
+        self.pool_c_bio = pool_c_bio
+        self.pool_c_hum = pool_c_hum
+        self.pool_c_iom = pool_c_iom
+
+    def get_rothc_vars(self):
+        '''
+
+        '''
+
+        return self.wc_t0, self.wat_strss_indx, self.pool_c_dpm, self.pool_c_rpm, \
+                                                                self.pool_c_bio, self.pool_c_hum, self.pool_c_iom
+
+    def get_n_change_vars(self):
+        '''
+
+        '''
+
+        return self.no3_start, self.nh4_start, self.c_n_rat_hum_prev
+
+    def append_vars(self, imnth, rate_mod, c_pi_mnth, cow,
+                                                pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
+                                                pool_c_rpm, pi_to_rpm, c_loss_rpm,
+                                                pool_c_bio, c_input_bio, c_loss_bio,
+                                                pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
+                                                pool_c_iom, cow_to_iom, co2_emiss):
+        '''
+        add one set of values for this timestep to each of lists
+        columns refer to A1. SOM change sheet
+        '''
+
+        # rate modifier start of each month cols D, G and H
+        # ==================================================
+        for var in ['imnth', 'rate_mod', 'c_pi_mnth', 'cow']:
+            self.data[var].append(eval(var))
+
+        # DPM pool cols K to M
+        # ====================
+        for var in ['pool_c_dpm', 'cow_to_dpm', 'pi_to_dpm', 'c_loss_dpm']:
+            self.data[var].append(eval(var))
 
 class MngmntSubarea(object, ):
     '''

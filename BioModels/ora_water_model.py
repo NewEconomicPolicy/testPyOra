@@ -119,15 +119,6 @@ def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
 
     return wat_soil
 
-def fix_soil_water(soil_water):
-    '''
-    TODO: crude fix to ensure data lists are same length
-    '''
-    aet = soil_water.data['aet'][-1]
-    soil_water.data['aet'].append(aet)
-
-    return
-
 class SoilWaterChange(object, ):
     '''
 
@@ -180,7 +171,7 @@ class SoilWaterChange(object, ):
             # (eq.3.2.4) col L - AET to rooting depth before irrigation (mm)
             # =============================================================
             aet = min(pet_prev, 5*days_in_mnth, (wat_soil - wc_pwp))
-            self.data['aet'].append(aet)
+
 
             self.data['wat_strss_indx'].append(self.data['aet'][-1]/pet_prev)
             wat_soil_prev = self.data['wat_soil'][-1]
@@ -189,6 +180,7 @@ class SoilWaterChange(object, ):
             aet = 0
             wat_soil_prev = 0
 
+        self.data['aet'].append(aet)    # TODO: revisit
         self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth (mm)
         self.data['wc_pwp'].append(wc_pwp)  # col I - Lower limit for water extraction (mm)
         self.data['wc_fld_cap'].append(wc_fld_cap)  # col J - Water content of root zone at field capacity (mm)

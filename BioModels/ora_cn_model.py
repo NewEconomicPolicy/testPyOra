@@ -28,8 +28,8 @@ from PyQt5.QtWidgets import QApplication
 
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
-from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange
-from ora_water_model import SoilWaterChange, fix_soil_water
+from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity
+from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
@@ -48,13 +48,9 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     generate_miami_dyce_npp(pettmp, management)
 
     dum, dum, dum, dum, tot_soc_meas, dum, dum, dum = get_soil_vars(soil_vars, subarea, write_flag = True)
-    pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = init_ss_carbon_pools(tot_soc_meas)
-    wc_t0 = None
-    no3_start = None
-    nh4_start = None
-    wat_strss_indx = 1.0
+    continuity = EnsureContinuity(tot_soc_meas)
 
-    summary_table = gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, management.pi_tonnes)
+    summary_table = gui_summary_table_add(continuity, management.pi_tonnes)
     converge_flag = False
     for iteration in range(MAX_ITERS):
         carbon_change = CarbonChange()
@@ -65,21 +61,15 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         # =========
         gui_optimisation_cycle(form, subarea, iteration)
 
-        pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = \
-                        run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0,
-                                            wat_strss_indx, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom)
-        fix_soil_water(soil_water)  # make sure data metrics have same length
-        wc_t0 = soil_water.data['wat_soil'][-1]     # carry forward to next iteration
-        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
+        run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity)
+        continuity.adjust_soil_water(soil_water)
 
-        nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management,
-                                        soil_vars, nitrogen_change, no3_start, nh4_start)
-        no3_start = nitrogen_change.data['no3_end'][-1]
-        nh4_start = nitrogen_change.data['nh4_end'][-1]
+        soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars, nitrogen_change, continuity)
+        continuity.adjust_soil_n_change(nitrogen_change)
 
         # after steady state period has completed adjust plant inputs
         # ===========================================================
-        tot_soc_simul = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom      # sum carbon pools
+        tot_soc_simul = continuity.sum_c_pools()
         rat_meas_simul_soc = tot_soc_meas/tot_soc_simul                                     # ratio of measured vs simulated SOC
         management.pi_tonnes = [val*rat_meas_simul_soc for val in management.pi_tonnes]     # (eq.2.1.1) adjust PIs
 
@@ -89,8 +79,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         if  diff_abs < SOC_MIN_DIFF:
             print('\nSimulated and measured SOC: {}\t*** converged *** after {} iterations'
                                                             .format(round(tot_soc_simul, 3), iteration + 1))
-            gui_summary_table_add(pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
-                                                                            management.pi_tonnes, summary_table)
+            gui_summary_table_add(continuity, management.pi_tonnes, summary_table)
             converge_flag = True
             break
 
@@ -111,14 +100,14 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     # run RothC
     # =========
-    wc_t0 = soil_water.data['wat_soil'][-1]  # from steady state
-    pools_set = run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, wc_t0)
+    continuity = EnsureContinuity()
+    continuity.adjust_soil_water(soil_water)
 
-    no3_start = nitrogen_change.data['no3_end'][-1]
-    nh4_start = nitrogen_change.data['nh4_end'][-1]
-    c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
-    nitrogen_change = soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars,
-                                                            nitrogen_change, no3_start, nh4_start, c_n_rat_hum_prev)
+    run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity)
+    continuity.adjust_soil_water(soil_water)
+
+    continuity.adjust_soil_n_change(nitrogen_change)
+    soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars, nitrogen_change, continuity)
     return (carbon_change, nitrogen_change, soil_water)
 
 def run_soil_cn_algorithms(form):

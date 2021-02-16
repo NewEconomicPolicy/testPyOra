@@ -41,9 +41,8 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
     
     # C to N ratios A2a soil N supply
     # ===============================
-    c_input_dpm = pi_to_dpm + cow_to_dpm
-    denom = (pool_c_dpm/c_n_rat_dpm_prev) + (c_input_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
-    c_n_rat_dpm = (pool_c_dpm + c_input_dpm)/denom  # (eq.3.3.10)
+    denom = (pool_c_dpm/c_n_rat_dpm_prev) + (pi_to_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
+    c_n_rat_dpm = (pool_c_dpm + pi_to_dpm + cow_to_dpm)/denom                                                  # (eq.3.3.10)
 
     c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/((pool_c_rpm/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))  # (eq.3.3.11)
 
