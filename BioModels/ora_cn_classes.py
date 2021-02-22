@@ -24,7 +24,6 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
-
 class CropModel(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
