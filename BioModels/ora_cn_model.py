@@ -28,17 +28,19 @@ from PyQt5.QtWidgets import QApplication
 
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
-from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity
+from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropModel
 from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, ReadWeather
-from ora_json_read import ReadJsonSubareas
+from ora_json_read import ReadMngmntJsonSubareas
 from ora_rothc_fns import run_rothc
 
+# takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single "Base line mgmt.json"
+# =============================================================================================
 MAX_ITERS = 1000
-SOC_MIN_DIFF = 0.0000001  # convergence criteria tonne/hectare
+SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
 
 def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     '''
@@ -83,6 +85,8 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
             converge_flag = True
             break
 
+    npp_zaks_grow_season(management)
+
     if not converge_flag:
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), tot_soc_meas, iteration + 1))
@@ -108,6 +112,9 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     continuity.adjust_soil_n_change(nitrogen_change)
     soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars, nitrogen_change, continuity)
+
+    npp_zaks_grow_season(management)
+
     return (carbon_change, nitrogen_change, soil_water)
 
 def run_soil_cn_algorithms(form):
@@ -130,7 +137,7 @@ def run_soil_cn_algorithms(form):
     if ora_parms.ow_parms is None:
         return
     ora_weather = ReadWeather(xls_inp_fname, study.latitude)
-    ora_subareas = ReadJsonSubareas(form.settings['mgmt_files'], ora_parms.crop_vars)
+    ora_subareas = ReadMngmntJsonSubareas(form.settings['mgmt_files'], ora_parms.crop_vars)
     extend_out_dir(form)     # extend outputs directory by mirroring inputs location
 
     lookup_df = form.settings['lookup_df']
@@ -157,10 +164,7 @@ def run_soil_cn_algorithms(form):
         complete_run = \
             _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_change, nitrogen_change, soil_water)
 
-        # TODO: a messy afterthought
-        # ==========================
-        npp_zaks_grow_season(mngmnt_ss)
-        npp_zaks_grow_season(mngmnt_fwd)
+        form.all_runs_crop_model[subarea] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd)
 
         # outputs only
         # ============
@@ -176,8 +180,11 @@ def run_soil_cn_algorithms(form):
         if excel_out_flag:
             write_excel_all_subareas(study, form.settings['out_dir'], ora_weather, all_runs)
 
-        # update GUI with new Excel output files
-        # ======================================
+        # update GUI by activating the livestock and new Excel output files push buttons
+        # ==============================================================================
+        if len(form.settings['lvstck_files']) > 0:
+            form.w_livestock.setEnabled(True)
+
         if study.output_excel:
             retrieve_output_xls_files(form, study.study_name)
 

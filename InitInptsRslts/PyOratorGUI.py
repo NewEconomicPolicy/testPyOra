@@ -290,11 +290,13 @@ class Form(QWidget):
         dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
         if dirname != '' and dirname != dirname_cur:
             self.w_lbl06.setText(dirname)
-            self.w_lbl07.setText(check_json_input_files(self, dirname))
+            self.w_lbl07.setText(check_json_input_files(self, dirname, 'mgmt'))
+            print(check_json_input_files(self, dirname, 'lvstck'))
             self.w_disp_c.setEnabled(False)
             self.w_disp_n.setEnabled(False)
             self.w_disp_w.setEnabled(False)
             self.w_disp_out.setEnabled(False)
+            self.w_livestock.setEnabled(False)
             extend_out_dir(self)
             retrieve_output_xls_files(self)
 
@@ -342,7 +344,7 @@ class Form(QWidget):
 
     def fetchInpExcel(self):
         """
-        QFileDialog returns a tuple for Python 3.5, 3.6
+        QFileDialog returns a tuple for Python 3.5 onwards
         """
         fname = self.w_lbl13.text()
         fname, dummy = QFileDialog.getOpenFileName(self, 'Open file', fname, 'Excel files (*.xlsx)')

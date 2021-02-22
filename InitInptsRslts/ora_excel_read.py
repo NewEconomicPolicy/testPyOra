@@ -33,30 +33,11 @@ from ora_low_level_fns import average_weather
 
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather'])
+REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather',
+                                                                                        "Typical animal production"])
 
+REQD_SHEETS = {'C1a':'Typical animal production'}
 ERR_MESS_SHEET = '*** Error *** reading sheet '
-
-def check_excel_livestock_file(form):
-    '''
-    validate existence of livestock Excel file
-    '''
-    form.w_livestock.setEnabled(False)
-    form.settings['livestock_fname'] = None
-
-    inp_dir = form.settings['inp_dir']
-    if not os.path.isdir(inp_dir):
-        return
-
-    fnames = glob(inp_dir +  '\\*livestock*.xls*')
-    if len(fnames) == 0:
-        return
-
-    form.w_livestock.setEnabled(True)
-    form.settings['livestock_fname'] = fnames[0]
-    print('Livestock Excel file : ' + fnames[0])
-    
-    return
 
 def check_excel_input_file(form, xls_inp_fname):
     '''
@@ -71,6 +52,7 @@ def check_excel_input_file(form, xls_inp_fname):
     form.settings['inp_dir'] = ''
     form.w_soil_cn.setEnabled(False)
     form.w_disp_out.setEnabled(False)
+    form.w_livestock.setEnabled(False)
 
     print('Loading parameters and weather inputs file: ' + xls_inp_fname)
     try:
@@ -131,7 +113,7 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
 
     n_parm_names = list(['atmos_n_depos', 'prop_atmos_dep_no3', 'no3_min', 'k_nitrif',
                       'n_denit_max', 'n_d50', 'prop_n2o_fc', 'prop_nitrif_gas', 'prop_nitrif_no',
-                      'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_som', 'r_dry', 'k_c_rate'])
+                      'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_soil', 'r_dry', 'k_c_rate'])
 
     data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1,3))
     n_parms_df = data.dropna(how='all')
@@ -252,6 +234,41 @@ class ReadStudy(object, ):
         # =============
         self.study_name, self.latitude, self.longitude \
                                         = _read_location_sheet(xls_inp_fname, 'Inputs1- Farm location', 13)
+
+class ReadAfricaAnmlProdn(object, ):
+
+    def __init__(self, xls_fname, crop_vars):
+        '''
+        read values from sheet C1a: Typical animal production in Africa provided Herrero et al. (2016)
+        '''
+        func_name =  __prog__ +  ' oratorExcelDetail __init__'
+
+        self.retcode = None
+        self.header_mappings = {'Type': 'Livestock type', 'ProdSystem': 'Livestock production system',
+             'Region': 'Region', 'System': 'System', 'Milk': 'Milk', 'Meat': 'Meat',
+             'FSgraze': 'Feedstock dry matter from grazing',
+             'FSstovers': 'Feedstock dry matter from stovers',
+             'FSoccas': 'Feedstock dry matter from occasional sources',
+             'FSgrain': 'Feedstock dry matter from grain',
+             'Manure': 'Manure dry matter', 'ExcreteN': 'Excreted N'}
+
+        sheet = REQD_SHEETS['C1a']
+        print('Reading Africa animal production data from sheet: ' + sheet)
+        column_names = 	list(self.header_mappings.keys())
+        data = read_excel(xls_fname, header=None, names= column_names, sheet_name=sheet, usecols=range(1,13),
+                                                                                            skiprows=range(0,13))
+        africa_anml_prodn = data.dropna(how='all')
+        self.africa_anml_prodn = africa_anml_prodn
+
+        # allowable values required for validation
+        # ========================================
+        self.africa_anml_types = list(africa_anml_prodn['Type'].unique()) + list(['Pigs','Poultry'])
+        self.africa_prodn_systms = list(africa_anml_prodn['ProdSystem'].unique())
+        self.africa_regions = list(africa_anml_prodn['Region'].unique())
+        self.africa_systems = list(africa_anml_prodn['System'].unique())
+        self.crop_names = list(crop_vars.keys())
+
+        self.retcode = 0
 
 def _add_tgdd_to_weather(tair_list):
     '''

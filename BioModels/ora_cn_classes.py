@@ -24,6 +24,59 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
+
+class CropModel(object, ):
+    '''
+    ensure continuity during equilibrium phase then between steady state and forward run
+    '''
+    def __init__(self, complete_run, mngmnt_ss, mngmnt_fwd):
+        '''
+        construct a crop model object suitable for livestock model
+        '''
+        self.title = 'CropModel'
+        self.data = {}
+
+        var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cumul_n_uptake', 'cumul_n_uptake_adj'])
+        for var_name in var_name_list:
+            self.data[var_name] = []
+
+        self.var_name_list = var_name_list
+
+        self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
+        self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
+
+        num_grow_seasons = len(self.data['npp_miami'])
+
+        # cumulative N uptake
+        # ===================
+        c_change, n_change, soil_water = complete_run
+        cumul_n_uptake = 0
+        cumul_n_uptake_adj = 0
+        this_crop_name = None
+        for crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['crop_name'],
+                                                    n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
+
+            if crop_name is None:
+                if cumul_n_uptake > 0:
+                    self.data['crop_name'].append(this_crop_name)
+                    self.data['cumul_n_uptake'].append(cumul_n_uptake)
+                    self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+
+                cumul_n_uptake = 0
+                cumul_n_uptake_adj = 0
+            else:
+                this_crop_name = crop_name
+                cumul_n_uptake += n_crop_dem
+                cumul_n_uptake_adj += n_crop_dem_adj
+
+
+        # catch situation when December is a growing month
+        # ================================================
+        if (len(self.data['cumul_n_uptake']) < num_grow_seasons):
+            self.data['crop_name'].append(this_crop_name)
+            self.data['cumul_n_uptake'].append(cumul_n_uptake)
+            self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+
 class EnsureContinuity(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
@@ -56,6 +109,7 @@ class EnsureContinuity(object, ):
         '''
         self.no3_start = nitrogen_change.data['no3_end'][-1]
         self.nh4_start = nitrogen_change.data['nh4_end'][-1]
+        self.c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
 
     def sum_c_pools(self):
         '''
@@ -88,27 +142,6 @@ class EnsureContinuity(object, ):
         '''
 
         return self.no3_start, self.nh4_start, self.c_n_rat_hum_prev
-
-    def append_vars(self, imnth, rate_mod, c_pi_mnth, cow,
-                                                pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
-                                                pool_c_rpm, pi_to_rpm, c_loss_rpm,
-                                                pool_c_bio, c_input_bio, c_loss_bio,
-                                                pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
-                                                pool_c_iom, cow_to_iom, co2_emiss):
-        '''
-        add one set of values for this timestep to each of lists
-        columns refer to A1. SOM change sheet
-        '''
-
-        # rate modifier start of each month cols D, G and H
-        # ==================================================
-        for var in ['imnth', 'rate_mod', 'c_pi_mnth', 'cow']:
-            self.data[var].append(eval(var))
-
-        # DPM pool cols K to M
-        # ====================
-        for var in ['pool_c_dpm', 'cow_to_dpm', 'pi_to_dpm', 'c_loss_dpm']:
-            self.data[var].append(eval(var))
 
 class MngmntSubarea(object, ):
     '''

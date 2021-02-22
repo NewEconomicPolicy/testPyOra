@@ -34,7 +34,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
 
     # initialise the zeroth timestep
     # ==============================
-    no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_som, precip_critic, prop_volat = \
+    no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_soil, precip_critic, prop_volat = \
                                                                                             get_n_parameters(n_parms)
     if no3_start is None:
         no3_start = no3_atmos
@@ -83,7 +83,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         # equs 3.3.7 to 3.3.12
         # ====================
         soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum = \
-            soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
+            soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_soil,
                                     cow_to_dpm, pi_to_dpm, pool_c_dpm_prev, c_loss_dpm, c_n_rat_dpm_prev,
                                                 pi_to_rpm, pool_c_rpm_prev, c_loss_rpm, c_n_rat_rpm_prev,
                                     cow_to_hum,            pool_c_hum_prev, c_loss_hum, c_n_rat_hum_prev, c_loss_bio)
@@ -166,7 +166,5 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         imnth += 1
         if imnth > 12:
             imnth = 1
-
-
 
     return

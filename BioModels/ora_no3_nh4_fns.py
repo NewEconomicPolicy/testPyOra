@@ -7,7 +7,7 @@
 #
 # Description:
 #    From 2.4. Soil nitrogen
-#    Based on content in "Report on modelling work done for BREAD 101218v2_print.pdf"
+#    Based on content in "ORATOR Technical Description 160221.pdf"
 #    Nitrogen is assumed to be held in 6 pools in the soil:
 #            mineral N (nitrate and ammonium) and organic N (DPM, RPM, BIO and HUM-N)
 #    loss by each process is adjusted using a loss adjustment ratio to account for
@@ -31,7 +31,84 @@ from calendar import monthrange
 
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
-def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_som,
+def _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, c_n_rat_dpm_prev):
+    '''
+    equation 3.3.10  C:N ratio for DPM
+        numer = pool_c_dpm + pi_to_dpm + cow_to_dpm
+        denom = (pool_c_dpm/c_n_rat_dpm_prev) + (pi_to_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
+        c_n_rat_dpm = numer/denom
+    '''
+    term1 = pool_c_dpm/c_n_rat_dpm_prev
+    term2 = pi_to_dpm/c_n_rat_pi
+    term3 = cow_to_dpm/c_n_rat_ow
+    denom = term1 + term2 + term3
+
+    numer = pool_c_dpm + pi_to_dpm + cow_to_dpm
+
+    c_n_rat_dpm = numer/denom
+
+    return c_n_rat_dpm
+
+def _get_c_n_rat_rpm(c_n_rat_pi, pool_c_rpm, pi_to_rpm, c_n_rat_rpm_prev):
+    '''
+    equation 3.3.11  C:N ratio for RPM
+        c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/((pool_c_rpm/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))
+    '''
+    term1 = pool_c_rpm/c_n_rat_rpm_prev
+    term2 = pi_to_rpm/c_n_rat_pi
+
+    c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/(term1 + term2)
+
+    return c_n_rat_rpm
+
+def _get_c_n_rat_hum(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow, c_n_rat_soil):
+    '''
+    equation 3.3.12  C:N ratio for RPM
+    Whereas the C : nutrient ratio of the BIO pool remains at the steady state for the soil, the
+    HUM pool receives nutrient inputs from the applied organic wastes
+    '''
+    term1 = pool_c_hum/c_n_rat_hum_prev
+    term2 = cow_to_hum/c_n_rat_ow
+    numer = pool_c_hum + cow_to_hum
+    term4 = numer/(term1 + term2)
+
+    soil_n_sply = 1         # TODO: see manual
+    c_n_diff = c_n_rat_soil - c_n_rat_hum_prev
+    term5 = c_n_diff*(soil_n_sply/soil_n_sply)
+
+    c_n_rat_hum = term4 + term5
+
+    return c_n_rat_hum
+
+def _get_n_release(prop_co2, c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, c_loss_bio, c_loss_hum,
+                   c_n_rat_hum):
+    '''
+    (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
+    '''
+    n_loss_dpm = c_loss_dpm/c_n_rat_dpm
+    n_loss_rpm = c_loss_rpm/c_n_rat_rpm
+    n_loss_bio = c_loss_bio/c_n_rat_soil
+    n_loss_hum = c_loss_hum/c_n_rat_hum
+
+    n_release = prop_co2*1000*(n_loss_dpm + n_loss_rpm  + n_loss_bio + n_loss_hum)
+
+    return n_release
+
+def _get_n_adjust(c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, prop_bio,
+                  prop_hum, pool_c_hum, c_n_rat_hum):
+    '''
+    (eq.3.3.9) N adjustment is difference in the stable C:N ratio of the soil and
+               C material being transformed into BIO and HUM from DPM and RPM pools
+    '''
+    term_bio  = prop_bio*(c_loss_dpm*(1/c_n_rat_soil - 1/c_n_rat_dpm) + c_loss_rpm*(1/c_n_rat_soil - 1/c_n_rat_rpm))
+    term_hum1 = prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) + c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))
+    term_hum2 = pool_c_hum*(1/c_n_rat_soil - 1/c_n_rat_hum)
+
+    n_adjust = 1000*(term_bio + term_hum1 + term_hum2)
+
+    return n_adjust
+
+def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_soil,
         cow_to_dpm, pi_to_dpm, pool_c_dpm, c_loss_dpm, c_n_rat_dpm_prev,
                     pi_to_rpm, pool_c_rpm, c_loss_rpm, c_n_rat_rpm_prev,
         cow_to_hum,            pool_c_hum, c_loss_hum, c_n_rat_hum_prev, c_loss_bio):
@@ -39,44 +116,21 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
     equations 3.3.7 to 3.3.12
     '''
     
-    # C to N ratios A2a soil N supply
-    # ===============================
-    denom = (pool_c_dpm/c_n_rat_dpm_prev) + (pi_to_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
-    c_n_rat_dpm = (pool_c_dpm + pi_to_dpm + cow_to_dpm)/denom                                                  # (eq.3.3.10)
+    # C to N ratios for DPM, RPM and HUM
+    # ==================================
+    c_n_rat_dpm = _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, c_n_rat_dpm_prev)
+    c_n_rat_rpm = _get_c_n_rat_rpm(c_n_rat_pi, pool_c_rpm, pi_to_rpm, c_n_rat_rpm_prev)
+    c_n_rat_hum = _get_c_n_rat_hum(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow, c_n_rat_soil)
 
-    c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/((pool_c_rpm/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))  # (eq.3.3.11)
+    n_release = _get_n_release(prop_co2, c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil,
+                               c_loss_bio, c_loss_hum, c_n_rat_hum)     #  (eq.3.3.8)  release of N due to CO2-C loss
 
-    c_n_rat_hum = (pool_c_hum + cow_to_hum)/((pool_c_hum/c_n_rat_hum_prev) + (cow_to_hum/c_n_rat_ow))  # (eq.3.3.12)
-
-    # (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
-    # ====================================================================================================
-    n_release = prop_co2*1000*(c_loss_dpm/c_n_rat_dpm + c_loss_rpm/c_n_rat_rpm + c_loss_bio/c_n_rat_som +
-                                                                                            c_loss_hum/c_n_rat_hum)
-    # (eq.3.3.9) N adjustment is difference in the stable C:N ratio of the soil and
-    #            C material being transformed into BIO and HUM from DPM and RPM pools
-    # ===============================================================================
-    n_adjust = 1000*prop_bio*(c_loss_dpm*(1/c_n_rat_som - 1/c_n_rat_dpm) +
-                                                                        c_loss_rpm*(1/c_n_rat_som - 1/c_n_rat_rpm)) + \
-               1000*prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) +
-                                                                        c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))
+    n_adjust = _get_n_adjust(c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil,
+                                            prop_bio, prop_hum, pool_c_hum, c_n_rat_hum)    # (eq.3.3.9) N adjustment
 
     soil_n_sply = n_release - n_adjust  # (eq.3.3.7)
 
     return soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum
-
-def c_n_rat_hum_from_prev(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow):
-    '''
-    not used: deconstruction of (eq.3.3.12)
-    '''
-
-    numer =   pool_c_hum + cow_to_hum
-    denom1 = pool_c_hum/c_n_rat_hum_prev
-    denom2 = cow_to_hum/c_n_rat_ow
-    denom = denom1 + denom2
-
-    c_n_rat_hum = numer/denom
-
-    return c_n_rat_hum
 
 def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
     '''
@@ -109,11 +163,11 @@ def get_n_parameters(n_parms):
     k_nitrif = n_parms['k_nitrif']
     min_no3_nh4 = n_parms['no3_min']
     n_d50 = n_parms['n_d50']
-    c_n_rat_som = n_parms['c_n_rat_som']
+    c_n_rat_soil = n_parms['c_n_rat_soil']
     precip_critic = n_parms['precip_critic']
     prop_volat = n_parms['prop_volat']
     
-    return no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_som, precip_critic, prop_volat
+    return no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_soil, precip_critic, prop_volat
 
 def _fertiliser_inputs(fert_amount):
     '''

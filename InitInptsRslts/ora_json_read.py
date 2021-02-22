@@ -21,46 +21,131 @@ __version__ = '0.0.0'
 #
 import os
 import json
-from time import sleep
 from glob import glob
 from copy import copy
 
 from ora_low_level_fns import get_imnth
 
-METRIC_LIST = list(['precip', 'tair'])
 ERROR_STR = '*** Error *** '
-sleepTime = 5
+METRIC_LIST = list(['precip', 'tair'])
+JSON_TYPES = {'mgmt': 'management', 'lvstck': 'livestock'}
+CLIMATE_TYPES = {'A':'Arid/semi-arid', 'H': 'humid/sub-humid', 'T':'Tropical highlands or temperate'}
+FARMING_TYPES = {'LG':'Livestock grazing', 'MR':'Mixed rotation'}
+STRATEGIES = list(['On farm production', 'Buy/sell'])
 
-def check_json_input_files(form, mgmt_dirname):
+'''
+=========== Livestock ==============
+'''
+def _region_validate(site_defn, anml_prodn_obj):
     '''
-    validate management files
+    TODO: improve - issue error
     '''
-    mgmt_files = []
-    json_files = glob(mgmt_dirname + '/*mgmt.json')
-    if len(json_files) > 0:
-        for mgmt_fname in json_files:
-            mgmt_fname = os.path.normpath(mgmt_fname)
-            try:
-                with open(mgmt_fname, 'r') as fmgmt:
-                    mgmt_content = json.load(fmgmt)
-                    # TODO: to log file?                print('Read management input file ' + mgmt_fname)
-                    mgmt_files.append(mgmt_fname)
+    region = site_defn['region']
+    if region not in anml_prodn_obj.africa_regions:
+        region = anml_prodn_obj.africa_regions[-1]
 
-            except (json.JSONDecodeError, OSError, IOError) as err:
-                print(str(err))
-                print('Could not read management input file ' + mgmt_fname)
+    return region
 
-    nfiles = len(mgmt_files)
-    if nfiles == 0 :
-        mess = 'No management JSON files'
+def _farming_system(site_defn):
+    '''
+    should be 3 characters, capitals
+    '''
+    system = site_defn['system'].upper()
+    if len(system) < 3:
+        system = 'MRA'  # TODO: issue warning
+
     else:
-        dummy, short_fname = os.path.split(mgmt_files[0])
-        mess = '{} management JSON files eg: {}'.format(nfiles, short_fname)
+        farming_type = system[0:2]
+        if farming_type not in FARMING_TYPES:
+            farming_type = 'MR'  # TODO: issue warning
 
-    form.settings['mgmt_files'] = mgmt_files
+        climate_type = system[2]
+        if climate_type not in CLIMATE_TYPES:
+            climate_type = 'A'
 
-    return mess
+        system = farming_type + climate_type
 
+    return system
+
+class LivestockEntity:
+
+    def __init__(self, lvstck_content, anml_prodn_obj):
+        '''
+        TODO: improve
+        '''
+        type = lvstck_content['type']
+        if type not in anml_prodn_obj.africa_anml_types:
+            type = anml_prodn_obj.africa_anml_types[-1]
+
+        number = float(lvstck_content['number'])    # TODO: trap error
+        strategy = lvstck_content['strategy']
+        if strategy not in STRATEGIES:
+            strategy = STRATEGIES[-1]
+
+        feeds = []
+        for key in lvstck_content:
+            if key.find('feed') > -1:
+                feed_type = lvstck_content[key]['type']
+                if feed_type ==  'bought in':
+                    value = None
+                else:
+                    if feed_type not in anml_prodn_obj.crop_names:
+                        feed_type = anml_prodn_obj.crop_names[-1]
+
+                    try:
+                        value = lvstck_content[key]['value']
+                    except KeyError as err:
+                        value = None
+
+                feeds.append({'type':feed_type, 'value': value})
+
+        self.type = type
+        self.number = number
+        self.statgey = strategy
+        self.feeds = feeds
+        self.manure = None
+        self.n_excrete = None
+        self.meat = None
+        self.milk = None
+
+class ReadLvstckJsonSubareas(object, ):
+
+    def __init__(self, lvstck_files, anml_prodn_obj):
+        '''
+        read and validate livestock JSON file
+        '''
+        print('Reading livestock JSON files...')
+
+        subareas = {}
+
+        for lvstck_fname in lvstck_files:
+
+            # avoid error when user has removed a management file during a session
+            # ====================================================================
+            if not os.path.isfile(lvstck_fname):
+                continue
+
+            with open(lvstck_fname, 'r') as flvstck:
+                lvstck_content = json.load(flvstck)
+
+            site_defn = lvstck_content['site definition']
+            area = site_defn['area name']
+            region = _region_validate(site_defn, anml_prodn_obj)
+            system = _farming_system(site_defn)
+
+            lvstck_grp = []
+            for key in site_defn:
+                if key.find('livestock') > -1:
+                    lvstck_grp.append(LivestockEntity(site_defn[key], anml_prodn_obj))
+
+            subareas[area] = {'region': region, 'system': system, 'lvstck_grp': lvstck_grp}
+
+        self.subareas = subareas
+        print()     # cosmetic
+
+'''
+=========== Management ==============
+'''
 def _add_months(crop_obj_inp, add_month):
     '''
     modify crop object by adding months, usually a factor of 12
@@ -118,7 +203,7 @@ def _read_crop_mngmnt(mgmt_defn, crop_vars):
 
     return crop_list
 
-class ReadJsonSubareas(object, ):
+class ReadMngmntJsonSubareas(object, ):
 
     def __init__(self, mgmt_files, crop_vars):
         '''
@@ -223,3 +308,40 @@ class Soil(object,):
         self.t_bulk = t_bulk
         self.tot_soc_meas = tot_soc_meas
 
+'''
+=========== called during initialisation or from GUI ==============
+'''
+def check_json_input_files(form, mgmt_dirname, jtype):
+    '''
+    validate management files
+    jtype can be either 'mgmt' for crop management, 'lvstck' for livestock
+    '''
+    if jtype not in JSON_TYPES:
+        return
+    json_type = JSON_TYPES[jtype]
+
+    ok_json_files = []
+    json_files = glob(mgmt_dirname + '/*' + jtype + '.json')
+    if len(json_files) > 0:
+        for json_fname in json_files:
+            json_fname = os.path.normpath(json_fname)
+            try:
+                with open(json_fname, 'r') as fmgmt:
+                    mgmt_content = json.load(fmgmt)
+                    # TODO: to log file?                print('Read management input file ' + json_fname)
+                    ok_json_files.append(json_fname)
+
+            except (json.JSONDecodeError, OSError, IOError) as err:
+                print(str(err))
+                print('Could not read ' + json_type + ' input file ' + json_fname)
+
+    nfiles = len(ok_json_files)
+    if nfiles == 0 :
+        mess = 'No ' + json_type + ' JSON files'
+    else:
+        dummy, short_fname = os.path.split(ok_json_files[0])
+        mess = '{} {} JSON files eg: {}'.format(nfiles, json_type, short_fname)
+
+    form.settings[jtype + '_files'] = ok_json_files
+
+    return mess

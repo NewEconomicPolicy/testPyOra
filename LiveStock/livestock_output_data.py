@@ -11,168 +11,105 @@ __prog__ = 'livestock_output_data.py'
 __version__ = '1.0.1'
 __author__ = 's02dm4'
 
-import matplotlib.pyplot as plt
-from pathlib import Path
-from pull_input_data import ReadInputExcel
-from merge_data import merge_harvest_land_use
-from livestock_class import Livestock
 
-# from livestock_class import Livestock, livestock_list
-livestock_list = []
+import os
+from pathlib import Path
+from ora_json_read import ReadLvstckJsonSubareas
+from ora_excel_read import ReadAfricaAnmlProdn
+from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
+
+def _get_pigs_or_poultry_production(anml_type):
+    '''
+    pigs are based on goats
+    poultry are guessed
+    '''
+
+    if anml_type == 'Pigs':
+        manure = 180.0
+        n_excrete = 15.0
+        meat = 10
+        milk = 0
+    else:
+        manure = 2
+        n_excrete = 0.1
+        meat = 0.01
+        milk = 0
+
+    return manure, n_excrete, meat, milk
+
+def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
+    '''
+
+    '''
+    anml_prodn_df = anml_prodn_obj.africa_anml_prodn
+
+    for subarea in all_lvstck.subareas:
+        lvstck_defn = all_lvstck.subareas[subarea]
+        region = lvstck_defn['region']
+        system = lvstck_defn['system']
+
+        new_lvstck_grp = []
+        for lvstck in lvstck_defn['lvstck_grp']:
+            num = lvstck.number
+            anml_type = lvstck.type
+            if anml_type == 'Pigs' or anml_type == 'Poultry':
+                manure, n_excrete, meat, milk = _get_pigs_or_poultry_production(anml_type)
+            else:
+                res = anml_prodn_df[(anml_prodn_df.Region == region) &
+                                    (anml_prodn_df.System == system) & (anml_prodn_df.Type == anml_type)]
+                manure = res.Manure.values[0]
+                n_excrete = res.ExcreteN.values[0]
+                meat = res.Meat.values[0]
+                milk = res.Milk.values[0]
+
+            lvstck.manure = manure
+            lvstck.n_excrete = n_excrete
+            lvstck.meat = meat
+            lvstck.milk = milk
+            new_lvstck_grp.append(lvstck)
+
+        lvstck_defn['lvstck_grp'] = new_lvstck_grp
+        all_lvstck.subareas[subarea] = lvstck_defn
+
+    return
 
 def write_livestock_charts(form):
+    '''
+
+    '''
 
     # read inputs and create folder to store graphs in
     # =================================================
-    xls_fname = form.settings['livestock_fname']
+    xls_inp_fname = os.path.normpath(form.w_lbl13.text())
+    if not os.path.isfile(xls_inp_fname):
+        print('Excel input file ' + xls_inp_fname + 'must exist')
+        return
+
+    # read sheets from input Excel workbook
+    # =====================================
+    print('Loading: ' + xls_inp_fname)
+    study = ReadStudy(xls_inp_fname, form.settings['out_dir'])
+    ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     out_dir = form.settings['out_dir']
     Path(out_dir + "/Livestock/Graphs").mkdir(parents = True, exist_ok = True)
 
-    orator_obj = ReadInputExcel(form, xls_fname)
-    if orator_obj.retcode is None:
+    # create animal production object which includes crop names for validation purposes
+    # =================================================================================
+    anml_prodn_obj = ReadAfricaAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
+    if anml_prodn_obj.retcode is None:
         return
 
+    # read and validate livestock JSON files
+    # ======================================
+    all_lvstck = ReadLvstckJsonSubareas(form.settings['lvstck_files'], anml_prodn_obj)
+    _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
+
+    '''
     harvest_land_use_merged = merge_harvest_land_use(orator_obj)
     print('Returned harvest land use merged with shape: ' + str(harvest_land_use_merged.shape))
 
     livestock = Livestock(orator_obj)
     livestock.get_monthly_harvest_change(orator_obj, harvest_land_use_merged)
-
+    '''
+    print('Finished livestock processing')
     return
-
-class Charts(object):
-    '''
-    Create charts
-    '''
-    def __init__(self, orator_obj):
-
-        self.title = 'Chart creation'
-        '''
-        Create graphs with all livestock shown on it
-        '''
-
-        # Milk and Eggs
-        # =============
-        plt.style.use('seaborn')
-        fig, ax = plt.subplots()
-        liv_manure_10_yr_monthly = {}
-        for livestock in livestock_list:
-            ax.plot(livestock.atyp_milk_prod, linewidth=3, label=livestock.neat_name)
-
-        plt.title("All livestock atypical milks/egg production", fontsize=24)
-        plt.xlabel('Months since typical', fontsize=16)
-        plt.ylabel('Production (Kg per year', fontsize=16)
-        plt.legend(loc="upper right")
-        plt.tick_params(axis='both', which='major', labelsize=16)
-        plt.savefig('Outputs/Livestock/Graphs/all_livestock_milk_eggs_atypical.png', bbox_inches='tight')
-
-        # Meat
-        # ====
-        plt.style.use('seaborn')
-        fig, ax = plt.subplots()
-        liv_manure_10_yr_monthly = {}
-        for livestock in livestock_list:
-            ax.plot(livestock.atyp_meat_prod, linewidth=3, label=livestock.neat_name)
-
-        plt.title("All livestock atypical meat production", fontsize=24)
-        plt.xlabel('Months since typical', fontsize=16)
-        plt.ylabel('Production (Kg per year', fontsize=16)
-        plt.legend(loc="upper right")
-        plt.tick_params(axis='both', which='major', labelsize=16)
-        plt.savefig('Outputs/Livestock/Graphs/all_livestock_meat_atypical.png', bbox_inches='tight')
-
-        # Manure
-        # ======
-        plt.style.use('seaborn')
-        fig, ax = plt.subplots()
-        liv_manure_10_yr_monthly = {}
-        for livestock in livestock_list:
-            ax.plot(livestock.atyp_man_prod, linewidth=3, label=livestock.neat_name)
-
-        plt.title("All livestock atypical manure production", fontsize=24)
-        plt.xlabel('Months since typical', fontsize=16)
-        plt.ylabel('Production (Kg per year', fontsize=16)
-        plt.legend(loc="upper right")
-        plt.tick_params(axis='both', which='major', labelsize=16)
-        plt.savefig('Outputs/Livestock/Graphs/all_livestock_manure_atypical.png', bbox_inches='tight')
-
-        # Excreted N
-        # ==========
-        plt.style.use('seaborn')
-        fig, ax = plt.subplots()
-        liv_manure_10_yr_monthly = {}
-        for livestock in livestock_list:
-            ax.plot(livestock.atyp_N_excr, linewidth=3, label=livestock.neat_name)
-
-        plt.title("All livestock atypical Nitrogen excretion", fontsize=24)
-        plt.xlabel('Months since typical', fontsize=16)
-        plt.ylabel('N Excretions (Kg per year', fontsize=16)
-        plt.legend(loc="upper right")
-        plt.tick_params(axis='both', which='major', labelsize=16)
-        plt.savefig('Outputs/Livestock/Graphs/all_livestock_nitrogen_atypical.png', bbox_inches='tight')
-
-        # Create graph with data for each animal and production type
-        # ==========================================================
-        for livestock in livestock_list:
-            plt.style.use('seaborn')
-            fig, ax = plt.subplots()
-            ax.plot(livestock.atyp_milk_prod, linewidth=3)
-
-            #Set chart title and label access
-            ax.set_title(f"Milk/Egg Production: {livestock.name}", fontsize=24)
-            ax.set_xlabel("Months since typical", fontsize=14)
-            ax.set_ylabel("Production (Kg per year", fontsize=14)
-
-            #Set size of tick labels
-            ax.tick_params(axis='both', labelsize=14)
-
-            # Save output
-            plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_milk_egg_prod_atypical.png', bbox_inches='tight')
-
-        for livestock in livestock_list:
-            plt.style.use('seaborn')
-            fig, ax = plt.subplots()
-            ax.plot(livestock.atyp_meat_prod, linewidth=3)
-
-            #Set chart title and label access
-            ax.set_title(f"Meat Production: {livestock.name}", fontsize=24)
-            ax.set_xlabel("Months since typical", fontsize=14)
-            ax.set_ylabel("Production (Kg per year", fontsize=14)
-
-            #Set size of tick labels
-            ax.tick_params(axis='both', labelsize=14)
-
-            # Save output
-            plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_meat_atypical.png', bbox_inches='tight')
-
-        for livestock in livestock_list:
-            plt.style.use('seaborn')
-            fig, ax = plt.subplots()
-            ax.plot(livestock.atyp_man_prod, linewidth=3)
-
-            #Set chart title and label access
-            ax.set_title(f"Manure Production: {livestock.name}", fontsize=24)
-            ax.set_xlabel("Months since typical", fontsize=14)
-            ax.set_ylabel("Production (Kg per year", fontsize=14)
-
-            #Set size of tick labels
-            ax.tick_params(axis='both', labelsize=14)
-
-            # Save output
-            plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_man_prod_atypical.png', bbox_inches='tight')
-
-        for livestock in livestock_list:
-            plt.style.use('seaborn')
-            fig, ax = plt.subplots()
-            ax.plot(livestock.atyp_N_excr, linewidth=3)
-
-            #Set chart title and label access
-            ax.set_title(f"N Excretion: {livestock.name}", fontsize=24)
-            ax.set_xlabel("Months since typical", fontsize=14)
-            ax.set_ylabel("Excretion (Kg per year", fontsize=14)
-
-            #Set size of tick labels
-            ax.tick_params(axis='both', labelsize=14)
-
-            # Save output
-            plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_N_excretion_atypical.png', bbox_inches='tight')

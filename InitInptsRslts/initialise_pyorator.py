@@ -24,7 +24,7 @@ import sys
 from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
-from ora_excel_read import check_excel_input_file, check_excel_livestock_file, ReadStudy
+from ora_excel_read import check_excel_input_file, ReadStudy
 from ora_excel_write import retrieve_output_xls_files
 from ora_low_level_fns import extend_out_dir
 from ora_json_read import check_json_input_files
@@ -45,7 +45,11 @@ def initiation(form):
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
     form.settings['studies'] = []
-    form.all_runs_output = {}       # TODO: important bridge beween GUI and results
+
+    # initialise bridges across economics, livestock and carbon-nitrogen-water models
+    # ===============================================================================
+    form.all_runs_output = {}
+    form.all_runs_crop_model = {}
 
     set_up_logging(form, PROGRAM_ID)
 
@@ -232,7 +236,8 @@ def read_config_file(form):
     mgmt_dir = os.path.normpath(config['mgmt_dir'])
     form.w_lbl06.setText(mgmt_dir)
 
-    form.w_lbl07.setText(check_json_input_files(form, mgmt_dir))
+    form.w_lbl07.setText(check_json_input_files(form, mgmt_dir, 'mgmt'))
+    print(check_json_input_files(form, mgmt_dir, 'lvstck'))
 
     if config['write_excel']:
         form.w_make_xls.setCheckState(2)
@@ -262,8 +267,6 @@ def read_config_file(form):
     study = ReadStudy(inp_xls, out_dir)
     extend_out_dir(form)
     retrieve_output_xls_files(form, study.study_name)
-
-    check_excel_livestock_file(form)
 
     return True
 
