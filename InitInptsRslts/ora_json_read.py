@@ -252,7 +252,7 @@ class Crop(object,):
         self.crop_lu = crop_name
         self.sowing_mnth = get_imnth(crop_defn['sowing'])
         self.harvest_mnth = get_imnth(crop_defn['harvest'])
-        self.c_yield_typ = crop_defn['yield']
+        self.yield_typ = crop_defn['yield']
 
         # inorganic fertiliser application
         # ================================

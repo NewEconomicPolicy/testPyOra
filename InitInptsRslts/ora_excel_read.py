@@ -379,7 +379,7 @@ class Crop(object,):
         self.crop_lu = crop_slice[0]
         self.sowing_mnth = crop_slice[1]
         self.harvest_mnth = crop_slice[2]
-        self.c_yield_typ = crop_slice[3]
+        self.yield_typ = crop_slice[3]
 
         # inorganic fertiliser application
         # ================================

@@ -24,6 +24,21 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
+
+def _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj):
+    '''
+
+    '''
+    self.data['crop_name'].append(this_crop_name)
+    self.data['cumul_n_uptake'].append(cumul_n_uptake)
+    self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+    yld_typ = self.data['yld_typ'][indx]
+    yld_n_lim = yld_typ * (cumul_n_uptake_adj / cumul_n_uptake)  # n limited yield
+    self.data['yld_n_lim'].append(yld_n_lim)
+
+    indx += 1
+    return indx
+
 class CropModel(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
@@ -35,7 +50,8 @@ class CropModel(object, ):
         self.title = 'CropModel'
         self.data = {}
 
-        var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cumul_n_uptake', 'cumul_n_uptake_adj'])
+        var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cumul_n_uptake', 'cumul_n_uptake_adj',
+                              'yld_typ', 'yld_n_lim'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -43,6 +59,8 @@ class CropModel(object, ):
 
         self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
         self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
+        for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
+            self.data['yld_typ'].append(crop_obj.yield_typ)     # typical yield
 
         num_grow_seasons = len(self.data['npp_miami'])
 
@@ -52,14 +70,13 @@ class CropModel(object, ):
         cumul_n_uptake = 0
         cumul_n_uptake_adj = 0
         this_crop_name = None
+        indx = 0
         for crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['crop_name'],
                                                     n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
 
             if crop_name is None:
                 if cumul_n_uptake > 0:
-                    self.data['crop_name'].append(this_crop_name)
-                    self.data['cumul_n_uptake'].append(cumul_n_uptake)
-                    self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+                    indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
 
                 cumul_n_uptake = 0
                 cumul_n_uptake_adj = 0
@@ -72,9 +89,8 @@ class CropModel(object, ):
         # catch situation when December is a growing month
         # ================================================
         if (len(self.data['cumul_n_uptake']) < num_grow_seasons):
-            self.data['crop_name'].append(this_crop_name)
-            self.data['cumul_n_uptake'].append(cumul_n_uptake)
-            self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+            indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
+
 
 class EnsureContinuity(object, ):
     '''
