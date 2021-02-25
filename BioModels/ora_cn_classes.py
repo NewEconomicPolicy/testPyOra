@@ -24,7 +24,6 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
-
 def _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj):
     '''
 
@@ -43,7 +42,7 @@ class CropModel(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
     '''
-    def __init__(self, complete_run, mngmnt_ss, mngmnt_fwd):
+    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None):
         '''
         construct a crop model object suitable for livestock model
         '''
@@ -57,40 +56,39 @@ class CropModel(object, ):
 
         self.var_name_list = var_name_list
 
-        self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
-        self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
-        for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
-            self.data['yld_typ'].append(crop_obj.yield_typ)     # typical yield
+        if complete_run is not None:
+            self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
+            self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
+            for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
+                self.data['yld_typ'].append(crop_obj.yield_typ)     # typical yield
 
-        num_grow_seasons = len(self.data['npp_miami'])
+            num_grow_seasons = len(self.data['npp_miami'])
 
-        # cumulative N uptake
-        # ===================
-        c_change, n_change, soil_water = complete_run
-        cumul_n_uptake = 0
-        cumul_n_uptake_adj = 0
-        this_crop_name = None
-        indx = 0
-        for crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['crop_name'],
-                                                    n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
+            # cumulative N uptake
+            # ===================
+            c_change, n_change, soil_water = complete_run
+            cumul_n_uptake = 0
+            cumul_n_uptake_adj = 0
+            this_crop_name = None
+            indx = 0
+            for crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['crop_name'],
+                                                        n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
 
-            if crop_name is None:
-                if cumul_n_uptake > 0:
-                    indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
+                if crop_name is None:
+                    if cumul_n_uptake > 0:
+                        indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
 
-                cumul_n_uptake = 0
-                cumul_n_uptake_adj = 0
-            else:
-                this_crop_name = crop_name
-                cumul_n_uptake += n_crop_dem
-                cumul_n_uptake_adj += n_crop_dem_adj
+                    cumul_n_uptake = 0
+                    cumul_n_uptake_adj = 0
+                else:
+                    this_crop_name = crop_name
+                    cumul_n_uptake += n_crop_dem
+                    cumul_n_uptake_adj += n_crop_dem_adj
 
-
-        # catch situation when December is a growing month
-        # ================================================
-        if (len(self.data['cumul_n_uptake']) < num_grow_seasons):
-            indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
-
+            # catch situation when December is a growing month
+            # ================================================
+            if (len(self.data['cumul_n_uptake']) < num_grow_seasons):
+                indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
 
 class EnsureContinuity(object, ):
     '''

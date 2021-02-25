@@ -345,3 +345,23 @@ def check_json_input_files(form, mgmt_dirname, jtype):
     form.settings[jtype + '_files'] = ok_json_files
 
     return mess
+
+def get_nyears_json_mgmt_files(mgmt_files):
+    '''
+    checks managment files and returns years
+    '''
+
+    for mgmt_fname in mgmt_files:
+
+        # avoid error when user has removed a management file during a session
+        # ====================================================================
+        if not os.path.isfile(mgmt_fname):
+            continue
+
+        with open(mgmt_fname, 'r') as fmgmt:
+            mgmt_content = json.load(fmgmt)
+
+        nyrs_ss = mgmt_content['steady state']['nyears']
+        nyrs_fwd = mgmt_content['forward run']['nyears']
+
+    return nyrs_ss, nyrs_fwd

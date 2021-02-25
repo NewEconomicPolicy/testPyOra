@@ -172,13 +172,12 @@ def run_soil_cn_algorithms(form):
         if excel_out_flag:
             generate_excel_outfiles(study, subarea, lookup_df, form.settings['out_dir'], ora_weather, complete_run,
                                                                                                 mngmnt_ss, mngmnt_fwd)
-
         print()
         all_runs[subarea] = complete_run
 
     if len(all_runs) > 0:
         if excel_out_flag:
-            write_excel_all_subareas(study, form.settings['out_dir'], ora_weather, all_runs)
+            write_excel_all_subareas(study, form.settings['out_dir'], lookup_df, all_runs)
 
         # update GUI by activating the livestock and new Excel output files push buttons
         # ==============================================================================
@@ -195,6 +194,11 @@ def run_soil_cn_algorithms(form):
         form.w_disp_c.setEnabled(False)
         form.w_disp_n.setEnabled(False)
         form.w_disp_w.setEnabled(False)
+
+    if len(form.all_runs_crop_model) > 0:
+        form.w_disp_cm.setEnabled(True)
+    else:
+        form.w_disp_cm.setEnabled(False)
 
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return

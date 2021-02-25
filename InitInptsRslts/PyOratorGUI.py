@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:
-# Purpose:     Creates a GUI with five adminstrative levels plus country
+# Name:        PyOratorGUI.py
+# Purpose:     main module for PyOrator
 # Author:      Mike Martin
-# Created:     11/12/2015
+# Created:     11/12/2019
 # Licence:     <your licence>
-# Decription:
-#       if climate weather sets and HWSD data are not found then use spreadsheet only for input data
+# Description:
+#
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 
@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLay
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
+
 from ora_excel_write import retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
 from livestock_output_data import write_livestock_charts
@@ -47,6 +48,7 @@ class Form(QWidget):
         font = QFont(self.font())
         font.setPointSize(font.pointSize() + 2)
         self.setFont(font)
+        strt_line = 0   # main layout is a grid therefore line and row spacing is important
 
         # grid will be put in RH vertical box
         # ===================================
@@ -56,7 +58,7 @@ class Form(QWidget):
         # line 0 for study details
         # ========================
         w_study = QLabel()
-        grid.addWidget(w_study, 1, 0, 1, 5)
+        grid.addWidget(w_study, strt_line + 1, 0, 1, 5)
         self.w_study = w_study
 
         # rows 2 and 3
@@ -64,17 +66,17 @@ class Form(QWidget):
         w_inp_xls = QPushButton("Parameters file")
         helpText = 'Select an Orator Excel inputs file comprising crop and nitrogen parameters, weather'
         w_inp_xls.setToolTip(helpText)
-        grid.addWidget(w_inp_xls, 2, 0)
+        grid.addWidget(w_inp_xls, strt_line + 2, 0)
         w_inp_xls.clicked.connect(self.fetchInpExcel)
 
         w_lbl13 = QLabel('')
-        grid.addWidget(w_lbl13, 2, 1, 1, 5)
+        grid.addWidget(w_lbl13, strt_line + 2, 1, 1, 5)
         self.w_lbl13 = w_lbl13
 
         # for message from check_xls_fname
         # ================================
         w_lbl14 = QLabel('')
-        grid.addWidget(w_lbl14, 3, 0, 1, 2)
+        grid.addWidget(w_lbl14, strt_line + 3, 0, 1, 2)
         self.w_lbl14 = w_lbl14
 
         # rows 4 and 5
@@ -82,17 +84,17 @@ class Form(QWidget):
         w_inp_json = QPushButton("Management files")
         helpText = 'Select a file location with JSON files comprising management data for steady state and forward run'
         w_inp_json.setToolTip(helpText)
-        grid.addWidget(w_inp_json, 4, 0)
+        grid.addWidget(w_inp_json, strt_line + 4, 0)
         w_inp_json.clicked.connect(self.fetchInpJson)
 
         w_lbl06 = QLabel('')
-        grid.addWidget(w_lbl06, 4, 1, 1, 5)
+        grid.addWidget(w_lbl06, strt_line + 4, 1, 1, 5)
         self.w_lbl06 = w_lbl06
 
         # line 5 - for message from check_json_fname
         # ==========================================
         w_lbl07 = QLabel('')
-        grid.addWidget(w_lbl07, 5, 1, 1, 5)
+        grid.addWidget(w_lbl07, strt_line + 5, 1, 1, 5)
         self.w_lbl07 = w_lbl07
 
         # line 7: carbon
@@ -103,12 +105,12 @@ class Form(QWidget):
         w_disp_c.clicked.connect(lambda: self.displayMetric(self.w_combo07, 'carbon'))
         w_disp_c.setEnabled(False)
         self.w_disp_c = w_disp_c
-        grid.addWidget(w_disp_c, 7, 0)
+        grid.addWidget(w_disp_c, strt_line + 7, 0)
 
         w_combo07 = QComboBox()
         w_combo07.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo07))
         self.w_combo07 = w_combo07
-        grid.addWidget(w_combo07, 7, 1, 1, 2)
+        grid.addWidget(w_combo07, strt_line + 7, 1, 1, 2)
 
         # line 8: nitrogen
         # ================
@@ -118,12 +120,12 @@ class Form(QWidget):
         w_disp_n.setEnabled(False)
         w_disp_n.clicked.connect(lambda: self.displayMetric(self.w_combo08, 'nitrogen'))
         self.w_disp_n = w_disp_n
-        grid.addWidget(w_disp_n, 8, 0)
+        grid.addWidget(w_disp_n, strt_line + 8, 0)
 
         w_combo08 = QComboBox()
         w_combo08.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo08))
         self.w_combo08 = w_combo08
-        grid.addWidget(w_combo08, 8, 1, 1, 2)
+        grid.addWidget(w_combo08, strt_line + 8, 1, 1, 2)
 
         # line 9: water
         # =============
@@ -133,25 +135,40 @@ class Form(QWidget):
         w_disp_w.clicked.connect(lambda: self.displayMetric(self.w_combo09, 'soil_water'))
         w_disp_w.setEnabled(False)
         self.w_disp_w = w_disp_w
-        grid.addWidget(w_disp_w, 9, 0)
+        grid.addWidget(w_disp_w, strt_line + 9, 0)
 
         w_combo09 = QComboBox()
         w_combo09.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo09))
         self.w_combo09 = w_combo09
-        grid.addWidget(w_combo09, 9, 1, 1, 2)
+        grid.addWidget(w_combo09, strt_line + 9, 1, 1, 2)
 
-        grid.addWidget(QLabel(), 10, 0, )   # spacer
+        # line 10: crop model
+        # ===================
+        w_disp_cm = QPushButton('Display crop model metric')
+        helpText = 'Display crop model chart'
+        w_disp_cm.setToolTip(helpText)
+        w_disp_cm.clicked.connect(lambda: self.displayMetric(self.w_combo10, 'crop_model'))
+        w_disp_cm.setEnabled(False)
+        self.w_disp_cm = w_disp_cm
+        grid.addWidget(w_disp_cm, strt_line + 10, 0)
+
+        w_combo10 = QComboBox()
+        w_combo10.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo10))
+        self.w_combo10 = w_combo10
+        grid.addWidget(w_combo10, strt_line + 10, 1, 1, 2)
+
+        grid.addWidget(QLabel(), strt_line + 11, 0, )   # spacer
 
         # row 15
         # ======
         w_out_dir = QPushButton("Outputs directory")
         helpText = 'Select a file path for Excel outputs files'
         w_out_dir.setToolTip(helpText)
-        grid.addWidget(w_out_dir, 15, 0)
+        grid.addWidget(w_out_dir, strt_line + 15, 0)
         w_out_dir.clicked.connect(self.fetchOutDir)
 
         w_lbl15 = QLabel('')
-        grid.addWidget(w_lbl15, 15, 1, 1, 5)
+        grid.addWidget(w_lbl15, strt_line + 15, 1, 1, 5)
         self.w_lbl15 = w_lbl15
 
         # line 16: generate Excel files
@@ -160,7 +177,7 @@ class Form(QWidget):
         helpText = 'Writing Excel files is slow'
         w_make_xls.setToolTip(helpText)
         w_make_xls.setChecked(True)
-        grid.addWidget(w_make_xls, 16, 0, 1, 2)
+        grid.addWidget(w_make_xls, strt_line + 16, 0, 1, 2)
         self.w_make_xls = w_make_xls
 
         # line 17: display output
@@ -170,16 +187,16 @@ class Form(QWidget):
         w_disp_out.setToolTip(helpText)
         w_disp_out.clicked.connect(self.displayXlsxOutput)
         self.w_disp_out = w_disp_out
-        grid.addWidget(w_disp_out, 17, 0)
+        grid.addWidget(w_disp_out, strt_line + 17, 0)
 
         w_combo17 = QComboBox()
         self.w_combo17 = w_combo17
-        grid.addWidget(w_combo17, 17, 1, 1, 3)
+        grid.addWidget(w_combo17, strt_line + 17, 1, 1, 3)
 
         # user feedback
         # =============
         w_opt_cycle = QLabel(gui_optimisation_cycle(self))
-        grid.addWidget(w_opt_cycle, 18, 1, 1, 6)
+        grid.addWidget(w_opt_cycle, strt_line + 18, 1, 1, 6)
         self.w_opt_cycle = w_opt_cycle
 
         # line 19
@@ -189,14 +206,14 @@ class Form(QWidget):
         w_economics.setToolTip(helpText)
         # w_economics.setEnabled(False)
         w_economics.clicked.connect(self.runEconomicsClicked)
-        grid.addWidget(w_economics, 19, 0)
+        grid.addWidget(w_economics, strt_line + 19, 0)
         self.w_economics = w_economics
 
         w_livestock = QPushButton('Livestock')
         helpText = 'Runs ORATOR livestock model'
         w_livestock.setToolTip(helpText)
         w_livestock.clicked.connect(self.runLivestockClicked)
-        grid.addWidget(w_livestock, 19, 1)
+        grid.addWidget(w_livestock, strt_line + 19, 1)
         self.w_livestock = w_livestock
 
         w_soil_cn = QPushButton('Soil C and N')
@@ -204,7 +221,7 @@ class Form(QWidget):
         w_soil_cn.setToolTip(helpText)
         w_soil_cn.setEnabled(False)
         w_soil_cn.clicked.connect(self.runSoilCnClicked)
-        grid.addWidget(w_soil_cn, 19, 2)
+        grid.addWidget(w_soil_cn, strt_line + 19, 2)
         self.w_soil_cn = w_soil_cn
 
         w_optimise = QPushButton('Optimise')
@@ -212,19 +229,19 @@ class Form(QWidget):
         w_optimise.setToolTip(helpText)
         w_optimise.setEnabled(False)
         w_optimise.clicked.connect(self.runOptimiseClicked)
-        grid.addWidget(w_optimise, 19, 3)
+        grid.addWidget(w_optimise, strt_line + 19, 3)
         self.w_optimise = w_optimise
 
         w_save = QPushButton("Save", self)
         helpText = 'save the configuration file'
         w_save.setToolTip(helpText)
-        grid.addWidget(w_save, 19, 6)
+        grid.addWidget(w_save, strt_line + 19, 6)
         w_save.clicked.connect(self.saveClicked)
 
         w_exit = QPushButton("Exit", self)
         helpText = 'Close GUI - the configuration file will be saved'
         w_exit.setToolTip(helpText)
-        grid.addWidget(w_exit, 19, 7)
+        grid.addWidget(w_exit, strt_line + 19, 7)
         w_exit.clicked.connect(self.exitClicked)
 
         # LH vertical box consists of png image
@@ -250,8 +267,6 @@ class Form(QWidget):
         w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
         bot_hbox.addWidget(w_report, 1)
         self.w_report = w_report
-        sys.stdout = OutLog(self.w_report, sys.stdout)
-        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
         # add LH and RH vertical boxes to main horizontal box
         # ===================================================
@@ -274,6 +289,8 @@ class Form(QWidget):
         # reads and set values from last run
         # ==================================
         read_config_file(self)
+        sys.stdout = OutLog(self.w_report, sys.stdout)
+        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
     def fetchOutDir(self):
 
@@ -284,7 +301,7 @@ class Form(QWidget):
 
     def fetchInpJson(self):
         '''
-        disable display push buttons
+        when the directory changes disable display push buttons
         '''
         dirname_cur = self.w_lbl06.text()
         dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
@@ -295,6 +312,7 @@ class Form(QWidget):
             self.w_disp_c.setEnabled(False)
             self.w_disp_n.setEnabled(False)
             self.w_disp_w.setEnabled(False)
+            self.w_disp_cm.setEnabled(False)
             self.w_disp_out.setEnabled(False)
             self.w_livestock.setEnabled(False)
             extend_out_dir(self)

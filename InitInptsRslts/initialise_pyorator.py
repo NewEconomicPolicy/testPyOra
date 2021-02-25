@@ -5,7 +5,7 @@
 # Author:      Mike Martin
 # Created:     31/07/2020
 # Licence:     <your licence>
-#
+# Description:#
 #   Notes:
 #       entries for drop-down menus are populated after GUI has been created and config file has been read
 #-------------------------------------------------------------------------------
@@ -28,12 +28,12 @@ from ora_excel_read import check_excel_input_file, ReadStudy
 from ora_excel_write import retrieve_output_xls_files
 from ora_low_level_fns import extend_out_dir
 from ora_json_read import check_json_input_files
-from ora_cn_classes import CarbonChange, NitrogenChange
+from ora_cn_classes import CarbonChange, NitrogenChange, CropModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
 PROGRAM_ID = 'pyorator'
-EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
+EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
 ERROR_STR = '*** Error *** '
 sleepTime = 5
 
@@ -62,13 +62,6 @@ def _read_setup_file(program_id):
     """
     func_name = __prog__ + ' _read_setup_file'
 
-    # TODO: this is an unsafe assumption, e.g. if user uses Apache OpenOffice
-    # =======================================================================
-    if not os.path.isfile(EXCEL_EXE_PATH):
-        print(ERROR_STR + 'Excel must be installed - usually here: ' + EXCEL_EXE_PATH)
-        sleep(sleepTime)
-        exit(0)
-
     # validate setup file
     # ===================
     fname_setup = program_id + '_setup.json'
@@ -89,12 +82,32 @@ def _read_setup_file(program_id):
     # initialise vars
     # ===============
     settings = setup['setup']
-    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup']
+    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'excel_dir', 'weather_dir']
     for key in settings_list:
         if key not in settings:
             print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
             sleep(sleepTime)
             exit(0)
+
+    # TODO: consider situation when user uses Apache OpenOffice
+    # =========================================================
+    excel_flag = False
+    if os.path.isdir(settings['excel_dir']):
+
+        excel_path = os.path.join(settings['excel_dir'], 'EXCEL.EXE')
+        if os.path.isfile(excel_path):
+            excel_flag = True
+        else:
+            print(ERROR_STR + 'Excel progam must exist - should be here: ' + excel_path)
+
+    else:
+        print(ERROR_STR + 'Excel directory must exist - usually here: ' + EXCEL_EXE_PATH)
+
+    if not excel_flag:
+        sleep(sleepTime)
+        exit(0)
+
+    settings['excel_path'] = excel_path
 
     # lookup Excel file is required
     # =============================
@@ -119,7 +132,6 @@ def _read_setup_file(program_id):
     # print('Using configuration file: ' + config_file)
 
     settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
-    settings['excel_path'] = EXCEL_EXE_PATH
 
     return settings
 
@@ -261,6 +273,11 @@ def read_config_file(form):
     display_names = fetch_display_names_from_metrics(lookup_df, soil_water)
     for display_name in display_names:
             form.w_combo09.addItem(display_name)
+
+    crop_model = CropModel()
+    display_names = fetch_display_names_from_metrics(lookup_df, crop_model)
+    for display_name in display_names:
+            form.w_combo10.addItem(display_name)
 
     # enable users to view outputs from previous run
     # ==============================================
