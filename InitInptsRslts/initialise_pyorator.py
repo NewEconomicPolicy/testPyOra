@@ -33,7 +33,7 @@ from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
 PROGRAM_ID = 'pyorator'
-EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
+EXCEL_EXE_PATH = 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
 ERROR_STR = '*** Error *** '
 sleepTime = 5
 

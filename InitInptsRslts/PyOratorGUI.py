@@ -250,7 +250,7 @@ class Form(QWidget):
         w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
         bot_hbox.addWidget(w_report, 1)
         self.w_report = w_report
-        sys.stdout = OutLog(self.w_report, sys.stdout)
+        # sys.stdout = OutLog(self.w_report, sys.stdout)
         # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
         # add LH and RH vertical boxes to main horizontal box

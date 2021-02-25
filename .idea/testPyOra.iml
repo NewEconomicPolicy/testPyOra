@@ -4,7 +4,9 @@
     <content url="file://$MODULE_DIR$/BioModels" />
     <content url="file://$MODULE_DIR$/EnvModelModules" />
     <content url="file://$MODULE_DIR$/InitInptsRslts" />
-    <orderEntry type="inheritedJdk" />
+    <content url="file://$MODULE_DIR$/LiveStock" />
+    <content url="file://$MODULE_DIR$/OratorRun" />
+    <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
