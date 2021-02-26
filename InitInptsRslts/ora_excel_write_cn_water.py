@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Name:        ora_excel_write.py
+# Name:        ora_excel_write_cn_water.py
 # Purpose:     a collection of reusable functions
 # Author:      Mike Martin
 # Created:     26/12/2019
@@ -13,7 +13,7 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 
-__prog__ = 'ora_excel_write.py'
+__prog__ = 'ora_excel_write_cn_water.py'
 __version__ = '0.0.0'
 
 # Version history
@@ -26,24 +26,13 @@ from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
 from pandas import DataFrame, ExcelWriter
 
+from ora_lookup_df_fns import fetch_detail_from_varname
+
 POOL_GROUPS = {'Active Pools':list(['pool_c_dpm', 'pool_c_rpm', 'pool_c_bio']),
                'Resistant Pools':list(['pool_c_hum', 'pool_c_iom', 'tot_soc_simul'])}
 
 LINE_COLORS = list(['FF0000', '00FF00','0000FF'])
 LINE_COLORS2 = list(['FF0000', '00FF00','0000FF', '0FF000', '000FF0'])
-
-Y_AXIS_LABELS = {'co2_emiss':'Carbon (t/ha)',
-                 'soil_n_sply':'Soil N supply (kg/ha)', 'no3_crop_dem':'Crop N demand from N pool (kg/ha)',
-                           'no3_nitrif':'Nitrified N (kg/ha)',
-                'no3_leach':'Leached nitrate (kg/ha)', 'no3_denit':' Denitrified nitrate (kg/ha)',
-                'nh4_crop_dem':'Crop N demand from ammonium (kg/ha)', 'nh4_volat':'Volatilised ammonium (kg/ha)',
-                 'wc_pwp':'', 'wat_soil':'', 'wc_fld_cap':'Water content of root zone at field capacity (mm)',
-                 'wat_strss_indx':'', 'aet':'AET to rooting depth before irrigation (mm)', 'irrig':'',
-                 'wc_soil_irri_root_zone':'Soil water content of root zone after irrigation (mm)',
-                 'aet_irri':'AET to rooting depth after irrigation (mm)',
-                 'wc_soil_irri':'Soil water content of root zone after irrigation (mm)',
-                 'wat_drain':'Drainage from soil  depth (mm)',
-                 'pcnt_c':'Soil carbon content (%)'}
 
 CHANGE_VARS = {}
 CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
@@ -55,19 +44,16 @@ CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx
 
 PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py  width in EMUs
 
-def _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, metric, max_sheet_row):
+def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart, metric, max_sheet_row):
 
     # generate charts for each subarea for two sets of metrics
     # ========================================================
-    if metric not in Y_AXIS_LABELS:
-        print(metric + ' not in Y_AXIS_LABELS')
-        return nrow_chart
-
     group_chart = LineChart()
     group_chart.style = 13
 
-    group_chart.title = metric
-    group_chart.y_axis.title = Y_AXIS_LABELS[metric]
+    defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
+    group_chart.title = defn
+    group_chart.y_axis.title = units
     group_chart.x_axis.title = 'Time step'
     group_chart.height = 10
     group_chart.width = 60
@@ -184,7 +170,7 @@ def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_she
 
     return nrow_chart
 
-def _generate_charts(fname, metric, sub_system):
+def _generate_charts(fname, metric, sub_system, lookup_df):
     '''
     add charts to an existing Excel file
     '''
@@ -218,17 +204,17 @@ def _generate_charts(fname, metric, sub_system):
 
     if sub_system == 'carbon':
         nrow_chart = _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
-        nrow_chart = _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, 'co2_emiss',
-                                                                                                    max_sheet_row)
+        nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
+                                                                                            'co2_emiss', max_sheet_row)
     elif sub_system == 'nitrogen':
         for metric in CHANGE_VARS['nitrogen']:
-            nrow_chart = _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, metric,
-                                                                                                    max_sheet_row)
+            nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
+                                                                                                metric, max_sheet_row)
     elif sub_system == 'water':
         nrow_chart = _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
         for metric in CHANGE_VARS['water']:
-            nrow_chart = _generate_comparison_charts(col_indices, wb_obj, chart_sheet, nrow_chart, metric,
-                                                                                                    max_sheet_row)
+            nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
+                                                                                                metric, max_sheet_row)
     try:
         wb_obj.active = len(wb_obj.sheetnames) - 1 # make the charts sheet active
         wb_obj.save(fname)
@@ -238,7 +224,7 @@ def _generate_charts(fname, metric, sub_system):
 
     return
 
-def write_excel_all_subareas(study, out_dir, ora_weather, all_runs):
+def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
     '''
 
     '''
@@ -265,7 +251,6 @@ def write_excel_all_subareas(study, out_dir, ora_weather, all_runs):
                 if month_flag:
                     plot_dict['month'] = all_runs[subarea][0].data['imnth']
 
-
                     month_flag = False
 
                 plot_dict[subarea] = all_runs[subarea][indx].data[var_name]
@@ -277,7 +262,6 @@ def write_excel_all_subareas(study, out_dir, ora_weather, all_runs):
 
         # reopen Excel file and write charts
         # ==================================
-        _generate_charts(fname, var_name, sub_system)
+        _generate_charts(fname, var_name, sub_system, lookup_df)
 
     return 0
-

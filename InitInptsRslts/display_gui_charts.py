@@ -19,7 +19,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, \
                                                                                         QPushButton, QLineEdit, QLabel
-from PyQt5.QtChart import QChart, QValueAxis, QChartView, QLineSeries
+from PyQt5.QtChart import QChart, QValueAxis, QChartView, QLineSeries, QScatterSeries
 from random import random
 from math import floor, ceil
 
@@ -28,7 +28,7 @@ from ora_lookup_df_fns import fetch_detail_from_varname
 SUBAREAS = list(['Blackburn', 'Todmorden', 'Bury', 'Oldham', 'Rochdale'])   # for generation of random data
 NTSTEPS = 240
 
-SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2}    # lookup table for data object
+SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2, 'crop_model':None}    # lookup table for data object
 WARNING_STR = '*** Warning *** '
 LRGE_NUM = 99999999
 THRESHOLD = 1e-10
@@ -191,6 +191,7 @@ class Second(QWidget):
         line_series = {}
         for icol_indx, subarea in enumerate(subareas):
             lseries = QLineSeries()
+            # lseries = QScatterSeries()
             lseries.setName(subarea)
             for irow_indx, val in enumerate(data_for_display[subarea]):
                 self.w_table.setItem(irow_indx, icol_indx, QTableWidgetItem(str(round(val, ndecimals))))
@@ -288,7 +289,10 @@ def _select_data_for_display(form, category, metric):
     else:
         # actual data
         # ===========
-        all_runs_output = form.all_runs_output
+        if group_indx is None:
+            all_runs_output  = form.all_runs_crop_model
+        else:
+            all_runs_output = form.all_runs_output
         subareas = list(all_runs_output.keys())
         description, units, out_format, pyora_display = fetch_detail_from_varname(form.settings['lookup_df'], metric)
 
@@ -296,10 +300,15 @@ def _select_data_for_display(form, category, metric):
         yaxis_max = -LRGE_NUM
         data_for_display = {}
         for subarea in subareas:
-            this_data = all_runs_output[subarea][group_indx].data[metric]
+            if group_indx is None:
+                this_data = all_runs_output[subarea].data[metric]
+            else:
+                this_data = all_runs_output[subarea][group_indx].data[metric]
+
             if len(this_data) == 0:
                 form.w_report.append(WARNING_STR + 'could not display metric: ' + metric)
                 return 9*[None]
+
             data_for_display[subarea] = this_data
             yaxis_min = min(yaxis_min, min(this_data))
             yaxis_max = max(yaxis_max, max(this_data))
