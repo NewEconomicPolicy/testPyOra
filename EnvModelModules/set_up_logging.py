@@ -43,14 +43,14 @@ def set_up_logging(form, appl_name):
 
     # Setup up initial logger to handle logging prior to setting up the
     # full logger using config options
-    form.lgr = logging.getLogger(appl_name)
-    form.lgr.setLevel(logging.INFO)
+    form.lggr = logging.getLogger(appl_name)
+    form.lggr.setLevel(logging.INFO)
     fh = logging.FileHandler(log_fname)    # send log recs (created by loggers) to appropriate destination
     fh.setLevel(logging.INFO)
     formatter = logging.Formatter('%(message)s')
     # formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)  # specify layout of records
-    form.lgr.addHandler(fh)
+    form.lggr.addHandler(fh)
 
     # if more than 15 or so files then delete oldest
     # ==============================================
@@ -64,7 +64,7 @@ def set_up_logging(form, appl_name):
         for ifile in range(num_to_delete):
             try:
                 os.remove(log_flist[ifile])
-                form.lgr.info('removed log file: ' + log_flist[ifile])
+                form.lggr.info('removed log file: ' + log_flist[ifile])
             except (OSError, IOError) as e:
                 print('Failed to delete log file: {0}'.format(e))
 
