@@ -397,7 +397,7 @@ class Form(QWidget):
         # close logging
         # =============
         try:
-            self.lgr.handlers[0].close()
+            self.lggr.handlers[0].close()
         except AttributeError:
             pass
 
