@@ -11,13 +11,25 @@ __prog__ = 'merge_data.py'
 __version__ = '0.0.0'
 __author__ = 's02dm4'
 
-from pandas import concat
+from pandas import concat, DataFrame
 
 def merge_harvest_land_use(orator_obj):
     '''
     Function to merge together previous harvest and land use info from ORATOR A1a
+    TODO: Change this so that it uses crop data created in PyORATOR rather than EXCELORATOR
     '''
-    harvest_data = orator_obj.harvest_data
+    harvest_data = orator_obj
+    for subarea in harvest_data:
+        crop_model = harvest_data[subarea]
+        crops = crop_model.data['crop_name']
+        yields = crop_model.data['yld_typ']
+        zaks = crop_model.data['npp_zaks']
+        miami = crop_model.data['npp_miami']
+        n_lim = crop_model.data['yld_n_lim']
+        dic_list = (crops, yields, zaks, miami, n_lim)
+        df = DataFrame(dic_list)
+
+
     land_use_tran = _transform_land_use_data(orator_obj)
 
     harvest_land_use_merged = concat([land_use_tran, harvest_data], axis=1)

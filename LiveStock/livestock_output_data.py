@@ -17,6 +17,7 @@ from pathlib import Path
 from ora_json_read import ReadLvstckJsonSubareas
 from ora_excel_read import ReadAfricaAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
+from merge_data import merge_harvest_land_use
 
 def _get_pigs_or_poultry_production(anml_type):
     '''
@@ -104,10 +105,10 @@ def write_livestock_charts(form):
     all_lvstck = ReadLvstckJsonSubareas(form.settings['lvstck_files'], anml_prodn_obj)
     _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
 
-    '''
-    harvest_land_use_merged = merge_harvest_land_use(orator_obj)
-    print('Returned harvest land use merged with shape: ' + str(harvest_land_use_merged.shape))
 
+    harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
+    print('Returned harvest land use merged with shape: ' + str(harvest_land_use_merged.shape))
+    '''
     livestock = Livestock(orator_obj)
     livestock.get_monthly_harvest_change(orator_obj, harvest_land_use_merged)
     '''
