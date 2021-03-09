@@ -281,7 +281,7 @@ def read_config_file(form):
 
     # enable users to view outputs from previous run
     # ==============================================
-    study = ReadStudy(inp_xls, out_dir)
+    study = ReadStudy(mgmt_dir, inp_xls, out_dir)
     extend_out_dir(form)
     retrieve_output_xls_files(form, study.study_name)
 

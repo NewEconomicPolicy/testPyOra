@@ -132,11 +132,12 @@ def run_soil_cn_algorithms(form):
     # read input Excel workbook
     # =========================
     print('Loading: ' + xls_inp_fname)
-    study = ReadStudy(xls_inp_fname, form.settings['out_dir'])
+    study = ReadStudy(form.w_lbl06.text(), xls_inp_fname, form.settings['out_dir'])
     ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     if ora_parms.ow_parms is None:
         return
-    ora_weather = ReadWeather(xls_inp_fname, study.latitude)
+
+    ora_weather = ReadWeather(form.w_lbl06.text(), xls_inp_fname, study.latitude)
     ora_subareas = ReadMngmntJsonSubareas(form.settings['mgmt_files'], ora_parms.crop_vars)
     extend_out_dir(form)     # extend outputs directory by mirroring inputs location
 

@@ -88,7 +88,7 @@ def write_livestock_charts(form):
     # read sheets from input Excel workbook
     # =====================================
     print('Loading: ' + xls_inp_fname)
-    study = ReadStudy(xls_inp_fname, form.settings['out_dir'])
+    study = ReadStudy(form.w_lbl06.text(), xls_inp_fname, form.settings['out_dir'])
     ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     out_dir = form.settings['out_dir']
     Path(out_dir + "/Livestock/Graphs").mkdir(parents = True, exist_ok = True)
