@@ -105,9 +105,11 @@ def write_livestock_charts(form):
     all_lvstck = ReadLvstckJsonSubareas(form.settings['lvstck_files'], anml_prodn_obj)
     _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
 
-
+    # Access crop production data
+    # ===========================
     harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
-    print('Returned harvest land use merged with shape: ' + str(harvest_land_use_merged.shape))
+    print('Returned harvest land use merged')
+
     '''
     livestock = Livestock(orator_obj)
     livestock.get_monthly_harvest_change(orator_obj, harvest_land_use_merged)

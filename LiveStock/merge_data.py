@@ -19,17 +19,20 @@ def merge_harvest_land_use(orator_obj):
     TODO: Change this so that it uses crop data created in PyORATOR rather than EXCELORATOR
     '''
     harvest_data = orator_obj
+    subarea_crop_prod_change = []
     for subarea in harvest_data:
         crop_model = harvest_data[subarea]
         crops = crop_model.data['crop_name']
-        yields = crop_model.data['yld_typ']
-        zaks = crop_model.data['npp_zaks']
-        miami = crop_model.data['npp_miami']
-        n_lim = crop_model.data['yld_n_lim']
-        dic_list = (crops, yields, zaks, miami, n_lim)
+        typ_yield = crop_model.data['yld_ann_typ']
+        yld_n_lim = crop_model.data['yld_n_lim']
+        zipped = (typ_yield + yld_n_lim)
+        dic_list = (crops, zipped)
         df = DataFrame(dic_list)
+        subarea_crop_prod_change.append(df)
 
+    return subarea_crop_prod_change
 
+    '''
     land_use_tran = _transform_land_use_data(orator_obj)
 
     harvest_land_use_merged = concat([land_use_tran, harvest_data], axis=1)
@@ -57,9 +60,8 @@ def merge_harvest_land_use(orator_obj):
     return harvest_land_use_merged
 
 def _transform_land_use_data(orator_obj):
-    '''
     Change land use data from key to name of crop
-    '''
+
     last_land_use = orator_obj.last_land_use
 
     last_land_use_transform = last_land_use.replace({1: 'None',
@@ -80,9 +82,9 @@ def _transform_land_use_data(orator_obj):
     return last_land_use_transform
 
 def get_atypical_years_crop_prod():
-    '''
+
     Calculate the change in crop production for each crop for atypical years
-    '''
+    
     harv_land_use_merged = _transform_land_use_data()
     harv_land_use_merged["Crop A"] = ""
     harv_land_use_merged["Tot production crop A"] = ""
@@ -96,3 +98,4 @@ def get_atypical_years_crop_prod():
     harv_land_use_merged["Tot production crop E"] = ""
 
     harv_land_use_merged.to_csv('harv_land_use_data_merged.csv')
+'''
