@@ -23,7 +23,7 @@ import os
 from glob import glob
 from calendar import monthrange
 from openpyxl import load_workbook
-from pandas import Series, read_excel
+from pandas import Series, read_excel, DataFrame
 from zipfile import BadZipFile
 
 from ora_excel_write import retrieve_output_xls_files
@@ -222,7 +222,7 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
 
 class ReadStudy(object, ):
 
-    def __init__(self, xls_inp_fname, out_dir, output_excel = True):
+    def __init__(self, mgmt_dir, xls_inp_fname, out_dir, output_excel = True):
         '''
         read location sheet from ORATOR inputs Excel file
         '''
@@ -232,7 +232,12 @@ class ReadStudy(object, ):
 
         # Farm location
         # =============
-        self.study_name, self.latitude, self.longitude \
+        wthr_xls = os.path.join(mgmt_dir,'Farm_Weather.xlsx')
+        if os.path.isfile(wthr_xls):
+            self.study_name, self.latitude, self.longitude = _read_external_farm_wthr_file(wthr_xls, study_flag = True)
+
+        else:
+            self.study_name, self.latitude, self.longitude \
                                         = _read_location_sheet(xls_inp_fname, 'Inputs1- Farm location', 13)
 
 class ReadAfricaAnmlProdn(object, ):
@@ -274,7 +279,6 @@ def _add_tgdd_to_weather(tair_list):
     '''
     growing degree days indicates the cumulative temperature when plant growth is assumed to be possible (above 5°C)
     '''
-
     imnth = 1
     grow_dds = []
     for tair in tair_list:
@@ -289,16 +293,51 @@ def _add_tgdd_to_weather(tair_list):
 
     return grow_dds
 
+def _read_external_farm_wthr_file(wthr_xls, study_flag = False):
+    '''
+    TODO: unpythonic, requires improvement
+    '''
+    wb_obj = load_workbook(wthr_xls, data_only=True)
+
+    if study_flag:
+        farm_sht = wb_obj['Farm location']
+        df = DataFrame(farm_sht.values, columns=['Description', 'Values'])
+        farm_name = df['Values'][2]
+        latitude = df['Values'][3]
+        longitude = df['Values'][4]
+        ret_var = (farm_name, latitude, longitude)
+    else:
+        pettmp_ss = {'precip': [], 'tair': []}
+        pettmp_fwd = {'precip': [], 'tair': []}
+
+        wthr_sht = wb_obj['Weather']
+        df = DataFrame(wthr_sht.values, columns=['period', 'year', 'month', 'precip', 'tair'])
+        for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
+            if mode == 'steady state':
+                pettmp_ss['precip'].append(precip)
+                pettmp_ss['tair'].append(tair)
+            else:
+                pettmp_fwd['precip'].append(precip)
+                pettmp_fwd['tair'].append(tair)
+
+        ret_var = (pettmp_ss, pettmp_fwd)
+
+    wb_obj.close()
+    return ret_var
+
 class ReadWeather(object, ):
 
-    def __init__(self, xls_inp_fname, latitude):
+    def __init__(self, mgmt_dir, xls_inp_fname, latitude):
         '''
         read parameters from ORATOR inputs Excel file
         '''
-
         print('Reading weather sheet...')
 
-        pettmp_ss, pettmp_fwd = _read_weather_sheet(xls_inp_fname, 'Weather', 14)
+        wthr_xls = os.path.join(mgmt_dir,'Farm_Weather.xlsx')
+        if os.path.isfile(wthr_xls):
+            pettmp_ss, pettmp_fwd = _read_external_farm_wthr_file(wthr_xls)
+        else:
+            pettmp_ss, pettmp_fwd = _read_weather_sheet(xls_inp_fname, 'Weather', 14)
 
         # generate PET from weather
         # =========================

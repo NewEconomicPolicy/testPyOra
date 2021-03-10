@@ -24,19 +24,31 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
-def _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj):
+def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim):
     '''
 
     '''
-    self.data['crop_name'].append(this_crop_name)
-    self.data['cumul_n_uptake'].append(cumul_n_uptake)
-    self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
-    yld_typ = self.data['yld_typ'][indx]
-    yld_n_lim = yld_typ * (cumul_n_uptake_adj / cumul_n_uptake)  # n limited yield
-    self.data['yld_n_lim'].append(yld_n_lim)
+    crop_model.data['yld_ann_typ'].append(yld_ann_typ)
+    crop_model.data['yld_ann_n_lim'].append(yld_ann_n_lim)
+    
+    return 0, 0
+
+def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
+    '''
+
+    '''
+    crop_model.data['crop_name'].append(this_crop_name)
+    crop_model.data['cml_n_uptk'].append(cml_n_uptk)
+    crop_model.data['cml_n_uptk_adj'].append(cml_n_uptk_adj)
+    yld_typ = crop_model.data['yld_typ'][indx]
+    yld_n_lim = yld_typ * (cml_n_uptk_adj / cml_n_uptk)  # n limited yield
+    crop_model.data['yld_n_lim'].append(yld_n_lim)
+
+    yld_ann_typ += yld_typ
+    yld_ann_n_lim += yld_n_lim
 
     indx += 1
-    return indx
+    return indx, 0, 0, yld_ann_typ, yld_ann_n_lim       # resets cummulated nitrogen uptakes to zero
 
 class CropModel(object, ):
     '''
@@ -49,14 +61,16 @@ class CropModel(object, ):
         self.title = 'CropModel'
         self.data = {}
 
-        var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cumul_n_uptake', 'cumul_n_uptake_adj',
-                              'yld_typ', 'yld_n_lim'])
+        var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cml_n_uptk', 'cml_n_uptk_adj',
+                              'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
         self.var_name_list = var_name_list
 
         if complete_run is not None:
+            self.nyears_ss = mngmnt_ss.nyears
+            self.nyears_fwd = mngmnt_fwd.nyears
             self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
             self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
             for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
@@ -64,31 +78,38 @@ class CropModel(object, ):
 
             num_grow_seasons = len(self.data['npp_miami'])
 
-            # cumulative N uptake
-            # ===================
+            # cmlative N uptake and typical and adjusted annual yields
+            # ==========================================================
             c_change, n_change, soil_water = complete_run
-            cumul_n_uptake = 0
-            cumul_n_uptake_adj = 0
+            cml_n_uptk = 0
+            cml_n_uptk_adj = 0
+            yld_ann_typ = 0
+            yld_ann_n_lim = 0
             this_crop_name = None
             indx = 0
-            for crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['crop_name'],
-                                                        n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
+            for imnth, crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['imnth'],
+                            n_change.data['crop_name'], n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
 
                 if crop_name is None:
-                    if cumul_n_uptake > 0:
-                        indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
-
-                    cumul_n_uptake = 0
-                    cumul_n_uptake_adj = 0
+                    if cml_n_uptk > 0:
+                        indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
+                            _record_values(self, indx, this_crop_name,
+                                        cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
                 else:
                     this_crop_name = crop_name
-                    cumul_n_uptake += n_crop_dem
-                    cumul_n_uptake_adj += n_crop_dem_adj
+                    cml_n_uptk += n_crop_dem
+                    cml_n_uptk_adj += n_crop_dem_adj
+
+                # record annual
+                # TODO: might miss last year
+                if imnth == 12:
+                    yld_ann_typ, yld_ann_n_lim = _record_annual_values(self, yld_ann_typ, yld_ann_n_lim)
 
             # catch situation when December is a growing month
             # ================================================
-            if (len(self.data['cumul_n_uptake']) < num_grow_seasons):
-                indx = _record_values(self, indx, this_crop_name, cumul_n_uptake, cumul_n_uptake_adj)
+            if (len(self.data['cml_n_uptk']) < num_grow_seasons):
+                dum, dum, dum, dum, dum = _record_values(self, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
+                                                                            yld_ann_typ, yld_ann_n_lim)
 
 class EnsureContinuity(object, ):
     '''
@@ -374,7 +395,7 @@ class NitrogenChange(object, ):
                         'nh4_crop_dem', 'nh4_total_loss', 'loss_adj_rat_nh4',
                         'nh4_loss_adj', 'nh4_end', 'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
                         'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum',
-                                        'prop_yld_opt_adj', 'cumul_n_uptake', 'cumul_n_uptake_adj', 'nut_n_fert'])
+                                        'prop_yld_opt_adj', 'cml_n_uptk', 'cml_n_uptk_adj', 'nut_n_fert'])
 
         for var_name in var_name_list:
             self.data[var_name] = []
@@ -445,11 +466,11 @@ class NitrogenChange(object, ):
         populate additional fields from existing data
         '''
 
-        # cumulative N uptake - sheets A2 and A2b
+        # cmlative N uptake - sheets A2 and A2b
         # =======================================
         tmp_list = []
-        cumul_n_uptake = 0
-        cumul_n_uptake_adj = 0
+        cml_n_uptk = 0
+        cml_n_uptk_adj = 0
         for crop_name, n_crop_dem, n_crop_dem_adj in zip(self.data['crop_name'], self.data['n_crop_dem'],
                                                          self.data['n_crop_dem_adj']):
             if n_crop_dem_adj > 0.0:
@@ -460,14 +481,14 @@ class NitrogenChange(object, ):
             self.data['prop_yld_opt_adj'] = tmp_list  # Yield scaled wrt optimum adjusted for other losses
 
             if crop_name is None:
-                cumul_n_uptake = 0
-                cumul_n_uptake_adj = 0
+                cml_n_uptk = 0
+                cml_n_uptk_adj = 0
             else:
-                cumul_n_uptake += n_crop_dem
-                cumul_n_uptake_adj += n_crop_dem_adj
+                cml_n_uptk += n_crop_dem
+                cml_n_uptk_adj += n_crop_dem_adj
 
-            self.data['cumul_n_uptake'].append(cumul_n_uptake)
-            self.data['cumul_n_uptake_adj'].append(cumul_n_uptake_adj)
+            self.data['cml_n_uptk'].append(cml_n_uptk)
+            self.data['cml_n_uptk_adj'].append(cml_n_uptk_adj)
 
         # nitrified N adjusted for other losses - sheet A2f
         # =================================================

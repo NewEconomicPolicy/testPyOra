@@ -233,7 +233,7 @@ class  A2bCropNuptake(object, ):
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',
                            'prop_yld_opt': '2f', 'n_crop_dem': '2f', 'n_crop_dem_adj': '2f',
-                           'prop_yld_opt_adj': '2f', 'cumul_n_uptake': '2f', 'cumul_n_uptake_adj': '2f'}
+                           'prop_yld_opt_adj': '2f', 'cml_n_uptk': '2f', 'cml_n_uptk_adj': '2f'}
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 
@@ -358,9 +358,7 @@ class A1SomChange(object, ):
         sheet_data['wat_soil'] = soil_water.data['wat_soil']  # col F
         sheet_data['tair'] = pettmp['tair']
 
-        ntsteps = len(sheet_data['tair'])
-        sheet_data['c_input_dpm'] \
-                    = [carbon_obj.data['pi_to_dpm'][i] + carbon_obj.data['cow_to_dpm'][i] for i in range(ntsteps)]
+        sheet_data['c_input_dpm'] = list(map(add, carbon_obj.data['pi_to_dpm'],carbon_obj.data['cow_to_dpm']))
 
         self.sheet_data = sheet_data
         self.var_name_list = var_name_list
