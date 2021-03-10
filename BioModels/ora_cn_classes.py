@@ -24,18 +24,24 @@ from operator import add, mul
 from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
-def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim):
+def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
+                                                                                npp_ann_miami, yld_ann_miami):
     '''
-
+    add values for each year
     '''
     crop_model.data['yld_ann_typ'].append(yld_ann_typ)
     crop_model.data['yld_ann_n_lim'].append(yld_ann_n_lim)
+    crop_model.data['npp_ann_zaks'].append(npp_ann_zaks)
+    crop_model.data['npp_ann_miami'].append(npp_ann_miami)
+    crop_model.data['yld_ann_zaks'].append(yld_ann_zaks)
+    crop_model.data['yld_ann_miami'].append(yld_ann_miami)
     
-    return 0, 0
+    return 6*[0]
 
 def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
     '''
-
+    add values relating to specific crop e.g. cumulative N uptake
+    Harvest index is defined as the weight of grain divided by the total weight of above ground biomass (stover plus grain).
     '''
     crop_model.data['crop_name'].append(this_crop_name)
     crop_model.data['cml_n_uptk'].append(cml_n_uptk)
@@ -54,7 +60,7 @@ class CropModel(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
     '''
-    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None):
+    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None):
         '''
         construct a crop model object suitable for livestock model
         '''
@@ -62,7 +68,8 @@ class CropModel(object, ):
         self.data = {}
 
         var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cml_n_uptk', 'cml_n_uptk_adj',
-                              'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim'])
+                              'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim', 'npp_ann_zaks','yld_ann_zaks',
+                              'npp_ann_miami', 'yld_ann_miami'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -73,6 +80,7 @@ class CropModel(object, ):
             self.nyears_fwd = mngmnt_fwd.nyears
             self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
             self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
+            crop_currs = mngmnt_ss.crop_currs + mngmnt_fwd.crop_currs
             for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
                 self.data['yld_typ'].append(crop_obj.yield_typ)     # typical yield
 
@@ -85,13 +93,21 @@ class CropModel(object, ):
             cml_n_uptk_adj = 0
             yld_ann_typ = 0
             yld_ann_n_lim = 0
+            npp_ann_zaks = 0
+            npp_ann_miami = 0
+            yld_ann_zaks = 0
+            yld_ann_miami = 0
             this_crop_name = None
             indx = 0
-            for imnth, crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['imnth'],
+            for imnth, crop_curr, crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['imnth'], crop_currs,
                             n_change.data['crop_name'], n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
 
                 if crop_name is None:
                     if cml_n_uptk > 0:
+                        npp_ann_zaks += self.data['npp_zaks'][indx]
+                        yld_ann_zaks += self.data['npp_zaks'][indx]*crop_vars[crop_curr]['harv_indx']
+                        npp_ann_miami += self.data['npp_miami'][indx]
+                        yld_ann_miami += self.data['npp_miami'][indx]*crop_vars[crop_curr]['harv_indx']
                         indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
                             _record_values(self, indx, this_crop_name,
                                         cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
@@ -103,7 +119,9 @@ class CropModel(object, ):
                 # record annual
                 # TODO: might miss last year
                 if imnth == 12:
-                    yld_ann_typ, yld_ann_n_lim = _record_annual_values(self, yld_ann_typ, yld_ann_n_lim)
+                    yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami = \
+                        _record_annual_values(self, yld_ann_typ, yld_ann_n_lim,
+                                              npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami)
 
             # catch situation when December is a growing month
             # ================================================
