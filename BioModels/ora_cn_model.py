@@ -165,7 +165,7 @@ def run_soil_cn_algorithms(form):
         complete_run = \
             _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_change, nitrogen_change, soil_water)
 
-        form.all_runs_crop_model[subarea] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd)
+        form.all_runs_crop_model[subarea] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars)
 
         # outputs only
         # ============
