@@ -46,11 +46,11 @@ def npp_zaks_grow_season(management):
     ntsteps = management.ntsteps
     npp_cumul = 0
     tgrow = 0
-    for tstep in range(ntsteps):
+    for tstep, crop_name in enumerate(management.crop_names):
 
         # second condition covers last month of last year
         # ===============================================
-        if management.npp_zaks[tstep] == 0 or tstep == (ntsteps - 1):
+        if crop_name is None or tstep == (ntsteps - 1):
             if tgrow > 0:
 
                 # fetch npp for this growing season and backfill monthly NPPs
