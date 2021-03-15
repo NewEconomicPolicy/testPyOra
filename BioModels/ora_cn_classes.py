@@ -25,7 +25,7 @@ from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
 
 def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
-                                                                                npp_ann_miami, yld_ann_miami):
+                                                                        npp_ann_miami, yld_ann_miami, crops_ann):
     '''
     add values for each year
     '''
@@ -35,6 +35,7 @@ def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, 
     crop_model.data['npp_ann_miami'].append(npp_ann_miami)
     crop_model.data['yld_ann_zaks'].append(yld_ann_zaks)
     crop_model.data['yld_ann_miami'].append(yld_ann_miami)
+    crop_model.data['crops_ann'].append(crops_ann)
     
     return 6*[0]
 
@@ -69,7 +70,7 @@ class CropModel(object, ):
 
         var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cml_n_uptk', 'cml_n_uptk_adj',
                               'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim', 'npp_ann_zaks','yld_ann_zaks',
-                              'npp_ann_miami', 'yld_ann_miami'])
+                              'npp_ann_miami', 'yld_ann_miami', 'crops_ann'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -97,6 +98,7 @@ class CropModel(object, ):
             npp_ann_miami = 0
             yld_ann_zaks = 0
             yld_ann_miami = 0
+            crops_ann = []
             this_crop_name = None
             indx = 0
             for imnth, crop_curr, crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['imnth'], crop_currs,
@@ -108,9 +110,10 @@ class CropModel(object, ):
                         yld_ann_zaks += self.data['npp_zaks'][indx]*crop_vars[crop_curr]['harv_indx']
                         npp_ann_miami += self.data['npp_miami'][indx]
                         yld_ann_miami += self.data['npp_miami'][indx]*crop_vars[crop_curr]['harv_indx']
+                        crops_ann.append(crop_curr)
                         indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
                             _record_values(self, indx, this_crop_name,
-                                        cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
+                                                            cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
                 else:
                     this_crop_name = crop_name
                     cml_n_uptk += n_crop_dem
@@ -121,9 +124,10 @@ class CropModel(object, ):
                 if imnth == 12:
                     yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami = \
                         _record_annual_values(self, yld_ann_typ, yld_ann_n_lim,
-                                              npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami)
+                                              npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami, crops_ann)
+                    crops_ann = []
 
-            # catch situation when December is a growing month
+                    # catch situation when December is a growing month
             # ================================================
             if (len(self.data['cml_n_uptk']) < num_grow_seasons):
                 dum, dum, dum, dum, dum = _record_values(self, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
