@@ -13,10 +13,12 @@ __author__ = 's02dm4'
 
 from pandas import concat, DataFrame
 
+
 def merge_harvest_land_use(orator_obj):
+
     '''
-    Function to merge together previous harvest and land use info from ORATOR A1a
-    TODO: Change this so that it uses crop data created in PyORATOR rather than EXCELORATOR
+    Function to create list of Dataframes; each DataFrame contains annual crop yields using N limitation, Zaks, and
+    Miami model calculations.
     '''
     harvest_data = orator_obj
     subarea_crop_prod_change = []
@@ -24,9 +26,13 @@ def merge_harvest_land_use(orator_obj):
         crop_model = harvest_data[subarea]
         crops = crop_model.data['crop_name']
         typ_yield = crop_model.data['yld_ann_typ']
-        yld_n_lim = crop_model.data['yld_n_lim']
-        zipped = (typ_yield + yld_n_lim)
-        dic_list = (crops, zipped)
+        yld_n_lim = crop_model.data['yld_ann_n_lim']
+        yld_zaks = crop_model.data['yld_ann_zaks']
+        yld_miami = crop_model.data['yld_ann_miami']
+        zipped_1 = (typ_yield + yld_n_lim)
+        zipped_2 = (typ_yield + yld_zaks)
+        zipped_3 = (typ_yield + yld_miami)
+        dic_list = (crops, zipped_1, zipped_2, zipped_3)
         df = DataFrame(dic_list)
         subarea_crop_prod_change.append(df)
 

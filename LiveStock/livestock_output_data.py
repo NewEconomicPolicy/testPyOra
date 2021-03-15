@@ -18,6 +18,7 @@ from ora_json_read import ReadLvstckJsonSubareas
 from ora_excel_read import ReadAfricaAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
+from livestock_class import Livestock
 
 def _get_pigs_or_poultry_production(anml_type):
     '''
@@ -110,8 +111,16 @@ def write_livestock_charts(form):
     harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
     print('Returned harvest land use merged')
 
+    # Calculate animal production
+    # ===========================
+    livestock_list = []
+    for subarea in all_lvstck.subareas.items():
+        subarea_livestock_data = Livestock(subarea, harvest_land_use_merged)
+        livestock_list.append(subarea_livestock_data)
+
+
     '''
-    livestock = Livestock(orator_obj)
+    livestock = Livestock(all_lvstck)
     livestock.get_monthly_harvest_change(orator_obj, harvest_land_use_merged)
     '''
     print('Finished livestock processing')

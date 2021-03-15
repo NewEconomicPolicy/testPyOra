@@ -14,15 +14,33 @@ __author__ = 's02dm4'
 from pandas import DataFrame, read_excel
 from openpyxl import load_workbook
 
+
 class Livestock:
     """Information on different types of livestock"""
 
-    def __init__(self, orator_obj):
+    def __init__(self, livestock_data, crop_prod_data):
 
-        self.name = 'Fred'
-        self.region = orator_obj.farm_info['Region']
-        self.system = orator_obj.farm_info['System']
+        livestock_data = livestock_data
+        crop_prod_data = crop_prod_data
+        self.region = livestock_data[1]['region']
+        self.system = livestock_data[1]['system']
+        livestock_info = livestock_data[1]['lvstck_grp']
 
+        for livestock in livestock_info:
+            livestock_name = livestock['type']
+            strat = livestock['statgey']
+            number = livestock['number']
+            manure = livestock['manure']
+            meat = livestock['meat']
+            milk = livestock['milk']
+            n_excrete = livestock['n_excrete']
+            feeds = livestock['feeds']
+            print (f'There are {number} {livestock_name}')
+
+
+
+
+    '''
     def get_monthly_harvest_change(self, orator_obj, harvest_land_use_merged):
 
         df = harvest_land_use_merged
@@ -157,15 +175,13 @@ import matplotlib.pyplot as plt
 from merge_data import merge_harvest_land_use
 
 class Charts(object):
-    '''
     Create charts
-    '''
     def __init__(self, orator_obj):
 
         self.title = 'Chart creation'
-        '''
+
         Create graphs with all livestock shown on it
-        '''
+
 
         # Milk and Eggs
         # =============
@@ -292,4 +308,5 @@ class Charts(object):
 
             # Save output
             plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_N_excretion_atypical.png', bbox_inches='tight')
+            '''
 
