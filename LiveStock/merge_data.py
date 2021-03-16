@@ -17,8 +17,8 @@ from pandas import concat, DataFrame
 def merge_harvest_land_use(orator_obj):
 
     '''
-    Function to create list of list of dictionaries; each list of dictionaries contains annual crop yields u
-    sing N limitation, Zaks, and Miami model calculations.
+    Function to create list of list of dictionaries; each list of dictionaries contains annual crop yields
+    using N limitation, Zaks, and Miami model calculations.
     '''
     harvest_data = orator_obj
     subarea_crop_prod_change = []
@@ -71,11 +71,40 @@ def merge_harvest_land_use(orator_obj):
                 temp_dic.update(crop_yield_dic_values)
             yld_miami_dic.append(temp_dic)
 
-        list_of_dics = [yld_n_lim_dic, yld_zaks_dic, yld_miami_dic]
+        # Calculate the change in yield using each of the three methods
+        n_lim_harv_change = []
+        for year in yld_n_lim_dic:
+            harv_yld_dic = {}
+            for key, value in year.items():
+                if key in typ_prod_dic:
+                    harv_chan = typ_prod_dic[key] * value / 100
+                    temp_dic = {key : harv_chan}
+                    harv_yld_dic.update(temp_dic)
+            n_lim_harv_change.append(harv_yld_dic)
+
+        zaks_harv_change = []
+        for year in yld_zaks_dic:
+            harv_yld_dic = {}
+            for key, value in year.items():
+                if key in typ_prod_dic:
+                    harv_chan = typ_prod_dic[key] * value / 100
+                    temp_dic = {key : harv_chan}
+                    harv_yld_dic.update(temp_dic)
+            zaks_harv_change.append(harv_yld_dic)
+
+        miami_harv_change = []
+        for year in yld_miami_dic:
+            harv_yld_dic = {}
+            for key, value in year.items():
+                if key in typ_prod_dic:
+                    harv_chan = typ_prod_dic[key] * value / 100
+                    temp_dic = {key : harv_chan}
+                    harv_yld_dic.update(temp_dic)
+            miami_harv_change.append(harv_yld_dic)
+
+        list_of_dics = [n_lim_harv_change, zaks_harv_change, miami_harv_change]
 
         subarea_crop_prod_change.append(list_of_dics)
-
-
 
     return subarea_crop_prod_change
 
