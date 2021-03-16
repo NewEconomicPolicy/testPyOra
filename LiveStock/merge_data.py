@@ -17,24 +17,65 @@ from pandas import concat, DataFrame
 def merge_harvest_land_use(orator_obj):
 
     '''
-    Function to create list of Dataframes; each DataFrame contains annual crop yields using N limitation, Zaks, and
-    Miami model calculations.
+    Function to create list of list of dictionaries; each list of dictionaries contains annual crop yields u
+    sing N limitation, Zaks, and Miami model calculations.
     '''
     harvest_data = orator_obj
     subarea_crop_prod_change = []
     for subarea in harvest_data:
         crop_model = harvest_data[subarea]
+
+        # Create dictionary with keys the names of crops and values their yield in typical years
         crops = crop_model.data['crop_name']
         typ_yield = crop_model.data['yld_ann_typ']
+        zipped = (crops, typ_yield)
+        typ_prod_dic = dict(zip(crops, typ_yield))
+
+        # Use equation 4.0.1 to calculate proportion of yield in atypical vs typical years, using various methods
+        # First, get a list with only forward run crops in it
+        crops_per_year = crop_model.data['crops_ann']
+        ss_years = crop_model.nyears_ss
+        fr_crops_per_year = crops_per_year[ss_years:]
+
+        # Get each years crop production data into a list of dictionaries
         yld_n_lim = crop_model.data['yld_ann_n_lim']
+        yld_n_lim_dic = []
+        for year in fr_crops_per_year:
+            crop_yield_dic = {crop : 0 for crop in year}
+            temp_dic = {}
+            for crop in crop_yield_dic:
+                crop_yield_dic_values = {crop : yld_n_lim[0]}
+                del yld_n_lim[0]
+                temp_dic.update(crop_yield_dic_values)
+            yld_n_lim_dic.append(temp_dic)
+
         yld_zaks = crop_model.data['yld_ann_zaks']
+        yld_zaks_dic = []
+        for year in fr_crops_per_year:
+            crop_yield_dic = {crop : 0 for crop in year}
+            temp_dic = {}
+            for crop in crop_yield_dic:
+                crop_yield_dic_values = {crop : yld_zaks[0]}
+                del yld_zaks[0]
+                temp_dic.update(crop_yield_dic_values)
+            yld_zaks_dic.append(temp_dic)
+
         yld_miami = crop_model.data['yld_ann_miami']
-        zipped_1 = (typ_yield + yld_n_lim)
-        zipped_2 = (typ_yield + yld_zaks)
-        zipped_3 = (typ_yield + yld_miami)
-        dic_list = (crops, zipped_1, zipped_2, zipped_3)
-        df = DataFrame(dic_list)
-        subarea_crop_prod_change.append(df)
+        yld_miami_dic = []
+        for year in fr_crops_per_year:
+            crop_yield_dic = {crop : 0 for crop in year}
+            temp_dic = {}
+            for crop in crop_yield_dic:
+                crop_yield_dic_values = {crop : yld_miami[0]}
+                del yld_miami[0]
+                temp_dic.update(crop_yield_dic_values)
+            yld_miami_dic.append(temp_dic)
+
+        list_of_dics = [yld_n_lim_dic, yld_zaks_dic, yld_miami_dic]
+
+        subarea_crop_prod_change.append(list_of_dics)
+
+
 
     return subarea_crop_prod_change
 

@@ -27,14 +27,14 @@ class Livestock:
         livestock_info = livestock_data[1]['lvstck_grp']
 
         for livestock in livestock_info:
-            livestock_name = livestock['type']
-            strat = livestock['statgey']
-            number = livestock['number']
-            manure = livestock['manure']
-            meat = livestock['meat']
-            milk = livestock['milk']
-            n_excrete = livestock['n_excrete']
-            feeds = livestock['feeds']
+            livestock_name = livestock.type
+            strat = livestock.statgey
+            number = livestock.number
+            manure = livestock.manure
+            meat = livestock.meat
+            milk = livestock.milk
+            n_excrete = livestock.n_excrete
+            feeds = livestock.feeds
             print (f'There are {number} {livestock_name}')
 
 
