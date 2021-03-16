@@ -27,7 +27,7 @@ def merge_harvest_land_use(orator_obj):
 
         # Create dictionary with keys the names of crops and values their yield in typical years
         crops = crop_model.data['crop_name']
-        typ_yield = crop_model.data['yld_ann_typ']
+        typ_yield = crop_model.data['yld_typ']
         zipped = (crops, typ_yield)
         typ_prod_dic = dict(zip(crops, typ_yield))
 
@@ -77,7 +77,7 @@ def merge_harvest_land_use(orator_obj):
             harv_yld_dic = {}
             for key, value in year.items():
                 if key in typ_prod_dic:
-                    harv_chan = typ_prod_dic[key] * value / 100
+                    harv_chan = (value / typ_prod_dic[key] )
                     temp_dic = {key : harv_chan}
                     harv_yld_dic.update(temp_dic)
             n_lim_harv_change.append(harv_yld_dic)
@@ -87,7 +87,7 @@ def merge_harvest_land_use(orator_obj):
             harv_yld_dic = {}
             for key, value in year.items():
                 if key in typ_prod_dic:
-                    harv_chan = typ_prod_dic[key] * value / 100
+                    harv_chan = (value / typ_prod_dic[key])
                     temp_dic = {key : harv_chan}
                     harv_yld_dic.update(temp_dic)
             zaks_harv_change.append(harv_yld_dic)
@@ -97,7 +97,7 @@ def merge_harvest_land_use(orator_obj):
             harv_yld_dic = {}
             for key, value in year.items():
                 if key in typ_prod_dic:
-                    harv_chan = typ_prod_dic[key] * value / 100
+                    harv_chan = (value / typ_prod_dic[key])
                     temp_dic = {key : harv_chan}
                     harv_yld_dic.update(temp_dic)
             miami_harv_change.append(harv_yld_dic)
