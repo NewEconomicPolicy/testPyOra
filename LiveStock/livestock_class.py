@@ -37,8 +37,18 @@ class Livestock:
             feeds = livestock.feeds
             print (f'There are {number} {livestock_name}')
 
-        # Calculate change inb production for each sub-area or management type, and each calculation method (i.e.
-        # N limitation, Zaks, Miami)
+            # Calculate change inb production for each sub-area or management type, and each calculation method (i.e.
+            # N limitation, Zaks, Miami)
+
+            for subarea in crop_prod_data:
+                for calc_method in subarea:
+                    for year in calc_method:
+                        for crop, prod_change in year.items():
+                            if crop in feeds:
+                                print(f'{crop} is in list of crops')
+                            else:
+                                print(f'{crop} is not in list of crops')
+
 
 
 
