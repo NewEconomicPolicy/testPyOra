@@ -18,34 +18,28 @@ from openpyxl import load_workbook
 class Livestock:
     """Information on different types of livestock"""
 
-    def __init__(self, livestock_data, crop_prod_data):
+    def __init__(self, livestock_data, region, system):
 
         livestock_data = livestock_data
-        crop_prod_data = crop_prod_data
-        self.region = livestock_data[1]['region']
-        self.system = livestock_data[1]['system']
-        livestock_info = livestock_data[1]['lvstck_grp']
+        self.region = region
+        self.system = system
 
 
-        # Populate a list with all livestock types and associated info
-        livestock_list = []
-        for livestock in livestock_info:
-            livestock_name = livestock.type
-            strat = livestock.statgey
-            number = livestock.number
-            manure = livestock.manure
-            meat = livestock.meat
-            milk = livestock.milk
-            n_excrete = livestock.n_excrete
-            feeds = livestock.feeds
-            # convert feeds from list of dictionaries to one dictionary
-            feed_dic = {}
-            for dictionary in feeds:
-                crop_name = dictionary['type']
-                prcnt_of_diet = dictionary['value']
-                temp_dic = {crop_name: prcnt_of_diet}
-                feed_dic.update(temp_dic)
-            livestock_list.append(livestock)
+        self.livestock_name = livestock_data.type
+        self.strat = livestock_data.statgey
+        self.number = livestock_data.number
+        self.manure = livestock_data.manure
+        self.meat = livestock_data.meat
+        self.milk = livestock_data.milk
+        self.n_excrete = livestock_data.n_excrete
+        self.feeds = livestock_data.feeds
+        # convert feeds from list of dictionaries to one dictionary
+        self.feed_dic = {}
+        for dictionary in self.feeds:
+            crop_name = dictionary['type']
+            prcnt_of_diet = dictionary['value']
+            temp_dic = {crop_name: prcnt_of_diet}
+            self.feed_dic.update(temp_dic)
 
 
 
@@ -55,22 +49,6 @@ class Livestock:
 
 
 
-
-
-
-            # Calculate change in livestock production for each sub-area or management type, and each calculation method (i.e.
-            # N limitation, Zaks, Miami)
-
-#            for subarea in crop_prod_data:
-#                for calc_method in subarea:
-#                    for year in calc_method:
-#                        for crop, prod_change in year.items():
-                            # Check if crop is key dic feed_dic
-#                            for crop_grown in feed_dic:
- #                               if crop == crop_grown['type']:
- #                                   print(f'{crop} is in list of crops')
- #                               else:
- #                                   print(f'{crop} is not in list of crops')
 
 
 

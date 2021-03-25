@@ -113,10 +113,15 @@ def write_livestock_charts(form):
 
     # Calculate animal production
     # ===========================
-    livestock_list = []
     for subarea in all_lvstck.subareas.items():
-        subarea_livestock_data = Livestock(subarea, harvest_land_use_merged)
-        livestock_list.append(subarea_livestock_data)
+        livestock_group = subarea[1]['lvstck_grp']
+        region = subarea[1]['region']
+        system = subarea[1]['system']
+        livestock_list = []
+        for livestock in livestock_group:
+            subarea_livestock_instance = Livestock(livestock, region, system)
+            livestock_list.append(subarea_livestock_instance)
+        print(f"livestock list contains {len(livestock_list)} animals")
 
 
     '''
