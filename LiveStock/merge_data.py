@@ -17,11 +17,11 @@ from pandas import concat, DataFrame
 def merge_harvest_land_use(orator_obj):
 
     '''
-    Function to create list of list of dictionaries; each list of dictionaries contains annual crop yields
+    Function to create dictionary of dictionaries; each dictionary of dictionaries contains annual crop yields
     using N limitation, Zaks, and Miami model calculations.
     '''
     harvest_data = orator_obj
-    subarea_crop_prod_change = []
+    subarea_crop_prod_change_dic = dict.fromkeys(harvest_data)
     for subarea in harvest_data:
         crop_model = harvest_data[subarea]
 
@@ -37,7 +37,7 @@ def merge_harvest_land_use(orator_obj):
         ss_years = crop_model.nyears_ss
         fr_crops_per_year = crops_per_year[ss_years:]
 
-        # Get each years crop production data into a list of dictionaries
+        # Get each years crop production data into a list of dictionaries for each calc method
         yld_n_lim = crop_model.data['yld_ann_n_lim']
         yld_n_lim_dic = []
         for year in fr_crops_per_year:
@@ -102,11 +102,15 @@ def merge_harvest_land_use(orator_obj):
                     harv_yld_dic.update(temp_dic)
             miami_harv_change.append(harv_yld_dic)
 
-        list_of_dics = [n_lim_harv_change, zaks_harv_change, miami_harv_change]
+        harv_change_dic_of_dics = { 'n_lim' : n_lim_harv_change,
+                                    'zaks' : zaks_harv_change,
+                                    'miami' : miami_harv_change,
+        }
+        subarea_dic = {subarea : harv_change_dic_of_dics}
+        subarea_crop_prod_change_dic.update(subarea_dic)
 
-        subarea_crop_prod_change.append(list_of_dics)
 
-    return subarea_crop_prod_change
+    return subarea_crop_prod_change_dic
 
     '''
     land_use_tran = _transform_land_use_data(orator_obj)

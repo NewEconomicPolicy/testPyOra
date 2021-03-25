@@ -26,6 +26,9 @@ class Livestock:
         self.system = livestock_data[1]['system']
         livestock_info = livestock_data[1]['lvstck_grp']
 
+
+        # Populate a list with all livestock types and associated info
+        livestock_list = []
         for livestock in livestock_info:
             livestock_name = livestock.type
             strat = livestock.statgey
@@ -35,19 +38,39 @@ class Livestock:
             milk = livestock.milk
             n_excrete = livestock.n_excrete
             feeds = livestock.feeds
-            print (f'There are {number} {livestock_name}')
+            # convert feeds from list of dictionaries to one dictionary
+            feed_dic = {}
+            for dictionary in feeds:
+                crop_name = dictionary['type']
+                prcnt_of_diet = dictionary['value']
+                temp_dic = {crop_name: prcnt_of_diet}
+                feed_dic.update(temp_dic)
+            livestock_list.append(livestock)
 
-            # Calculate change inb production for each sub-area or management type, and each calculation method (i.e.
+
+
+
+
+
+
+
+
+
+
+
+            # Calculate change in livestock production for each sub-area or management type, and each calculation method (i.e.
             # N limitation, Zaks, Miami)
 
-            for subarea in crop_prod_data:
-                for calc_method in subarea:
-                    for year in calc_method:
-                        for crop, prod_change in year.items():
-                            if crop in feeds:
-                                print(f'{crop} is in list of crops')
-                            else:
-                                print(f'{crop} is not in list of crops')
+#            for subarea in crop_prod_data:
+#                for calc_method in subarea:
+#                    for year in calc_method:
+#                        for crop, prod_change in year.items():
+                            # Check if crop is key dic feed_dic
+#                            for crop_grown in feed_dic:
+ #                               if crop == crop_grown['type']:
+ #                                   print(f'{crop} is in list of crops')
+ #                               else:
+ #                                   print(f'{crop} is not in list of crops')
 
 
 
