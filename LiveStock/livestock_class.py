@@ -61,8 +61,12 @@ class Livestock:
         manure_prod_fr = [(item/100) * self.manure * self.number for item in total_food_change_fr]
         n_excrete_fr = [(item/100) * self.n_excrete * self.number for item in total_food_change_fr]
 
+        animal_prod_dic_fr = {'milk_prod_fr' : milk_prod_fr,
+                              'meat_prod_fr' : meat_prod_fr,
+                              'manure_prod_fr' : manure_prod_fr,
+                              'n_excrete_fr' : n_excrete_fr}
 
-        return milk_prod_fr, meat_prod_fr, manure_prod_fr, n_excrete_fr
+        return animal_prod_dic_fr
 
 
 
