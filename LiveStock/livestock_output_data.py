@@ -113,6 +113,8 @@ def write_livestock_charts(form):
 
     # Calculate animal production
     # ===========================
+    # Create list of all livestock types, for each livestock subarea
+    livestock_all_subareas = []
     for subarea in all_lvstck.subareas.items():
         livestock_group = subarea[1]['lvstck_grp']
         region = subarea[1]['region']
@@ -121,7 +123,28 @@ def write_livestock_charts(form):
         for livestock in livestock_group:
             subarea_livestock_instance = Livestock(livestock, region, system)
             livestock_list.append(subarea_livestock_instance)
-        print(f"livestock list contains {len(livestock_list)} animals")
+    livestock_all_subareas.append(livestock_list)
+
+    # Calculate change in prodcution for each crop sub-area and management type, using each calculation method
+    total_an_prod_all_subareas = {}
+    for subarea in harvest_land_use_merged.items():
+        calc_method_dic = {}
+        for calc_method in subarea[1].items():
+            subarea_prod = {}
+            for livestock_subarea in livestock_all_subareas:
+                for livestock in livestock_subarea:
+                    prod = livestock.calc_prod_chng(calc_method)
+                    prod_dic = {livestock.livestock_name : prod}
+                    subarea_prod.update(prod_dic)
+            calc_dic = {calc_method[0] : subarea_prod}
+            calc_method_dic.update(calc_dic)
+        tot_prod_data = {subarea[0] : calc_method_dic}
+        total_an_prod_all_subareas.update(tot_prod_data)
+    print('all animal calcs completed')
+
+
+
+
 
 
     '''

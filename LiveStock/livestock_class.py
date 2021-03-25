@@ -24,7 +24,6 @@ class Livestock:
         self.region = region
         self.system = system
 
-
         self.livestock_name = livestock_data.type
         self.strat = livestock_data.statgey
         self.number = livestock_data.number
@@ -40,6 +39,30 @@ class Livestock:
             prcnt_of_diet = dictionary['value']
             temp_dic = {crop_name: prcnt_of_diet}
             self.feed_dic.update(temp_dic)
+
+    def calc_prod_chng(self, hrv_change):
+        "Calculate the changes in production for livestock"
+
+        harv_chnge_data = hrv_change
+        total_food_change_fr = []
+        for year in harv_chnge_data[1]:
+            total_feed_year = 0
+            for crop, value in year.items():
+                for foodstuff, proportion in self.feed_dic.items():
+                    if foodstuff == crop:
+                        foodstuff_change = proportion * value
+                        total_feed_year = total_feed_year + foodstuff_change
+                    else:
+                        continue
+            total_food_change_fr.append(total_feed_year)
+
+        milk_prod_fr = [(item/100) * self.milk * self.number for item in total_food_change_fr]
+        meat_prod_fr = [(item/100) * self.meat * self.number for item in total_food_change_fr]
+        manure_prod_fr = [(item/100) * self.manure * self.number for item in total_food_change_fr]
+        n_excrete_fr = [(item/100) * self.n_excrete * self.number for item in total_food_change_fr]
+
+
+        return milk_prod_fr, meat_prod_fr, manure_prod_fr, n_excrete_fr
 
 
 
