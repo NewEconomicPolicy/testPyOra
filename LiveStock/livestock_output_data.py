@@ -17,6 +17,7 @@ import csv
 from datetime import datetime
 import matplotlib.pyplot as plt
 from pathlib import Path
+from pandas import DataFrame
 from ora_json_read import ReadLvstckJsonSubareas
 from ora_excel_read import ReadAfricaAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
@@ -127,7 +128,7 @@ def write_livestock_charts(form):
             livestock_list.append(subarea_livestock_instance)
     livestock_all_subareas.append(livestock_list)
 
-    # Calculate change in prodcution for each crop sub-area and management type, using each calculation method
+    # Calculate change in production for each crop sub-area and management type, using each calculation method
     total_an_prod_all_subareas = {}
     for subarea in harvest_land_use_merged.items():
         calc_method_dic = {}
@@ -142,6 +143,10 @@ def write_livestock_charts(form):
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
+    # Problem here
+    dataframe = DataFrame.from_dict(total_an_prod_all_subareas)
+    path = 'C:\\livestockoutputtest\\'
+    dataframe.to_csv(path+'test.csv' )
 
     # Create graphs for each data
     print('Creating Livestock Charts')
