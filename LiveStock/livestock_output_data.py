@@ -112,7 +112,6 @@ def write_livestock_charts(form):
     # Access crop production data
     # ===========================
     harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
-    print('Returned harvest land use merged')
 
     # Calculate animal production
     # ===========================
@@ -144,9 +143,8 @@ def write_livestock_charts(form):
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
 
-    # Save all outputs as CSV files
-
     # Create graphs for each data
+    print('Creating Livestock Charts')
     parent_dir = 'c:/livestockoutputtest'
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
@@ -169,13 +167,13 @@ def write_livestock_charts(form):
                     plt.xlabel('Years since steady state')
                     plt.ylabel('prod')
                     plt.title(output)
-                    plt.savefig(f'{animal_type[0]} {output}.png')
-
-
-
-
-
-
+                    if animal_type[0] == 'Goats/sheep for milk':
+                        filename = f'Goats or sheep for milk {output}'
+                    else:
+                        filename = f'{animal_type[0]} {output}'
+                    filename_path = os.path.join(calc_method_full,filename)
+                    plt.savefig(filename_path)
+                    plt.close()
 
 
     '''
