@@ -144,9 +144,9 @@ def write_livestock_charts(form):
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
     # Problem here
-    dataframe = DataFrame.from_dict(total_an_prod_all_subareas)
-    path = 'C:\\livestockoutputtest\\'
-    dataframe.to_csv(path+'test.csv' )
+#    dataframe = DataFrame.from_dict(total_an_prod_all_subareas)
+#    path = 'C:\\livestockoutputtest\\'
+#    dataframe.to_csv(path+'test.csv' )
 
     # Create graphs for each data
     print('Creating Livestock Charts')
@@ -158,6 +158,8 @@ def write_livestock_charts(form):
                 f'{run_time.hour}_{run_time.minute}_{run_time.second}'
     path = os.path.join(parent_dir, directory)
     os.makedirs(path)
+    all_livestock_df = DataFrame.from_dict(total_an_prod_all_subareas)
+    all_livestock_df.to_csv(path+'\\all_data.csv')
     for subarea in total_an_prod_all_subareas.items():
         subarea_path = f'{subarea[0]}'
         join_path = os.path.join(path, subarea_path)
