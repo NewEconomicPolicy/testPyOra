@@ -13,6 +13,9 @@ __author__ = 's02dm4'
 
 
 import os
+import csv
+from datetime import datetime
+import matplotlib.pyplot as plt
 from pathlib import Path
 from ora_json_read import ReadLvstckJsonSubareas
 from ora_excel_read import ReadAfricaAnmlProdn
@@ -140,7 +143,35 @@ def write_livestock_charts(form):
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
-    print('all animal calcs completed')
+
+    # Save all outputs as CSV files
+
+    # Create graphs for each data
+    parent_dir = 'c:/livestockoutputtest'
+    if not os.path.exists(parent_dir):
+        os.makedirs(parent_dir)
+    run_time = datetime.now()
+    directory = f'Livestock run at {run_time.day}_{run_time.month}_{run_time.year} ' \
+                f'{run_time.hour}_{run_time.minute}_{run_time.second}'
+    path = os.path.join(parent_dir, directory)
+    os.makedirs(path)
+    for subarea in total_an_prod_all_subareas.items():
+        subarea_path = f'{subarea[0]}'
+        join_path = os.path.join(path, subarea_path)
+        os.makedirs(join_path)
+        for calc_method in subarea[1].items():
+            calc_method_path = f'{calc_method[0]}'
+            calc_method_full = os.path.join(join_path, calc_method_path)
+            os.makedirs(calc_method_full)
+            for animal_type in calc_method[1].items():
+                for output, values in animal_type[1].items():
+                    plt.plot(values)
+                    plt.xlabel('Years since steady state')
+                    plt.ylabel('prod')
+                    plt.title(output)
+                    plt.savefig(f'{animal_type[0]} {output}.png')
+
+
 
 
 
