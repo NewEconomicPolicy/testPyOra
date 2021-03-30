@@ -129,6 +129,7 @@ def write_livestock_charts(form):
     livestock_all_subareas.append(livestock_list)
 
     # Calculate change in production for each crop sub-area and management type, using each calculation method
+    print('Calculating livestock production')
     total_an_prod_all_subareas = {}
     for subarea in harvest_land_use_merged.items():
         calc_method_dic = {}
@@ -143,13 +144,9 @@ def write_livestock_charts(form):
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
-    # Problem here
-#    dataframe = DataFrame.from_dict(total_an_prod_all_subareas)
-#    path = 'C:\\livestockoutputtest\\'
-#    dataframe.to_csv(path+'test.csv' )
 
-    # Create graphs for each data
-    print('Creating Livestock Charts')
+    # Create graphs and CSV for each data
+    print('Creating livestock charts')
     parent_dir = 'c:/livestockoutputtest'
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
@@ -172,8 +169,24 @@ def write_livestock_charts(form):
                 for output, values in animal_type[1].items():
                     plt.plot(values)
                     plt.xlabel('Years since steady state')
-                    plt.ylabel('prod')
-                    plt.title(output)
+                    if output == 'milk_prod_fr':
+                        plt.ylabel('Milk Production (Litres)')
+                        plt.title('Milk Production Forward Run')
+                    if output == 'meat_prod_fr':
+                        plt.ylabel('Meat Production (Kg)')
+                        plt.title('Meat Forward Run')
+                    elif output == 'manure_prod_fr':
+                        plt.ylabel('Manure Production (Kg)')
+                        plt.title('Manure Production Forward Run')
+                    elif output == 'n_excrete_fr':
+                        plt.ylabel('Nitrogen Excreted (Kg)')
+                        plt.title('Nitrogen Excreted Forward Run')
+                    elif output == 'egg_prod_fr':
+                        plt.ylabel('Egg production (Kg)')
+                        plt.title('Egg Production Forward Run')
+                    else:
+                        plt.ylabel('Production')
+                        plt.title(output)
                     if animal_type[0] == 'Goats/sheep for milk':
                         filename = f'Goats or sheep for milk {output}'
                     else:

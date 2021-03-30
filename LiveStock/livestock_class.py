@@ -52,6 +52,12 @@ class Livestock:
                     if foodstuff == crop:
                         foodstuff_change = proportion * value
                         total_feed_year = total_feed_year + foodstuff_change
+                    elif foodstuff == 'bought in':
+                        try:
+                            total_feed_year = total_feed_year + proportion
+                        except TypeError:
+                            print('Bought in food at 0 - please delete or amend')
+                            continue
                     else:
                         continue
             total_food_change_fr.append(total_feed_year)
