@@ -34,7 +34,7 @@ from ora_low_level_fns import average_weather
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather',
-                                                                                        "Typical animal production"])
+                             'Purchases & Sales', "Typical animal production"])
 
 REQD_SHEETS = {'C1a':'Typical animal production'}
 ERR_MESS_SHEET = '*** Error *** reading sheet '
