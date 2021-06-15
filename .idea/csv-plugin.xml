@@ -10,6 +10,34 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\BioModels\ora_cn_model.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\BioModels\ora_economics_model.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\InitInptsRslts\PyOratorGUI.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\InitInptsRslts\ora_excel_read.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\LiveStock\livestock_class.py">
           <value>
             <Attribute>

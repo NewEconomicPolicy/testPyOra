@@ -220,6 +220,14 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
 
     return all_ow_parms
 
+def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
+    '''
+    Read data on purchases and sales, required for econ module
+    '''
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    purch_sales_df = DataFrame(data)
+    return purch_sales_df
+
 class ReadStudy(object, ):
 
     def __init__(self, mgmt_dir, xls_inp_fname, out_dir, output_excel = True):
@@ -448,3 +456,4 @@ class Crop(object,):
                 irrig[mnth] = amount
 
         self.irrig = irrig
+

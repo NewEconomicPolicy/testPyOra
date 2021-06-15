@@ -73,22 +73,6 @@ class Livestock:
 
         return animal_prod_dic_fr
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     '''
     def get_monthly_harvest_change(self, orator_obj, harvest_land_use_merged):
 
