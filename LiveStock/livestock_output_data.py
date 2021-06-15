@@ -16,6 +16,7 @@ import os
 import csv
 from datetime import datetime
 import matplotlib.pyplot as plt
+import numpy as np
 from pathlib import Path
 from pandas import DataFrame
 from ora_json_read import ReadLvstckJsonSubareas
@@ -167,8 +168,10 @@ def write_livestock_charts(form):
             os.makedirs(calc_method_full)
             for animal_type in calc_method[1].items():
                 for output, values in animal_type[1].items():
-                    plt.plot(values)
+                    values_array = np.array(values)
+                    plt.plot(values_array)
                     plt.xlabel('Years since steady state')
+                    plt.xticks(range(len(values)))
                     if output == 'milk_prod_fr':
                         plt.ylabel('Milk Production (Litres)')
                         plt.title('Milk Production Forward Run')
@@ -194,7 +197,6 @@ def write_livestock_charts(form):
                     filename_path = os.path.join(calc_method_full,filename)
                     plt.savefig(filename_path)
                     plt.close()
-
 
     '''
     livestock = Livestock(all_lvstck)

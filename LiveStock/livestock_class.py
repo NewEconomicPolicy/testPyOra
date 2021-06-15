@@ -56,7 +56,6 @@ class Livestock:
                         try:
                             total_feed_year = total_feed_year + proportion
                         except TypeError:
-                            print('Bought in food at 0 - please delete or amend')
                             continue
                     else:
                         continue
