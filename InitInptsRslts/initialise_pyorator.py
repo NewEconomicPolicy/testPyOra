@@ -50,6 +50,9 @@ def initiation(form):
     # ===============================================================================
     form.all_runs_output = {}
     form.all_runs_crop_model = {}
+    form.total_an_prod_all_subareas = {}
+    # Set flag to show if livestock module has been run
+    form.livestock_run = False
 
     set_up_logging(form, PROGRAM_ID)
 

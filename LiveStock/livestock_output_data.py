@@ -45,6 +45,7 @@ def _get_pigs_or_poultry_production(anml_type):
     return manure, n_excrete, meat, milk
 
 def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
+
     '''
 
     '''
@@ -80,10 +81,13 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
 
     return
 
-def write_livestock_charts(form):
+def calc_livestock_data(form):
     '''
-
+    Calculate livestock data
     '''
+    # Change flag to show livestock module has been run
+    # =================================================
+    form.livestock_run = True
 
     # read inputs and create folder to store graphs in
     # =================================================
@@ -145,8 +149,14 @@ def write_livestock_charts(form):
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
+    print('livestock calcs completed')
+    form.total_an_prod_all_subareas = total_an_prod_all_subareas
+    return
+
 
     # Create graphs and CSV for each data
+    # THIS IS VERY VERY SLOW RIGHT NOW - NEEDS REDONE
+'''
     print('Creating livestock charts')
     parent_dir = 'c:/livestockoutputtest'
     if not os.path.exists(parent_dir):
@@ -197,10 +207,4 @@ def write_livestock_charts(form):
                     filename_path = os.path.join(calc_method_full,filename)
                     plt.savefig(filename_path)
                     plt.close()
-
-    '''
-    livestock = Livestock(all_lvstck)
-    livestock.get_monthly_harvest_change(orator_obj, harvest_land_use_merged)
-    '''
-    print('Finished livestock processing')
-    return
+'''

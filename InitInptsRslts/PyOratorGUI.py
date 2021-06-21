@@ -24,7 +24,7 @@ from initialise_pyorator import read_config_file, initiation, write_config_file
 
 from ora_excel_write import retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
-from livestock_output_data import write_livestock_charts
+from livestock_output_data import calc_livestock_data
 from ora_cn_model import run_soil_cn_algorithms
 from ora_excel_read import check_excel_input_file
 from ora_json_read import check_json_input_files
@@ -369,7 +369,7 @@ class Form(QWidget):
 
     def runLivestockClicked(self):
 
-        write_livestock_charts(self)
+        calc_livestock_data(self)
 
     def runSoilCnClicked(self):
 
