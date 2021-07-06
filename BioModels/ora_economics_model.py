@@ -64,6 +64,16 @@ def test_economics_algorithms(form):
     else:
         print('No manure production data! Please run livestock module')
 
+    # Calculate wet and dry season income
+    dryseas_income = ((purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']) -
+                            (purch_sales_df['dryseas_pur_pr'] *  purch_sales_df['dryseas_pur_quant']))
+    total_dryseas_income = dryseas_income.sum()
+    wetseas_income = ((purch_sales_df['wetseas_sale_pr'] * purch_sales_df['wetseas_sale_quant']) -
+                            (purch_sales_df['wetseas_pur_pr'] *  purch_sales_df['wetseas_pur_quant']))
+    total_wetseas_income = wetseas_income.sum()
+    total_income = total_dryseas_income + total_wetseas_income
+
+
 
 
 

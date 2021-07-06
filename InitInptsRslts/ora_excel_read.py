@@ -226,6 +226,7 @@ def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
     '''
     data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
     purch_sales_df = DataFrame(data)
+
     return purch_sales_df
 
 class ReadStudy(object, ):
