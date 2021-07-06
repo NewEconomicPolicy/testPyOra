@@ -22,7 +22,9 @@ import os
 
 from ora_excel_read import read_econ_purch_sales_sheet
 
+
 def test_economics_algorithms(form):
+
     '''
     Algorithm to model household economics
     '''
@@ -41,18 +43,23 @@ def test_economics_algorithms(form):
 
     #----------------------------------------
     # Check if livestock model has been run.
-    # If yes > Import livestock data and get manure production data
+    # If yes > Import livestock data and get total yearly manure production data
     # If no > Prompt user
-    # STOP BEFORE HOLIDAYS - HOW TO CALC TOTAL MANURE FOR EACH CALC METHOD AND MAN TYPE
     if form.livestock_run:
         manure_data = form.total_an_prod_all_subareas
+        management_type_manure_dic = {}
         for management_type, data in manure_data.items():
             calc_method_manure_dic = {}
             for calc_method, livestock in data.items():
-                calc_method_manure_dic.update({calc_method: 0})
-                total_manure_fr = []
+                # Create variable which stores list of lists, each list is an animals manure production per year
+                manure_fr = []
                 for animal, prod_data in livestock.items():
-                    total_manure_fr.append(prod_data['manure_prod_fr'])
+                    manure_fr.append(prod_data['manure_prod_fr'])
+                # Sum all manure production to get total produced each year for all animals
+                total_manure_fr = [sum(i) for i in zip(*manure_fr)]
+                # Update dictionary with calculation method total production
+                calc_method_manure_dic.update({calc_method: total_manure_fr})
+            management_type_manure_dic.update({management_type:calc_method_manure_dic})
 
     else:
         print('No manure production data! Please run livestock module')
