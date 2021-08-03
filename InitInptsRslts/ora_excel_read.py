@@ -34,7 +34,7 @@ from ora_low_level_fns import average_weather
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather',
-                             'Purchases & Sales', "Typical animal production"])
+                             'Purchases & Sales', 'Labour', "Typical animal production"])
 
 REQD_SHEETS = {'C1a':'Typical animal production'}
 ERR_MESS_SHEET = '*** Error *** reading sheet '
@@ -224,10 +224,21 @@ def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
     '''
     Read data on purchases and sales, required for econ module
     '''
+
     data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
     purch_sales_df = DataFrame(data)
 
     return purch_sales_df
+
+def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
+    '''
+    Read data on labour, required for econ module
+    '''
+
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    labour_df = DataFrame(data)
+
+    return labour_df
 
 class ReadStudy(object, ):
 

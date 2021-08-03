@@ -20,7 +20,7 @@ __version__ = '0.0.0'
 #
 import os
 
-from ora_excel_read import read_econ_purch_sales_sheet
+from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 
 
 def test_economics_algorithms(form):
@@ -30,7 +30,7 @@ def test_economics_algorithms(form):
     '''
 
     #----------------------------------------------------------
-    # Import data on purchases and sales from excel spreadsheet
+    # Import data on purchases and sales, and labour, from excel spreadsheet
     # Save as a DataFrame
 
     xls_inp_fname = os.path.normpath(form.w_lbl13.text())
@@ -40,6 +40,7 @@ def test_economics_algorithms(form):
     purch_sales_df.columns= ['category', 'name', 'dryseas_pur_pr', 'units', 'dryseas_pur_quant', 'measure',
                              'wetseas_pur_pr', 'wetseas_pur_quant', 'dryseas_sale_pr', 'dryseas_sale_quant',
                              'wetseas_sale_pr', 'wetseas_sale_quant']
+    labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
 
     #----------------------------------------
     # Check if livestock model has been run.
@@ -63,6 +64,8 @@ def test_economics_algorithms(form):
 
     else:
         print('No manure production data! Please run livestock module')
+
+    # Calculate how much manure is needed/produced/sold during year
 
     # Calculate wet and dry season income
     dryseas_income = ((purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']) -
