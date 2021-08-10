@@ -22,6 +22,54 @@ import os
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 
+#----------------------------------------------------------
+# Create class to store instances of family members, in order to work out labour
+
+
+class HouseholdMembers:
+
+    '''
+    Information on household members and their labour contribution
+    '''
+
+    def __init__(self, name, labour_data):
+
+        labour_data = labour_data
+        self.name = name
+        self.number = labour_data[0]
+        self.awake = labour_data[1]
+
+        # Information on wood
+        self.wood_bundle_weight = labour_data[3]
+        self. time_collect_1_wood_bundle = labour_data[4]
+        self.number_weekly_wood_trips = labour_data[6]
+        self.per_wood_trip_time_spent_travelling = labour_data[8]
+        self.per_wood_trip_time_spent_collecting = labour_data[9]
+
+        # Information on water
+        self.weekly_trips_water_collect_non_irrigation = labour_data[12]
+        self.volume_water_carried_per_trip = labour_data[14]
+        self.normal_year_time_travel_water_per_trip = labour_data[16]
+        self.normal_year_time_queue_water_per_trip = labour_data[17]
+        self.drought_year_time_travel_water_per_trip = labour_data[19]
+        self.drought_year_time_queue_water_per_trip = labour_data[20]
+
+        # Information on livestock
+        self.daily_time_spent_tending_animals = labour_data[23]
+        self.daily_time_dung_management = labour_data[24]
+
+        # Information on crop production
+        self.total_days_sowing_crops = labour_data[27]
+        self.daily_average_time_sowing_crops = labour_data[29]
+        self.grow_seas_total_time_tending_crops = labour_data[32]
+        self.harvest_total_days_harvesting = labour_data[34]
+        self.harvest_average_day_hrs_spent_harvesting = labour_data[36]
+
+        # Information on other activities
+        self.grow_seas_essential_activities_hrs_day = labour_data[40]
+        self.grow_seas_non_essential_activities_hrs_day = labour_data[41]
+
+
 def test_economics_algorithms(form):
 
     '''
@@ -40,6 +88,17 @@ def test_economics_algorithms(form):
                              'wetseas_pur_pr', 'wetseas_pur_quant', 'dryseas_sale_pr', 'dryseas_sale_quant',
                              'wetseas_sale_pr', 'wetseas_sale_quant']
     labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
+
+    # ----------------------------------------
+    # Create instances of HouseholdMembers Class using dataframe created from excel sheet
+    hh_members = []
+    labour_df = labour_df.iloc[: , 1:]
+    for column_name, column_data in labour_df.iteritems():
+        hh_instance =  HouseholdMembers(column_name, column_data)
+        hh_members.append(hh_instance)
+
+
+
 
     # ----------------------------------------
     # Check if crop model has been run
