@@ -118,6 +118,8 @@ def calc_livestock_data(form):
     # Access crop production data
     # ===========================
     harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
+    # Add on;y crop production data to form object so it can be used by econ module
+    form.crop_production = harvest_land_use_merged
 
     # Calculate animal production
     # ===========================

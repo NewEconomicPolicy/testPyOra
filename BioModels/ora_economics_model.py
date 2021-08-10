@@ -22,7 +22,6 @@ import os
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 
-
 def test_economics_algorithms(form):
 
     '''
@@ -42,9 +41,21 @@ def test_economics_algorithms(form):
                              'wetseas_sale_pr', 'wetseas_sale_quant']
     labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
 
+    # ----------------------------------------
+    # Check if crop model has been run
+    # If yes > import crop production data for forward run
+    # If no > prompt user
+    if form.crop_run:
+        crop_data = form.crop_production
+
+    else:
+        print('No crop data! Please run C and N model first')
+
+
+
     #----------------------------------------
-    # Check if livestock model has been run.
-    # If yes > Import livestock data and get total yearly manure production data
+    # Check if livestock model has been run
+    # If yes > Import livestock data and get total yearly manure production data for forward run
     # If no > Prompt user
     if form.livestock_run:
         manure_data = form.total_an_prod_all_subareas
@@ -80,5 +91,5 @@ def test_economics_algorithms(form):
 
 
 
-    print('ORATOR economics model')
+    print('Economics Calcs completed')
     return
