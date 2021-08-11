@@ -29,7 +29,7 @@ from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 class HouseholdMembers:
 
     '''
-    Information on household members and their labour contribution
+    Class to store information on household members and their labour contribution
     '''
 
     def __init__(self, name, labour_data):
@@ -70,6 +70,30 @@ class HouseholdMembers:
         self.grow_seas_non_essential_activities_hrs_day = labour_data[41]
 
 
+class HouseholdPurchasesSales:
+
+    '''
+    Class to store information on household/farm purchases and sales
+    '''
+
+    def __init__(self, purchase_sales_data):
+
+        purchase_sales_data= purchase_sales_data
+        self.category = purchase_sales_data[0]
+        self.name = purchase_sales_data[1]
+        self.dryseas_pur_price = purchase_sales_data[2]
+        self.cost_units = purchase_sales_data[3]
+        self.dryseas_pur_quant = purchase_sales_data[4]
+        self.quant_units = purchase_sales_data[5]
+        self.wetseas_pur_price = purchase_sales_data[6]
+        self.wetseas_pur_quant = purchase_sales_data[7]
+        self.dryseas_sale_price = purchase_sales_data[8]
+        self.dryseas_sale_quant = purchase_sales_data[9]
+        self.wetseas_sale_price = purchase_sales_data[10]
+        self.wetseas_sale_quant = purchase_sales_data[11]
+
+
+
 def test_economics_algorithms(form):
 
     '''
@@ -90,12 +114,20 @@ def test_economics_algorithms(form):
     labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
 
     # ----------------------------------------
-    # Create instances of HouseholdMembers Class using dataframe created from excel sheet
+    # Create instances of HouseholdPurchasesSales Class using Dataframe created from excel sheet. Store in list.
+    hh_purchases_sales = []
+    for index, data in purch_sales_df.iterrows():
+        hh_ps_instance = HouseholdPurchasesSales(data)
+        hh_purchases_sales.append(hh_ps_instance)
+
+
+    # ----------------------------------------
+    # Create instances of HouseholdMembers Class using Dataframe created from excel sheet. Store in list.
     hh_members = []
     labour_df = labour_df.iloc[: , 1:]
     for column_name, column_data in labour_df.iteritems():
-        hh_instance =  HouseholdMembers(column_name, column_data)
-        hh_members.append(hh_instance)
+        hh_lab_instance =  HouseholdMembers(column_name, column_data)
+        hh_members.append(hh_lab_instance)
 
 
 
