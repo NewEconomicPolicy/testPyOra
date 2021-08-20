@@ -167,16 +167,38 @@ def test_economics_algorithms(form):
     else:
         print('No manure production data! Please run livestock module')
 
-    # Calculate how much manure is needed/produced/sold during year
+    # Calculate value of crops produced
+    # First create list containing only instances of crops
+    crop_purch_sales = []
+    for good in hh_purchases_sales:
+        if good.category == 'crop':
+            crop_purch_sales.append(good)
+        else:
+            continue
 
-    # Calculate wet and dry season income
-    dryseas_income = ((purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']) -
-                            (purch_sales_df['dryseas_pur_pr'] *  purch_sales_df['dryseas_pur_quant']))
-    total_dryseas_income = dryseas_income.sum()
-    wetseas_income = ((purch_sales_df['wetseas_sale_pr'] * purch_sales_df['wetseas_sale_quant']) -
-                            (purch_sales_df['wetseas_pur_pr'] *  purch_sales_df['wetseas_pur_quant']))
-    total_wetseas_income = wetseas_income.sum()
-    total_income = total_dryseas_income + total_wetseas_income
+    # STOP HERE: Does calcs but need to convert weith produced (tonnes per Ha) into weight sold
+    # TEST FOR GITHUB TOKEN
+    all_management_crops_value_dic = {}
+    for management_type, calc_methods in crop_data.items():
+        fr_crop_sales_value = {}
+        for method, crops in calc_methods.items():
+            for year in crops:
+                yearly_crop_sales_value = []
+                for single_crop_name, single_crop_yield in year.items():
+                    for good in crop_purch_sales:
+                        if good.name == single_crop_name:
+                            # Only calculating for dry season just now
+                            value_of_good = good.dryseas_sale_price * single_crop_yield
+                            value_of_good_dic = {single_crop_name : value_of_good}
+                            yearly_crop_sales_value.append(value_of_good_dic)
+                        else:
+                            continue
+                fr_crop_sales_value.update({method : yearly_crop_sales_value})
+            all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
+
+
+
+
 
 
 
