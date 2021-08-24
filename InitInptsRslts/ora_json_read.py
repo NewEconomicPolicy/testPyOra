@@ -215,6 +215,7 @@ class ReadMngmntJsonSubareas(object, ):
         crop_mngmnt_fwd = {}
         crop_mngmnt_ss = {}
         soil_all_areas = {}
+        areas_ha = {}
 
         for mgmt_fname in mgmt_files:
 
@@ -229,9 +230,11 @@ class ReadMngmntJsonSubareas(object, ):
             site_defn = mgmt_content['site definition']
             area = site_defn['area name']
             soil_all_areas[area] = Soil(site_defn['soil'])
+            areas_ha[area] = site_defn['area (ha)']
             crop_mngmnt_ss[area] = _read_crop_mngmnt(mgmt_content['steady state'], crop_vars)
             crop_mngmnt_fwd[area] = _read_crop_mngmnt(mgmt_content['forward run'], crop_vars)
 
+        self.areas_ha = areas_ha
         self.soil_all_areas = soil_all_areas
         self.crop_mngmnt_ss = crop_mngmnt_ss
         self.crop_mngmnt_fwd = crop_mngmnt_ss

@@ -79,7 +79,7 @@ class Form(QWidget):
         # ================================
         irow += 1
         w_lbl14 = QLabel('')
-        grid.addWidget(w_lbl14, irow, 0, 1, 2)
+        grid.addWidget(w_lbl14, irow, 0, 1, 5)
         self.w_lbl14 = w_lbl14
 
         # rows 4 and 5

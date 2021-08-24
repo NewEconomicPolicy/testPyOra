@@ -245,7 +245,13 @@ def read_config_file(form):
 
     inp_xls = os.path.normpath(config['inp_xls'])
     form.w_lbl13.setText(inp_xls)
-    form.w_lbl14.setText(check_excel_input_file(form, inp_xls))     # needs out_dir from form.settings
+
+    ret_str = check_excel_input_file(form, inp_xls)
+    if ret_str.find('is valid') == -1:
+        sleep(sleepTime)
+        sys.exit(0)
+
+    form.w_lbl14.setText(ret_str)     # needs out_dir from form.settings
 
     # this stanza relates to use of JSON files
     # ========================================
