@@ -167,6 +167,7 @@ def test_economics_algorithms(form):
     else:
         print('No manure production data! Please run livestock module')
 
+    #----------------------------------------
     # Calculate value of crops produced
     # First create list containing only instances of crops
     crop_purch_sales = []
@@ -176,12 +177,12 @@ def test_economics_algorithms(form):
         else:
             continue
 
-    # STOP HERE: Does calcs but need to convert weith produced (tonnes per Ha) into weight sold
-    # TEST FOR GITHUB TOKEN
+    # Calcualte value of crops produced on a yearly basis
     all_management_crops_value_dic = {}
     for management_type, calc_methods in crop_data.items():
         fr_crop_sales_value = {}
         for method, crops in calc_methods.items():
+            all_yrs_crop_sale_value = []
             for year in crops:
                 yearly_crop_sales_value = []
                 for single_crop_name, single_crop_yield in year.items():
@@ -193,8 +194,9 @@ def test_economics_algorithms(form):
                             yearly_crop_sales_value.append(value_of_good_dic)
                         else:
                             continue
-                fr_crop_sales_value.update({method : yearly_crop_sales_value})
-            all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
+                all_yrs_crop_sale_value.append(yearly_crop_sales_value)
+            fr_crop_sales_value.update({method : all_yrs_crop_sale_value})
+        all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
 
 
 
