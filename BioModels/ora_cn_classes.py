@@ -61,7 +61,7 @@ class CropModel(object, ):
     '''
     ensure continuity during equilibrium phase then between steady state and forward run
     '''
-    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None):
+    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None, area_ha = None):
         '''
         construct a crop model object suitable for livestock model
         '''
@@ -77,6 +77,7 @@ class CropModel(object, ):
         self.var_name_list = var_name_list
 
         if complete_run is not None:
+            self.area_ha = area_ha
             self.nyears_ss = mngmnt_ss.nyears
             self.nyears_fwd = mngmnt_fwd.nyears
             self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
