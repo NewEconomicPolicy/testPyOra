@@ -118,7 +118,24 @@ def calc_livestock_data(form):
     # Access crop production data
     # ===========================
     harvest_land_use_merged = merge_harvest_land_use(form.all_runs_crop_model)
-    # Add on;y crop production data to form object so it can be used by econ module
+
+    # Calculate total production and add to form object, so it can be accessed by econ module. First make dic with
+    # area in ha for each subarea
+    total_area_dic = {}
+    for sub_area, data in form.all_runs_crop_model.items():
+        area_ha = data.area_ha
+        total_area_dic.update({sub_area:area_ha})
+
+    # Iterate through all production data and multiply yield per ha by field area in hectares
+    for management_type, calc_methods in harvest_land_use_merged.items():
+        area_ha = total_area_dic.get(management_type)
+        for calc_method, years in calc_methods.items():
+            for year in years:
+                for crop, prod in year.items():
+                    total_yield = prod * area_ha
+                    year.update({crop: total_yield})
+
+    # Add to form object to it can be accessed by econ module
     form.crop_production = harvest_land_use_merged
 
     # Calculate animal production

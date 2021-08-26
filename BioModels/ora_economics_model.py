@@ -111,6 +111,10 @@ def test_economics_algorithms(form):
     purch_sales_df.columns= ['category', 'name', 'dryseas_pur_pr', 'units', 'dryseas_pur_quant', 'measure',
                              'wetseas_pur_pr', 'wetseas_pur_quant', 'dryseas_sale_pr', 'dryseas_sale_quant',
                              'wetseas_sale_pr', 'wetseas_sale_quant']
+    # Calculate value of all sales
+    purch_sales_df['dryseas_sales_value'] = purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']
+    purch_sales_df['wetseas_sales_value'] = purch_sales_df['wetseas_sale_pr'] * purch_sales_df['wetseas_sale_quant']
+
     labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
 
     # ----------------------------------------
@@ -189,6 +193,7 @@ def test_economics_algorithms(form):
                     for good in crop_purch_sales:
                         if good.name == single_crop_name:
                             # Only calculating for dry season just now
+                            # is price in $ per tonne? As total weight of crops is in tonne
                             value_of_good = good.dryseas_sale_price * single_crop_yield
                             value_of_good_dic = {single_crop_name : value_of_good}
                             yearly_crop_sales_value.append(value_of_good_dic)
@@ -197,6 +202,7 @@ def test_economics_algorithms(form):
                 all_yrs_crop_sale_value.append(yearly_crop_sales_value)
             fr_crop_sales_value.update({method : all_yrs_crop_sale_value})
         all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
+
 
 
 
