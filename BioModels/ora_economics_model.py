@@ -25,7 +25,6 @@ from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 #----------------------------------------------------------
 # Create class to store instances of family members, in order to work out labour
 
-
 class HouseholdMembers:
 
     '''
@@ -68,6 +67,52 @@ class HouseholdMembers:
         # Information on other activities
         self.grow_seas_essential_activities_hrs_day = labour_data[40]
         self.grow_seas_non_essential_activities_hrs_day = labour_data[41]
+
+    def agricultural_labour_calc(self):
+        '''
+        Function to calculate time spent on agricultural labour, including dung collection
+        '''
+
+        # In excel sheet this says 'typical weather' - what does this mean? drought years need to be considered?
+        livestock_time = self.daily_time_spent_tending_animals + self.daily_time_dung_management
+        self.livestock_time_annual = livestock_time * 365
+
+        # How to differentriate sowing time from growing season from harvest time? Attatch to form object for calcs
+        # Need also hourly rate for wages?
+        self.sowing_time_year = self.total_days_sowing_crops * self.daily_average_time_sowing_crops
+
+        # Create 'growing_season variable - how?
+        grow_season_days_total = 200
+        self.tending_crops_time = self.grow_seas_total_time_tending_crops *grow_season_days_total
+
+        self.harvest_crops_year = self.harvest_total_days_harvesting * self.harvest_average_day_hrs_spent_harvesting
+        self.total_agriculture_labour_yearly = self.livestock_time_annual + self.sowing_time_year + \
+                                               self.tending_crops_time
+
+        
+    def domestic_labour_calc(self):
+        '''
+        Function to calculate time spent on household labour (collecting water, firewood, cooking)
+        '''
+        wood_collection_weekly = self.number_weekly_wood_trips * \
+                                 (self.per_wood_trip_time_spent_travelling + self.per_wood_trip_time_spent_collecting)
+        self.year_wood_collect = wood_collection_weekly * 52
+        water_collection_weekly_normal = self.weekly_trips_water_collect_non_irrigation * \
+                                         (self.normal_year_time_travel_water_per_trip +
+                                          self.normal_year_time_queue_water_per_trip)
+        self.water_collection_yearly_normal = water_collection_weekly_normal * 52
+        water_collection_weekly_drought = self.weekly_trips_water_collect_non_irrigation * \
+                                          (self.drought_year_time_travel_water_per_trip +
+                                           self.drought_year_time_queue_water_per_trip)
+        self.water_collection_yearly_drought = water_collection_weekly_drought * 52
+
+        # Currently doing this calc for 365 days, but how to do for only grow season?
+        self.essential_activities_year = self.grow_seas_essential_activities_hrs_day * 365
+        self.non_essential_activites_year = self.grow_seas_non_essential_activities_hrs_day * 365
+
+        # Currently only for normal years. Need to define drought years and attacth to form object then add if statement
+        self.total_domestic_labour = self.year_wood_collect + self.water_collection_yearly_normal + \
+                                     self.essential_activities_year + self.non_essential_activites_year
 
 
 class HouseholdPurchasesSales:
@@ -181,31 +226,41 @@ def test_economics_algorithms(form):
         else:
             continue
 
-    # Calcualte value of crops produced on a yearly basis
+    # Calculate value of crops produced on a yearly basis
     all_management_crops_value_dic = {}
     for management_type, calc_methods in crop_data.items():
         fr_crop_sales_value = {}
         for method, crops in calc_methods.items():
             all_yrs_crop_sale_value = []
             for year in crops:
-                yearly_crop_sales_value = []
+                yearly_crop_sales_value = {}
                 for single_crop_name, single_crop_yield in year.items():
                     for good in crop_purch_sales:
                         if good.name == single_crop_name:
                             # Only calculating for dry season just now
-                            # is price in $ per tonne? As total weight of crops is in tonne
-                            value_of_good = good.dryseas_sale_price * single_crop_yield
+                            # Assume input is in ETB/$ per kg, so multiply by 1000 to get ETB/$ per tonne
+                            value_of_good = (good.dryseas_sale_price * 1000) * single_crop_yield
                             value_of_good_dic = {single_crop_name : value_of_good}
-                            yearly_crop_sales_value.append(value_of_good_dic)
+                            yearly_crop_sales_value.update(value_of_good_dic)
                         else:
                             continue
+                total_sales = sum(yearly_crop_sales_value.values())
+                yearly_crop_sales_value.update({'Total Crop Sales': total_sales})
                 all_yrs_crop_sale_value.append(yearly_crop_sales_value)
             fr_crop_sales_value.update({method : all_yrs_crop_sale_value})
         all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
 
+    # ----------------------------------------
+    # Calculate dry and wet season fixed sales (i.e. those taken from excel input)
+    dry_seas_fixed_sales_total = purch_sales_df['dryseas_sales_value'].sum()
+    wet_seas_fixed_sales_total = purch_sales_df['wetseas_sales_value'].sum()
 
-
-
+    # ----------------------------------------
+    # Calculate value of time for each household member undertaking agricultural activities (including dung collection)
+    # and other activities (collecting water, firewood, cooking)
+    for person_type in hh_members:
+        person_type.agricultural_labour_calc()
+        person_type.domestic_labour_calc()
 
 
 
