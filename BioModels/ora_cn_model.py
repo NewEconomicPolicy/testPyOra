@@ -33,14 +33,16 @@ from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
-from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, ReadWeather
-from ora_json_read import ReadMngmntJsonSubareas
+from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_run_xlxs_file
 from ora_rothc_fns import run_rothc
 
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single "Base line mgmt.json"
 # =============================================================================================
-MAX_ITERS = 1000
+MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
+
+ERROR_STR = '*** Error *** '
+FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
 def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     '''
@@ -89,7 +91,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
     if not converge_flag:
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
-              .format(round(tot_soc_simul, 3), tot_soc_meas, iteration + 1))
+              .format(round(tot_soc_simul, 3), round(tot_soc_meas, 3), iteration + 1))
 
     QApplication.processEvents()    # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water, converge_flag
@@ -99,6 +101,10 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     '''
     pettmp = weather.pettmp_fwd
+    if management.ntsteps > len(pettmp['precip']):
+        print('Cannot proceed with forward run due to insuffient weather timesteps ')
+        return None
+
     management.pet_prev = weather.pettmp_ss['pet'][-1]    # TODO: ugly patch to ensure smooth tranistion in RothC
     generate_miami_dyce_npp(pettmp, management)
 
@@ -124,60 +130,65 @@ def run_soil_cn_algorithms(form):
     func_name = __prog__ + '\ttest_soil_cn_algorithms'
 
     excel_out_flag = form.w_make_xls.isChecked()
-    xls_inp_fname = os.path.normpath(form.w_lbl13.text())
-    if not os.path.isfile(xls_inp_fname):
-        print('Excel input file ' + xls_inp_fname + 'must exist')
-        return
 
-    # read input Excel workbook
-    # =========================
-    print('Loading: ' + xls_inp_fname)
-    study = ReadStudy(form.w_lbl06.text(), xls_inp_fname, form.settings['out_dir'])
-    ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
+    parms_xls_fname = form.settings['params_xls']
+    print('Reading: ' + parms_xls_fname)
+    ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
     if ora_parms.ow_parms is None:
         return
 
-    ora_weather = ReadWeather(form.w_lbl06.text(), xls_inp_fname, study.latitude)
-    ora_subareas = ReadMngmntJsonSubareas(form.settings['mgmt_files'], ora_parms.crop_vars)
-    extend_out_dir(form)     # extend outputs directory by mirroring inputs location
+    mgmt_dir = form.w_lbl06.text()
+    run_xls_fname = os.path.join(mgmt_dir, FNAME_RUN)
+    if not os.path.isfile(run_xls_fname):
+        print(ERROR_STR + 'Excel run file ' + run_xls_fname + 'must exist')
+        return
 
     lookup_df = form.settings['lookup_df']
+
+    # read input Excel workbook
+    # =========================
+    print('Reading: Run file: ' + run_xls_fname)
+    study = ReadStudy(form, form.w_lbl06.text(), run_xls_fname, form.settings['out_dir'])
+    retcode = read_run_xlxs_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
+    if retcode is None:
+        return
+    else:
+        ora_weather, ora_subareas = retcode
 
     # process each subarea
     # ====================
     form.all_runs_output = {}   # clear previously recorded outputs
     all_runs = {}
-    for subarea in ora_subareas.soil_all_areas:
+    for sba in ora_subareas:
 
-        soil_vars = ora_subareas.soil_all_areas[subarea]
+        soil_vars = ora_subareas[sba].soil_for_area
 
-        mngmnt_ss = MngmntSubarea(ora_subareas.crop_mngmnt_ss[subarea], ora_parms)
+        mngmnt_ss = MngmntSubarea(ora_subareas[sba].crop_mngmnt_ss, ora_parms)
 
         carbon_change, nitrogen_change, soil_water, converge_flag = \
-                                        _cn_steady_state(form, ora_parms, ora_weather, mngmnt_ss, soil_vars, subarea)
+                                        _cn_steady_state(form, ora_parms, ora_weather, mngmnt_ss, soil_vars, sba)
         if converge_flag is None:
-            print('Skipping forward run for ' + subarea)
+            print('Skipping forward run for ' + sba)
             continue
 
         pi_tonnes = carbon_change.data['c_pi_mnth']
 
-        mngmnt_fwd = MngmntSubarea(ora_subareas.crop_mngmnt_fwd[subarea], ora_parms, pi_tonnes)
+        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_parms, pi_tonnes)
         complete_run = \
             _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_change, nitrogen_change, soil_water)
+        if complete_run is None:
+            continue
 
-        form.all_runs_crop_model[subarea] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars,
-                                                                                        ora_subareas.areas_ha[subarea])
-        # Change flag to show crop module has been run
-        form.crop_run = True
-
+        form.all_runs_crop_model[sba] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars,
+                                                                                        ora_subareas[sba].area_ha)
         # outputs only
         # ============
-        form.all_runs_output[subarea] = complete_run
+        form.all_runs_output[sba] = complete_run
         if excel_out_flag:
-            generate_excel_outfiles(study, subarea, lookup_df, form.settings['out_dir'], ora_weather, complete_run,
+            generate_excel_outfiles(study, sba, lookup_df, form.settings['out_dir'], ora_weather, complete_run,
                                                                                                 mngmnt_ss, mngmnt_fwd)
         print()
-        all_runs[subarea] = complete_run
+        all_runs[sba] = complete_run
 
     if len(all_runs) > 0:
         if excel_out_flag:

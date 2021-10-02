@@ -70,20 +70,22 @@ class Second(QWidget):
     '''
     def __init__(self, title, subareas, ntsteps, description, parent = None):
 
-        # calls the __init__() of the QWidget class, allowing you to use it in the Second class without repeating code
+        # calls the __init__() of the QWidget class, allowing you to use it in the DispSubareaMgmt class without repeating code
         super(Second, self).__init__(parent)
 
         CHART_MIN_WDTH = 1200
         TABLE_MIN_WDTH = 625
+        TABLE_MAX_WDTH = 700
 
         self.setWindowTitle(title)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         # Table - one column for each subarea
         # ===================================
         w_table = QTableWidget()
 
         w_table.setMinimumWidth(TABLE_MIN_WDTH)
+        w_table.setMaximumWidth(TABLE_MAX_WDTH)
         w_table.setRowCount(ntsteps)
         w_table.setColumnCount(len(subareas))
         w_table.setHorizontalHeaderLabels(subareas)

@@ -188,12 +188,17 @@ def get_fert_vals_for_tstep(management, parameters, tstep):
     func_name = __prog__ + ' get_fert_vals_for_tstep'
 
     org_fert = management.org_fert[tstep]
-    ow_type = org_fert['ow_type']
+    if org_fert is None:
+        ow_type = 'Fresh waste'
+        amount = 0
+    else:
+        ow_type = org_fert['ow_type']
+        amount = org_fert['amount']
 
     # inorganic fertiliser
     # ====================
     inorg_fert = management.fert_n[tstep]
-    if inorg_fert == 0:
+    if inorg_fert is None:
         nut_n_fert = 0
     else:
         nut_n_fert = inorg_fert['fert_n']
@@ -201,13 +206,10 @@ def get_fert_vals_for_tstep(management, parameters, tstep):
     # organic fertiliser
     # ==================
     ow_parms = parameters.ow_parms
-    nh4_ow_fert = org_fert['amount']*ow_parms[ow_type]['pcnt_urea']
+    nh4_ow_fert = amount*ow_parms[ow_type]['pcnt_urea']
 
     # TODO: greater clarity required
     nh4_inorg_fert, no3_inorg_fert = 2*[nut_n_fert]
-
-    org_fert = management.org_fert[tstep]
-    ow_type = org_fert['ow_type']
 
     ow_parms = parameters.ow_parms
     c_n_rat_ow = ow_parms[ow_type]['c_n_rat']
@@ -244,14 +246,19 @@ def get_values_for_tstep(pettmp, management, parameters, tstep):
     max_root_dpth = parameters.crop_vars[crop_name]['max_root_dpth']
     t_grow = parameters.crop_vars[crop_name]['t_grow']
 
-    org_fert = management.org_fert[tstep]
-    ow_type = org_fert['ow_type']
-
     ow_parms = parameters.ow_parms
+    org_fert = management.org_fert[tstep]
+    if org_fert is None:
+        ow_type = 'Fresh waste'
+        amount = 0
+    else:
+        ow_type = org_fert['ow_type']
+        amount = org_fert['amount']
+
     c_n_rat_ow = ow_parms[ow_type]['c_n_rat']
     prop_iom_ow = ow_parms[ow_type]['prop_iom_ow']       # proportion of inert organic matter in added organic waste
     rat_dpm_hum_ow = ow_parms[ow_type]['rat_dpm_hum_ow'] # ratio of DPM:HUM in the active organic waste added
-    cow = org_fert['amount']*ow_parms[ow_type]['pcnt_c']     # proportion of plant input is carbon (t ha-1)
+    cow = amount*ow_parms[ow_type]['pcnt_c']     # proportion of plant input is carbon (t ha-1)
 
     return tair, precip, pet_prev, pet, irrig, c_pi_mnth, c_n_rat_ow, rat_dpm_rpm, cow, rat_dpm_hum_ow, prop_iom_ow, \
                                                                                                 max_root_dpth, t_grow
@@ -294,7 +301,7 @@ def plant_inputs_crops_distribution(t_grow, c_pi_yr = None):
         # =======================
         pi_tonnes = []
         denom = 0
-        for imnth in range(t_grow + 1):
+        for imnth in range(t_grow):
             c_pi = exp(-k_pi_c*(t_grow - imnth))      # (eq.2.1.14)
             denom += c_pi
             pi_tonnes.append(c_pi)

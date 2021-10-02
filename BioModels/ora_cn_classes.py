@@ -19,10 +19,10 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from math import ceil
 from operator import add, mul
-from ora_low_level_fns import populate_org_fert
 from ora_cn_fns import init_ss_carbon_pools
+
+ERROR_STR = '*** Error *** '
 
 def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
                                                                         npp_ann_miami, yld_ann_miami, crops_ann):
@@ -48,7 +48,12 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     crop_model.data['cml_n_uptk'].append(cml_n_uptk)
     crop_model.data['cml_n_uptk_adj'].append(cml_n_uptk_adj)
     yld_typ = crop_model.data['yld_typ'][indx]
-    yld_n_lim = yld_typ * (cml_n_uptk_adj / cml_n_uptk)  # n limited yield
+    try:
+        yld_n_lim = yld_typ * (cml_n_uptk_adj / cml_n_uptk)  # n limited yield
+    except ZeroDivisionError as err:
+        print(str(err))
+        yld_n_lim = 0.0
+
     crop_model.data['yld_n_lim'].append(yld_n_lim)
 
     yld_ann_typ += yld_typ
@@ -107,14 +112,18 @@ class CropModel(object, ):
 
                 if crop_name is None:
                     if cml_n_uptk > 0:
-                        npp_ann_zaks += self.data['npp_zaks'][indx]
-                        yld_ann_zaks += self.data['npp_zaks'][indx]*crop_vars[crop_curr]['harv_indx']
-                        npp_ann_miami += self.data['npp_miami'][indx]
-                        yld_ann_miami += self.data['npp_miami'][indx]*crop_vars[crop_curr]['harv_indx']
-                        crops_ann.append(crop_curr)
-                        indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
-                            _record_values(self, indx, this_crop_name,
-                                                            cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
+                        try:
+                            npp_ann_zaks += self.data['npp_zaks'][indx]
+                            yld_ann_zaks += self.data['npp_zaks'][indx]*crop_vars[crop_curr]['harv_indx']
+                            npp_ann_miami += self.data['npp_miami'][indx]
+                            yld_ann_miami += self.data['npp_miami'][indx]*crop_vars[crop_curr]['harv_indx']
+                            crops_ann.append(crop_curr)
+                            indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
+                                _record_values(self, indx, this_crop_name,
+                                            cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
+                        except IndexError as err:
+                            print(str(err) + '\tCrop: {}\tindx: {}'.format(crop_name, indx))
+                            return
                 else:
                     this_crop_name = crop_name
                     cml_n_uptk += n_crop_dem
@@ -128,7 +137,7 @@ class CropModel(object, ):
                                               npp_ann_zaks, yld_ann_zaks, npp_ann_miami, yld_ann_miami, crops_ann)
                     crops_ann = []
 
-                    # catch situation when December is a growing month
+            # catch situation when December is a growing month
             # ================================================
             if (len(self.data['cml_n_uptk']) < num_grow_seasons):
                 dum, dum, dum, dum, dum = _record_values(self, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
@@ -204,80 +213,35 @@ class MngmntSubarea(object, ):
     '''
 
     '''
-    def __init__(self, crop_mngmnt, ora_parms, pi_tonnes_ss = None):
+    def __init__(self, mngmnt, ora_parms, pi_tonnes_ss = None):
         """
         determine temporal extent of the management
         should list indices correspond to the months?
         """
-        self.crop_mngmnt = crop_mngmnt
-
-        last_crop = crop_mngmnt[-1]
-
-        nyears = ceil(last_crop.harvest_mnth/12)
-        ntsteps = nyears * 12
-        np1 = ntsteps + 1
-        irrig = np1*[0]
-        org_fert = np1*[None]
-        fert_n_list = np1*[0]
-        pi_prop_list = np1*[0]     # plant input proportions
-        pi_tonnes_list = np1*[0]   # plant input - will be overwritten
-        crop_names = np1 * [None]
-        crop_currs = np1 * [None]
-        npp_zaks = np1 * [0]
-        npp_miami = np1 * [0]
-
-        # populate list of current crops
-        # ==============================
-        imnth_last = len(crop_currs)
-        for crop in reversed(crop_mngmnt):
-            crop_current = crop.crop_lu
-            imnth_sow = crop.sowing_mnth
-            crop_currs[imnth_sow:imnth_last] = [crop_current for indx in range(imnth_sow, imnth_last)]
-            imnth_last = imnth_sow
-
-        crop_currs[0:imnth_sow] = [crop_current for indx in range(0, imnth_sow)]      # make sure no gaps
-
-        for crop in crop_mngmnt:
-            crop_name = crop.crop_lu  # e.g. Maize
-            pi_tonnes = ora_parms.crop_vars[crop_name]['pi_tonnes']
-            pi_prop = ora_parms.crop_vars[crop_name]['pi_prop']
-            sow_mnth = crop.sowing_mnth
-            harv_mnth = crop.harvest_mnth
-
-            # TODO: this does not seem Pythonic
-            # =================================
-            for indx, imnth in enumerate(range(sow_mnth, harv_mnth + 1)):
-
-                crop_names[imnth] = crop_name
-                pi_prop_list[imnth] = pi_prop[indx]
-                pi_tonnes_list[imnth] = pi_tonnes[indx]
-
-            for imnth in crop.irrig:
-                irrig[imnth] = crop.irrig[imnth]
-
-            org_fert[crop.ow_mnth] = {'ow_type': crop.ow_type, 'amount': crop.ow_amount}
-            fert_n_list[crop.fert_mnth] = {'fert_type': crop.fert_type, 'fert_n': crop.fert_n}
+        ntsteps = len(mngmnt['crop_name'])
+        nyears = int(ntsteps/12)
 
         self.nyears = nyears
         self.ntsteps = ntsteps
-        self.irrig = irrig[1:]
-        self.crop_names = crop_names[1:]
-        self.fert_n = fert_n_list[1:]
+        self.irrig = mngmnt['irrig']
+        self.crop_names = mngmnt['crop_name']
+        self.fert_n = mngmnt['fert_n']
 
         # TODO: important for RothC calculations see function : get_values_for_tstep
         # ==========================================================================
-        self.org_fert = populate_org_fert(org_fert[1:])
+        self.org_fert = mngmnt['org_fert']
 
         if pi_tonnes_ss is None:
-            self.pi_tonnes = pi_tonnes_list[1:]      # required for seeding steady state
+            self.pi_tonnes = mngmnt['pi_tonne']      # required for seeding steady state
         else:
             self.pi_tonnes = pi_tonnes_ss   # use plant inputs from steady state
 
-        self.pi_props  = pi_prop_list[1:]
-        self.crop_currs = crop_currs[1:]
-        self.npp_zaks = npp_zaks[1:]
+        self.pi_props  = mngmnt['pi_prop']
+        self.crop_currs = mngmnt['crop_curr']
+        self.crop_mngmnt = mngmnt['crop_mngmnt']
+        self.npp_zaks = ntsteps * [0]
         self.npp_zaks_grow = []
-        self.npp_miami = npp_miami[1:]
+        self.npp_miami = ntsteps * [0]
         self.npp_miami_grow = []
 
 class CarbonChange(object, ):

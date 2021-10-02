@@ -28,11 +28,22 @@ from pandas import DataFrame, ExcelWriter
 
 from ora_lookup_df_fns import fetch_detail_from_varname
 
+'''
+26 colors for the 2010 Colour Alphabet Project which proposed 26 "letters" coded by colors 
+stated to be near the maximum number reliably distinguishable. 
+'''
+COLORS_DISTING = {'Green':'2BCE48', 'Damson':'4C005C', 'Forest':'005C31', 'Sky':'5EF1F2', 'Khaki':'8F7C00',
+          'Lime':'9DCC00', 'Blue':'0075DC', 'Jade':'94FFB5', 'Violet':'740AFF', 'Caramel':'993F00',
+          'Turquoise':'00998F', 'Navy':'003380', 'Ebony':'191919', 'Quagmire':'426600', 'Iron':'808080',
+          'Wine':'990000', 'Mallow':'C20088', 'Uranium':'E0FF66', 'Amethyst':'F0A3FF', 'Red':'FF0010',
+          'Zinnia':'FF5005', 'Pink':'FFA8BB', 'Orpiment':'FFA405', 'Honeydew':'FFCC99', 'Yellow':'FFFF00',
+          'Xanthin':'FFFF80', 'White':'FFFFFF'}
+
 POOL_GROUPS = {'Active Pools':list(['pool_c_dpm', 'pool_c_rpm', 'pool_c_bio']),
                'Resistant Pools':list(['pool_c_hum', 'pool_c_iom', 'tot_soc_simul'])}
+LINE_COLORS_POOL_GROUPS  = list(['FF0000', '00FF00','0000FF'])
 
-LINE_COLORS = list(['FF0000', '00FF00','0000FF'])
-LINE_COLORS2 = list(['FF0000', '00FF00','0000FF', '0FF000', '000FF0'])
+LINE_COLORS_SUBAREAS = list(['Blue',  'Jade', 'Red', 'Honeydew', 'Yellow'])
 
 CHANGE_VARS = {}
 CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
@@ -72,7 +83,10 @@ def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nro
         # ===========================
         sref = group_chart.series[iarea]
         sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
-        sref.graphicalProperties.line.solidFill = LINE_COLORS2[iarea]
+
+        dum, indx_color = divmod(iarea, 5)  # prevent IndexError by using remainder
+        color_key = LINE_COLORS_SUBAREAS[indx_color]
+        sref.graphicalProperties.line.solidFill = COLORS_DISTING[color_key]
         sref.smooth = True
 
     # now write to previously created sheet
@@ -117,7 +131,7 @@ def _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_shee
                 # ===========================
                 sref = group_chart.series[isht]
                 sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
-                sref.graphicalProperties.line.solidFill = LINE_COLORS[isht]
+                sref.graphicalProperties.line.solidFill = LINE_COLORS_POOL_GROUPS[isht]
                 sref.smooth = True
 
             # now write to previously created sheet
@@ -160,7 +174,7 @@ def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_she
             # ===========================
             sref = group_chart.series[isht]
             sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
-            sref.graphicalProperties.line.solidFill = LINE_COLORS[isht]
+            sref.graphicalProperties.line.solidFill = LINE_COLORS_POOL_GROUPS[isht]
             sref.smooth = True
 
         # write to previously created sheet

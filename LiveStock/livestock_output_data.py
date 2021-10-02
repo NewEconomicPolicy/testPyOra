@@ -91,7 +91,7 @@ def calc_livestock_data(form):
 
     # read inputs and create folder to store graphs in
     # =================================================
-    xls_inp_fname = os.path.normpath(form.w_lbl13.text())
+    xls_inp_fname = os.path.normpath(form.settings['params_xls'])
     if not os.path.isfile(xls_inp_fname):
         print('Excel input file ' + xls_inp_fname + 'must exist')
         return

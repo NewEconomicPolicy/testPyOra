@@ -22,15 +22,14 @@ from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
 
-from ora_excel_write import retrieve_output_xls_files
 from ora_economics_model import test_economics_algorithms
 from livestock_output_data import calc_livestock_data
 from ora_cn_model import run_soil_cn_algorithms
-from ora_excel_read import check_excel_input_file
-from ora_json_read import check_json_input_files
+from ora_excel_read import ReadStudy
+from ora_json_read import check_json_xlsx_inp_files
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
-from ora_low_level_fns import extend_out_dir, gui_optimisation_cycle
+from ora_low_level_fns import gui_optimisation_cycle
 from set_up_logging import OutLog
 
 class Form(QWidget):
@@ -62,31 +61,12 @@ class Form(QWidget):
         grid.addWidget(w_study, irow, 0, 1, 5)
         self.w_study = w_study
 
-        # rows 2 and 3
-        # ============
-        irow += 1
-        w_inp_xls = QPushButton("Parameters file")
-        helpText = 'Select an Orator Excel inputs file comprising crop and nitrogen parameters, weather'
-        w_inp_xls.setToolTip(helpText)
-        grid.addWidget(w_inp_xls, irow, 0)
-        w_inp_xls.clicked.connect(self.fetchInpExcel)
-
-        w_lbl13 = QLabel('')
-        grid.addWidget(w_lbl13, irow, 1, 1, 5)
-        self.w_lbl13 = w_lbl13
-
-        # for message from check_xls_fname
-        # ================================
-        irow += 1
-        w_lbl14 = QLabel('')
-        grid.addWidget(w_lbl14, irow, 0, 1, 5)
-        self.w_lbl14 = w_lbl14
-
         # rows 4 and 5
         # ============
         irow += 1
-        w_inp_json = QPushButton("Management files")
-        helpText = 'Select a file location with JSON files comprising management data for steady state and forward run'
+        w_inp_json = QPushButton("Run file location")
+        helpText = 'Location with a project file set comprising: livestock JSON file '
+        helpText += 'and an Excel file with a farm location, management, soil and weather sheets'
         w_inp_json.setToolTip(helpText)
         grid.addWidget(w_inp_json, irow, 0)
         w_inp_json.clicked.connect(self.fetchInpJson)
@@ -95,11 +75,11 @@ class Form(QWidget):
         grid.addWidget(w_lbl06, irow, 1, 1, 5)
         self.w_lbl06 = w_lbl06
 
-        # line 5 - for message from check_json_fname
-        # ==========================================
+        # for message describing project files
+        # ====================================
         irow += 1
         w_lbl07 = QLabel('')
-        grid.addWidget(w_lbl07, irow, 1, 1, 5)
+        grid.addWidget(w_lbl07, irow, 0, 1, 5)
         self.w_lbl07 = w_lbl07
 
         # line 7: carbon
@@ -169,19 +149,6 @@ class Form(QWidget):
         irow += 1
         grid.addWidget(QLabel(), irow, 0, )   # spacer
 
-        # row 15
-        # ======
-        irow += 4
-        w_out_dir = QPushButton("Outputs directory")
-        helpText = 'Select a file path for Excel outputs files'
-        w_out_dir.setToolTip(helpText)
-        grid.addWidget(w_out_dir, irow, 0)
-        w_out_dir.clicked.connect(self.fetchOutDir)
-
-        w_lbl15 = QLabel('')
-        grid.addWidget(w_lbl15, irow, 1, 1, 5)
-        self.w_lbl15 = w_lbl15
-
         # line 16: generate Excel files
         # =============================
         irow += 1
@@ -227,6 +194,7 @@ class Form(QWidget):
         w_livestock = QPushButton('Livestock')
         helpText = 'Runs ORATOR livestock model'
         w_livestock.setToolTip(helpText)
+        w_livestock.setEnabled(False)
         w_livestock.clicked.connect(self.runLivestockClicked)
         grid.addWidget(w_livestock, irow, 1)
         self.w_livestock = w_livestock
@@ -277,7 +245,7 @@ class Form(QWidget):
         bot_hbox = QHBoxLayout()
         w_report = QTextEdit()
         w_report.verticalScrollBar().minimum()
-        w_report.setMinimumHeight(175)
+        w_report.setMinimumHeight(250)
         w_report.setMinimumWidth(1000)
         w_report.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
         bot_hbox.addWidget(w_report, 1)
@@ -307,31 +275,22 @@ class Form(QWidget):
         sys.stdout = OutLog(self.w_report, sys.stdout)
         # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
 
-    def fetchOutDir(self):
-
-        dirname_cur = self.w_lbl15.text()
-        dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
-        if dirname != '' and dirname != dirname_cur:
-            self.w_lbl15.setText(dirname)
-
     def fetchInpJson(self):
         '''
         when the directory changes disable display push buttons
         '''
-        dirname_cur = self.w_lbl06.text()
-        dirname = QFileDialog.getExistingDirectory(self, 'Select directory', dirname_cur)
-        if dirname != '' and dirname != dirname_cur:
-            self.w_lbl06.setText(dirname)
-            self.w_lbl07.setText(check_json_input_files(self, dirname, 'mgmt'))
-            print(check_json_input_files(self, dirname, 'lvstck'))
+        mgmt_dir_cur = self.w_lbl06.text()
+        mgmt_dir = QFileDialog.getExistingDirectory(self, 'Select directory', mgmt_dir_cur)
+        if mgmt_dir != '' and mgmt_dir != mgmt_dir_cur:
+            self.w_lbl06.setText(mgmt_dir)
+            self.w_lbl07.setText(check_json_xlsx_inp_files(self, mgmt_dir))
             self.w_disp_c.setEnabled(False)
             self.w_disp_n.setEnabled(False)
             self.w_disp_w.setEnabled(False)
             self.w_disp_cm.setEnabled(False)
             self.w_disp_out.setEnabled(False)
             self.w_livestock.setEnabled(False)
-            extend_out_dir(self)
-            retrieve_output_xls_files(self)
+            self.settings['study'] = ReadStudy(self, mgmt_dir)
 
     def changeHelpText(self, w_combo):
         '''
@@ -374,16 +333,6 @@ class Form(QWidget):
     def runSoilCnClicked(self):
 
         run_soil_cn_algorithms(self)
-
-    def fetchInpExcel(self):
-        """
-        QFileDialog returns a tuple for Python 3.5 onwards
-        """
-        fname = self.w_lbl13.text()
-        fname, dummy = QFileDialog.getOpenFileName(self, 'Open file', fname, 'Excel files (*.xlsx)')
-        if fname != '':
-            self.w_lbl13.setText(fname)
-            self.w_lbl14.setText(check_excel_input_file(self, fname))
 
     def cancelClicked(self):
 

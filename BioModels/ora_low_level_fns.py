@@ -148,7 +148,7 @@ def gui_optimisation_cycle(form, subarea = None, iteration = None):
     if subarea is None:
         mess = 'Optimisation Cycle'
     else:
-        mess = 'Sub area: ' + subarea + '\t\tOptimisation Cycle'
+        mess = 'Sub area: ' + subarea + '\t\tOptimisation Cycle:'
 
     if iteration is None:
         return mess

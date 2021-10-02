@@ -20,47 +20,405 @@ __version__ = '0.0.0'
 # ---------------
 #
 import os
-from glob import glob
-from calendar import monthrange
+from copy import copy
 from openpyxl import load_workbook
 from pandas import Series, read_excel, DataFrame
 from zipfile import BadZipFile
+from glob import glob
+from calendar import monthrange
+from pandas import DataFrame
+from numpy import nan, isnan
 
-from ora_excel_write import retrieve_output_xls_files
 from ora_water_model import add_pet_to_weather
 from ora_cn_fns import plant_inputs_crops_distribution
 from ora_low_level_fns import average_weather
 
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-REQUIRED_SHEET_NAMES = list(['Inputs1- Farm location','N constants', 'Crop parms','Org Waste parms','Weather',
-                             'Purchases & Sales', 'Labour', "Typical animal production"])
 
-REQD_SHEETS = {'C1a':'Typical animal production'}
-ERR_MESS_SHEET = '*** Error *** reading sheet '
+ANML_PRODN_SHEET = 'Typical animal production'   # Herrero table
+REQUIRED_SHEET_NAMES = list(['N constants', 'Crop parms', 'Org Waste parms', ANML_PRODN_SHEET])
+FARM_WTHR_SHEET_NAMES = {'lctn': 'Farm location', 'wthr':'Weather'}
 
-def check_excel_input_file(form, xls_inp_fname):
+RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas'}
+SOIL_METRICS = list(['t_depth', 't_clay', 't_sand', 't_silt', 't_carbon', 't_bulk', 't_pH', 't_salinity'])
+MNGMNT_SHT_HDRS = ['period', 'year', 'month', 'crop_name', 'yld', 'fert_type', 'fert_n', 'ow_type', 'ow_amnt', 'irrig']
+T_DEPTH = 30
+
+FNAME_RUN = 'FarmWthrMgmt.xlsx'
+
+ERR_MESS = '*** Error *** '
+ERR_MESS_SHEET = ERR_MESS + 'reading sheet\t'
+WARNING_STR = '*** Warning ***\t'
+
+from string import ascii_uppercase
+ALPHABET = list(ascii_uppercase)
+MAX_SUB_AREAS = 8
+
+def _create_ow_fert(df):
     '''
-    validate selected Excel file
+'   create fertiliser and organic waste lists from series
     '''
-    fileOkFlag = True
+    fert_ns = []
+    for fert_type, fert_n in zip(df['fert_type'].values, df['fert_n'].values):
+        if fert_type is None:
+            fert_ns.append(None)
+        else:
+            fert_ns.append({'fert_type': fert_type, 'fert_n': fert_n})
 
-    if not os.path.isfile(xls_inp_fname):
+    org_ferts = []
+    for ow_type, ow_amnt in zip(df['ow_type'].values, df['ow_amnt'].values):
+        if ow_type is None:
+            org_ferts.append(None)
+        else:
+            org_ferts.append({'ow_type': ow_type, 'amount': ow_amnt})
+
+    irrigs_tmp = list(df['irrig'].values)
+    irrigs = []
+    for irrig in irrigs_tmp:
+        if irrig is None:
+            irrigs.append(0)
+        else:
+            if isnan(irrig):
+                irrigs.append(0)
+            else:
+                irrigs.append(irrig)
+
+    return fert_ns, org_ferts, irrigs
+
+def _add_tgdd_to_weather(tair_list):
+    '''
+    growing degree days indicates the cumulative temperature when plant growth is assumed to be possible (above 5Â°C)
+    '''
+    imnth = 1
+    grow_dds = []
+    for tair in tair_list:
+
+        dummy, ndays = monthrange(2011, imnth)
+        n_grow_days = max(0, ndays * (tair - 5))    #  (eq.3.2.2)
+        grow_dds.append(round(n_grow_days,3))
+
+        imnth += 1
+        if imnth > 12:
+            imnth = 1
+
+    return grow_dds
+
+def read_run_xlxs_file(run_xls_fn, crop_vars, latitude):
+    '''
+    check required sheets are present
+     '''
+    ret_var = None
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+    # check required sheets are present
+    # =================================
+    integrity_flag = True
+    for rqrd_sheet in RUN_SHT_NAMES.values():
+        if rqrd_sheet not in wb_obj.sheetnames:
+            print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
+            integrity_flag = False
+
+    if integrity_flag:
+
+        # Farm location - not used
+        # =============
+        lctn_sht = wb_obj[RUN_SHT_NAMES['lctn']]
+        df = DataFrame(lctn_sht.values, columns=['Attribute', 'Values'])
+        lctn_var = list(df['Values'][:])
+
+        # Weather
+        # =======
+        pettmp_ss = {'precip': [], 'tair': []}
+        pettmp_fwd = {'precip': [], 'tair': []}
+
+        wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
+        df = DataFrame(wthr_sht.values, columns=['period', 'year', 'month', 'precip', 'tair'])
+        for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
+            if mode == 'steady state':
+                pettmp_ss['precip'].append(precip)
+                pettmp_ss['tair'].append(tair)
+            else:
+                pettmp_fwd['precip'].append(precip)
+                pettmp_fwd['tair'].append(tair)
+
+        ora_weather = ReadWeather(pettmp_ss, pettmp_fwd, latitude)
+
+        # Subareas - read subareas lookup sheet which includes soil definition
+        # ====================================================================
+        sbas_sht = wb_obj[RUN_SHT_NAMES['sbas']]
+        rows_generator = sbas_sht.values
+        header_row = next(rows_generator)
+        data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]
+
+        ora_subareas = {}
+        for rec in data_rows:
+            descr = rec[1]
+
+            # if subarea description is present then make sure the corresponding subarea sheet is present
+            # ===========================================================================================
+            if descr is not None:
+                sba = rec[0]
+                if sba not in wb_obj:
+                    print(WARNING_STR + 'Management sheet ' + sba + ' not in run file')
+                    continue
+
+                area_ha = rec[4]
+
+                # soils
+                # =====
+                soil_defn = {}
+                for val, metric in zip([T_DEPTH] + rec[5:], SOIL_METRICS):
+                    if val is None:
+                        print(ERR_MESS + 'Soil for subarea ' + sba + ' not defined in run file')
+                        integrity_flag = False
+                        break
+                    soil_defn[metric] = val
+
+                if integrity_flag:
+                    # read subarea sheet
+                    # ==================
+                    soil_for_area = Soil(soil_defn)
+                    ora_subareas[sba] = ReadMngmntSubareas(wb_obj, sba, soil_for_area, crop_vars, area_ha)
+                else:
+                    break
+
+        if integrity_flag:
+            ret_var = (ora_weather, ora_subareas)
+        else:
+            ret_var = None
+
+    wb_obj.close()
+
+    return ret_var
+
+def _make_current_crop_list(crop_names):
+    '''
+    fill in crops for entire period
+    '''
+    crop_currs = copy(crop_names)
+    prev_crop = crop_names[0]
+    for indx, crop in enumerate(crop_names):
+        if crop is None:
+
+            # if remaining entries are all None then fill with previous crop
+            # ==============================================================
+            rmn_set = set(crop_names[indx:])
+            if len(rmn_set) == 1:
+                if list(rmn_set)[0] is None:
+                    crop_currs[indx] = prev_crop
+
+            # find next crop in future months
+            # ===============================
+            for crop_fwd in crop_names[indx + 1:]:
+                if crop_fwd is not None:
+                    crop_currs[indx] = crop_fwd
+                    break
+        else:
+            # remember last crop
+            # ==================
+            prev_crop = crop
+
+    return crop_currs
+
+def _homologate_list(base_list, inp_list, func_name, padding_val = 0):
+    '''
+    check input list against base list and, if necessary adjust input list
+    '''
+    nelems = len(base_list)
+
+    if len(inp_list) != nelems:
+        print(WARNING_STR + 'repaired inconsistent list lengths in ' + func_name)
+        ndiff = len(inp_list) - nelems
+        if ndiff > 0:
+            inp_list = inp_list[:nelems]
+        else:
+            inp_list = inp_list + abs(ndiff)*[padding_val]
+
+    return inp_list
+
+def _make_pi_props_tonnes(crop_names, indx_mode, crop_vars):
+    '''
+    accumulate growing months for each crop
+    '''
+    func_name = __prog__ + '\t_make_pi_props_tonnes'
+
+    crops_ss = []
+    crops_fwd = []
+    pi_props = []
+    pi_tonnes = []
+    prev_crop = None
+
+    indx_pi = 0
+    for indx, crop in enumerate(crop_names):
+        if crop is None:
+            pi_tonnes.append(0)
+            pi_props.append(0)
+            indx_pi += 1
+        elif crop != prev_crop:
+            # consider contiguous perennial crops - grassland, scrubland, coffee
+            # ==================================================================
+            pi_tonnes += crop_vars[crop]['pi_tonnes']
+            pi_props += crop_vars[crop]['pi_prop']
+            indx_pi += crop_vars[crop]['t_grow']
+
+            yield_typ = crop_vars[crop]['max_yld']      # TODO: should get yield from run file
+            if indx < indx_mode:
+                crops_ss.append(Crop(crop, yield_typ))
+            else:
+                crops_fwd.append(Crop(crop, yield_typ))
+
+        prev_crop = crop
+
+    # check list length consistency - should not be necessary
+    # =======================================================
+    pi_tonnes = _homologate_list(crop_names, pi_tonnes, func_name)
+    pi_props  = _homologate_list(crop_names, pi_props, func_name)
+
+    return pi_props, pi_tonnes, crops_ss, crops_fwd
+
+class ReadMngmntSubareas(object, ):
+
+    def __init__(self, wb_obj, sba, soil_for_area, crop_vars, area_ha):
+        '''
+
+        '''
+        print('Reading management sheet ' + sba)
+
+        mgmt_sht = wb_obj[sba]
+        ntsteps = mgmt_sht.max_row - 1
+        rows_generator = mgmt_sht.values
+        header_row = next(rows_generator)
+        data_rows = [list(row) for (_, row) in zip(range(ntsteps), rows_generator)]
+
+        df = DataFrame(data_rows, columns = MNGMNT_SHT_HDRS)
+        period_list = list(df['period'].values)
+        try:
+            indx_mode = period_list.index('forward run')
+        except ValueError as err:
+            print(ERR_MESS + 'bad subarea sheet ' + sba)
+            return
+
+        crop_names = list(df['crop_name'].values)
+
+        crop_currs = _make_current_crop_list(crop_names)
+        fert_n_list, org_fert_list, irrigs = _create_ow_fert(df)
+        pi_props, pi_tonnes, crops_ss, crops_fwd = _make_pi_props_tonnes(crop_names, indx_mode, crop_vars)
+
+        # TODO: crude and unpythonic
+        # ==========================
+        crop_mngmnt_fwd = {}
+        crop_mngmnt_ss = {}
+
+        crop_mngmnt_ss['crop_name'] = crop_names[:indx_mode]
+        crop_mngmnt_ss['crop_curr'] = crop_currs[:indx_mode]
+        crop_mngmnt_ss['crop_mngmnt'] = crops_ss
+        crop_mngmnt_ss['fert_n'] = fert_n_list[:indx_mode]
+        crop_mngmnt_ss['org_fert'] = org_fert_list[:indx_mode]
+        crop_mngmnt_ss['pi_prop'] = pi_props[:indx_mode]
+        crop_mngmnt_ss['pi_tonne'] = pi_tonnes[:indx_mode]
+        crop_mngmnt_ss['irrig'] = irrigs[:indx_mode]
+
+        crop_mngmnt_fwd['crop_name'] = crop_names[indx_mode:]
+        crop_mngmnt_fwd['crop_curr'] = crop_currs[indx_mode:]
+        crop_mngmnt_fwd['crop_mngmnt'] = crops_fwd
+        crop_mngmnt_fwd['fert_n'] = fert_n_list[indx_mode:]
+        crop_mngmnt_fwd['org_fert'] = org_fert_list[indx_mode:]
+        crop_mngmnt_fwd['pi_prop'] = pi_props[indx_mode:]
+        crop_mngmnt_fwd['pi_tonne'] = pi_tonnes[indx_mode:]
+        crop_mngmnt_fwd['irrig'] = irrigs[indx_mode:]
+
+        self.soil_for_area = soil_for_area
+        self.crop_mngmnt_ss = crop_mngmnt_ss
+
+        self.crop_mngmnt_fwd = crop_mngmnt_fwd
+        self.area_ha = area_ha
+
+class ReadWeather(object, ):
+
+    def __init__(self, pettmp_ss, pettmp_fwd, latitude):
+        '''
+        read parameters from ORATOR inputs Excel file
+        '''
+        # generate PET from weather
+        # =========================
+        self.pettmp_ss = add_pet_to_weather(latitude, pettmp_ss)
+        self.pettmp_fwd = add_pet_to_weather(latitude, pettmp_fwd)
+
+        # growing degree days
+        # ==================
+        self.pettmp_ss['grow_dds'] = _add_tgdd_to_weather(pettmp_ss['tair'])
+        self.pettmp_fwd['grow_dds'] = _add_tgdd_to_weather(pettmp_fwd['tair'])
+
+        # average monthly precip and temp is required for spin up
+        # =======================================================
+        self.ave_precip_ss, self.ave_temp_ss, self.ave_pet_ss = \
+                            average_weather(latitude, self.pettmp_ss['precip'], self.pettmp_ss['tair'])
+
+        # get average annual rain and temperature of first 10 years
+        # =========================================================
+        nmnths = len(pettmp_ss['precip'])
+        nyrs = nmnths/12
+        self.ann_ave_precip_ss = sum(pettmp_ss['precip'])/nyrs
+        self.ann_ave_temp_ss = sum(pettmp_ss['tair'])/nmnths
+
+class Soil(object,):
+    '''
+
+    '''
+    def __init__(self, soil_defn):
+        """
+        Assumptions:
+        """
+        self.title = 'Soil'
+
+        t_depth = soil_defn['t_depth']
+        self.t_clay = soil_defn['t_clay']
+        self.t_silt = soil_defn['t_silt']
+        self.t_sand = soil_defn['t_sand']
+        t_carbon = soil_defn['t_carbon']
+        t_bulk = soil_defn['t_bulk']
+        self.t_pH_h2o = soil_defn['t_pH']
+
+        salinity = soil_defn['t_salinity']
+        if salinity is None:
+            self.t_salinity = 0.0
+        else:
+            self.t_salinity = salinity
+
+        tot_soc_meas = (10 ** 4) * (t_depth / 100) * t_bulk * (t_carbon / 100)  # tonnes/ha
+
+        self.t_depth = t_depth
+        self.t_carbon = t_carbon
+        self.t_bulk = t_bulk
+        self.tot_soc_meas = tot_soc_meas
+
+class Crop(object,):
+    '''
+
+    '''
+    def __init__(self, crop_name, yield_typ):
+        """
+        Assumptions:
+        """
+        self.crop_lu = crop_name
+        self.yield_typ = yield_typ
+def check_params_excel_file(params_xls_fn):
+    '''
+    validate selected Excel parameters file and disable CN model push button if not valid
+    '''
+    retcode = None
+
+    if not os.path.isfile(params_xls_fn):
         return None
 
-    form.w_study.setText('Study not set')
-    form.settings['inp_dir'] = ''
-    form.w_soil_cn.setEnabled(False)
-    form.w_disp_out.setEnabled(False)
-    form.w_livestock.setEnabled(False)
-
-    print('Loading parameters and weather inputs file: ' + xls_inp_fname)
+    print('ORATOR parameters file: ' + params_xls_fn)
     try:
-        wb_obj = load_workbook(xls_inp_fname, data_only = True)
+        wb_obj = load_workbook(params_xls_fn, data_only = True)
         sheet_names = wb_obj.sheetnames
-    except (PermissionError, BadZipFile) as e:
-        print('Error: ' + str(e))
-        return None
+    except (PermissionError, BadZipFile) as err:
+        print(ERR_MESS + str(err))
+        return retcode
 
     wb_obj.close()
 
@@ -68,43 +426,10 @@ def check_excel_input_file(form, xls_inp_fname):
     # ===================================
     for sheet in REQUIRED_SHEET_NAMES:
         if sheet not in sheet_names:
-            fileOkFlag = False
-            break
+            print(ERR_MESS + 'Required sheet ' + sheet + ' is not present - please check file')
+            return retcode
 
-    if fileOkFlag:
-        mess = '\tinputs file is valid'
-        form.w_soil_cn.setEnabled(True)
-
-        study, latitude, longitude = _read_location_sheet(xls_inp_fname, 'Inputs1- Farm location', 13)
-        study_desc = 'Study: ' + study
-        study_desc += '\tLatitude: {}'.format(latitude)
-        study_desc += '\tLongitude: {}'.format(longitude)
-        form.w_study.setText(study_desc)
-
-        form.settings['study'] = study
-        form.settings['inp_dir'], dummy = os.path.split(xls_inp_fname)
-        retrieve_output_xls_files(form, study)
-
-    else:
-        mess = 'Required sheet ' + sheet + ' is not present - please check file'
-
-    print(mess + '\n')
-    return mess
-
-def _read_location_sheet(xls_fname, sheet_name, skip_until):
-    '''
-
-    '''
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(2,4))
-
-    location = data.dropna(how='all')
-    location = location.rename(columns={'Unnamed: 2': 'Description', 'Unnamed: 3': 'Value'})
-
-    study = location['Value'].values[1]
-    latitude  = location['Value'].values[2]
-    longitude = location['Value'].values[3]
-
-    return study, latitude, longitude
+    return 0
 
 def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
     '''
@@ -122,40 +447,6 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
         n_parms[defn]  = n_parms_df['Value'].values[indx]
 
     return n_parms
-
-def _extract_weather(pettmp_dframe, year_strt, year_end, indx):
-
-    pettemp = []
-    for yr in range(year_strt, year_end):
-        slice = list(pettmp_dframe[yr][indx:indx + 12])
-        pettemp += slice
-
-    return pettemp
-
-def _read_weather_sheet(xls_fname, sheet_name, skip_until):
-    '''
-    reads weather
-    '''
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(3, 16))
-    pettmp_dframe = data.dropna(how='all')
-    year_strt = pettmp_dframe.columns[2]
-    ncols = len(pettmp_dframe.columns)
-    nyears = ncols - 3
-    year_end = year_strt + nyears
-    col_names = ['Month', 'Season'] + [year_strt + val for val in range(nyears)] + ['dummy']
-    pettmp_dframe.columns = col_names
-
-    # reorganise into total rainfall (mm month-1) and average air temperature (°C) for steady state and forward runs
-    # ==============================================================================================================
-    pettmp_ss = {}
-    for indx, metric in zip(list([0, 14]), METRIC_LIST):
-        pettmp_ss[metric] = _extract_weather(pettmp_dframe, year_strt, year_end, indx)
-
-    pettmp_fwd = {}
-    for indx, metric in zip(list([28, 42]), METRIC_LIST):
-        pettmp_fwd[metric] = _extract_weather(pettmp_dframe, year_strt, year_end, indx)
-
-    return pettmp_ss, pettmp_fwd
 
 def _read_crop_vars(xls_fname, sheet_name):
     '''
@@ -220,45 +511,73 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
 
     return all_ow_parms
 
-def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
+def repopulate_excel_dropdown(form, study_name):
     '''
-    Read data on purchases and sales, required for econ module
+    repopulate Excel drop-down
     '''
-
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
-    purch_sales_df = DataFrame(data)
-
-    return purch_sales_df
-
-def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
-    '''
-    Read data on labour, required for econ module
-    '''
-
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
-    labour_df = DataFrame(data)
-
-    return labour_df
+    out_dir = form.settings['out_dir']
+    xlsx_list = glob(out_dir + '/' + study_name + '*.xlsx')
+    form.w_combo17.clear()
+    if len(xlsx_list) > 0:
+        form.w_disp_out.setEnabled(True)
+        for out_xlsx in xlsx_list:
+            dummy, short_fn = os.path.split(out_xlsx)
+            form.w_combo17.addItem(short_fn)
+    return
 
 class ReadStudy(object, ):
 
-    def __init__(self, mgmt_dir, xls_inp_fname, out_dir, output_excel = True):
+    def __init__(self, form, mgmt_dir, run_xls_fname = None, output_excel = True):
         '''
         read location sheet from ORATOR inputs Excel file
         '''
-
         self.output_excel = output_excel
-        self.out_dir = out_dir
+
+        if run_xls_fname is None:
+            run_xls_fname = os.path.normpath(os.path.join(mgmt_dir, FNAME_RUN))
+
+        if not os.path.isfile(run_xls_fname):
+            print('No run file ' + FNAME_RUN + ' in directory ' + mgmt_dir)
+            return None
+
+        # split management directory
+        # ==========================
+        norm_path = os.path.normpath(mgmt_dir)
+        path_cmpnts = norm_path.split(os.sep)
+        study_area, farm = path_cmpnts[-2:]
 
         # Farm location
         # =============
-        wthr_xls = os.path.join(mgmt_dir,'Farm_Weather.xlsx')
-        if os.path.isfile(wthr_xls):
-            self.study_name, self.latitude, self.longitude = _read_external_farm_wthr_file(wthr_xls, study_flag = True)
+        ret_var = read_farm_wthr_xlxs_file(run_xls_fname, study_flag = True)
+        dum, sub_distr, farm_name, latitude, longitude, area, prnct, dum = ret_var
 
-        else:
-            self.study_name, self.latitude, self.longitude \
-                                        = _read_location_sheet(xls_inp_fname, 'Inputs1- Farm location', 13)
+        # check consistency
+        # =================
+        if farm_name != farm:
+            print('Inconsistent farm names: ' + farm + '\tname in run file: ' + farm_name)
+
+        study_desc = 'Study area: ' + study_area + '\t\tFarm: ' + farm_name
+        study_desc += '\t\tLatitude: {}'.format(latitude)
+        study_desc += '\tLongitude: {}'.format(longitude)
+        form.w_study.setText(study_desc)
+
+        self.study_name = farm_name
+        self.latitude = latitude
+        self.longitude = longitude
+
+        '''
+         base outputs directory on inputs location, check and if necessary create
+        '''
+        out_dir = os.path.normpath(os.path.join(mgmt_dir, 'outputs'))
+        if not os.path.isdir(out_dir):
+            try:
+                os.mkdir(out_dir)
+                print('Created output directory: ' + out_dir)
+            except:
+                raise Exception('*** Error *** Could not create output directory: ' + out_dir)
+
+        form.settings['out_dir'] = out_dir
+        repopulate_excel_dropdown(form, farm_name)
 
 class ReadAfricaAnmlProdn(object, ):
 
@@ -277,11 +596,10 @@ class ReadAfricaAnmlProdn(object, ):
              'FSgrain': 'Feedstock dry matter from grain',
              'Manure': 'Manure dry matter', 'ExcreteN': 'Excreted N'}
 
-        sheet = REQD_SHEETS['C1a']
-        print('Reading Africa animal production data from sheet: ' + sheet)
+        print('Reading Africa animal production data from sheet: ' + ANML_PRODN_SHEET)
         column_names = 	list(self.header_mappings.keys())
-        data = read_excel(xls_fname, header=None, names= column_names, sheet_name=sheet, usecols=range(1,13),
-                                                                                            skiprows=range(0,13))
+        data = read_excel(xls_fname, header=None, names= column_names, sheet_name=ANML_PRODN_SHEET,
+                                                                        usecols=range(1,13), skiprows=range(0,13))
         africa_anml_prodn = data.dropna(how='all')
         self.africa_anml_prodn = africa_anml_prodn
 
@@ -295,37 +613,60 @@ class ReadAfricaAnmlProdn(object, ):
 
         self.retcode = 0
 
-def _add_tgdd_to_weather(tair_list):
+def read_subarea_sheet(wthr_xls, sba_indx, nyrs_rota, mngmnt_hdrs):
     '''
-    growing degree days indicates the cumulative temperature when plant growth is assumed to be possible (above 5°C)
+    read first rotation period of management sheet
     '''
-    imnth = 1
-    grow_dds = []
-    for tair in tair_list:
+    df = None
+    data_rows = None
 
-        dummy, ndays = monthrange(2011, imnth)
-        n_grow_days = max(0, ndays * (tair - 5))    #  (eq.3.2.2)
-        grow_dds.append(round(n_grow_days,3))
+    nmnths = 12*nyrs_rota
+    wb_obj = load_workbook(wthr_xls, data_only=True)
+    if sba_indx in wb_obj.sheetnames:
+        sba_sht = wb_obj[sba_indx]
+        rows_generator = sba_sht.values
+        header_row = next(rows_generator)
+        data_rows = [list(row) for (_, row) in zip(range(nmnths), rows_generator)]
 
-        imnth += 1
-        if imnth > 12:
-            imnth = 1
+        # df = DataFrame(data_rows, columns=mngmnt_hdrs)
 
-    return grow_dds
+    wb_obj.close()
 
-def _read_external_farm_wthr_file(wthr_xls, study_flag = False):
+    if data_rows is None:
+        return data_rows
+
+    if len(data_rows[0]) < 9:
+        print(ERR_MESS_SHEET + sba_indx + ' must have at least 9 values per line')
+        return None
+
+    # condition data so yield, Fert N amount, OW amount and	irrigation are mapped from None to zero
+    # =============================================================================================
+    data_recs = []
+    for row in data_rows:
+        new_row = copy(row)
+        for icol in list([4, 5, 8, 9]):     # corresponds to columns E, G, I and J
+            if row[icol] is None:
+                new_row[icol] = '0'
+
+        data_recs.append(new_row)
+
+    return data_recs
+
+def read_farm_wthr_xlxs_file(wthr_xls, study_flag = False):
     '''
-    TODO: unpythonic, requires improvement
+    check required sheets are present
     '''
     wb_obj = load_workbook(wthr_xls, data_only=True)
 
     if study_flag:
-        farm_sht = wb_obj['Farm location']
-        df = DataFrame(farm_sht.values, columns=['Description', 'Values'])
-        farm_name = df['Values'][2]
-        latitude = df['Values'][3]
-        longitude = df['Values'][4]
-        ret_var = (farm_name, latitude, longitude)
+        rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
+        if rqrd_sheet in wb_obj.sheetnames:
+            farm_sht = wb_obj[rqrd_sheet]
+            df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
+            ret_var = list(df['Values'][:])
+        else:
+            print('Sheet ' + rqrd_sheet + ' not present in ' + wthr_xls)
+            ret_var = None
     else:
         pettmp_ss = {'precip': [], 'tair': []}
         pettmp_fwd = {'precip': [], 'tair': []}
@@ -343,47 +684,12 @@ def _read_external_farm_wthr_file(wthr_xls, study_flag = False):
         ret_var = (pettmp_ss, pettmp_fwd)
 
     wb_obj.close()
+
     return ret_var
-
-class ReadWeather(object, ):
-
-    def __init__(self, mgmt_dir, xls_inp_fname, latitude):
-        '''
-        read parameters from ORATOR inputs Excel file
-        '''
-        print('Reading weather sheet...')
-
-        wthr_xls = os.path.join(mgmt_dir,'Farm_Weather.xlsx')
-        if os.path.isfile(wthr_xls):
-            pettmp_ss, pettmp_fwd = _read_external_farm_wthr_file(wthr_xls)
-        else:
-            pettmp_ss, pettmp_fwd = _read_weather_sheet(xls_inp_fname, 'Weather', 14)
-
-        # generate PET from weather
-        # =========================
-        self.pettmp_ss = add_pet_to_weather(latitude, pettmp_ss)
-        self.pettmp_fwd = add_pet_to_weather(latitude, pettmp_fwd)
-
-        # growing degree days
-        # ==================
-        self.pettmp_ss['grow_dds'] = _add_tgdd_to_weather(pettmp_ss['tair'])
-        self.pettmp_fwd['grow_dds'] = _add_tgdd_to_weather(pettmp_fwd['tair'])
-
-        # average monthly precip and temp is required for spin up
-        # =======================================================
-        self.ave_precip_ss, self.ave_temp_ss, self.ave_pet_ss = \
-                            average_weather(latitude, self.pettmp_ss['precip'], self.pettmp_ss['tair'])
-
-        # get average annual rain and temperature of first 10 years
-        # =========================================================
-        nmnths = len(pettmp_ss['precip'])
-        nyrs = nmnths/12
-        self.ann_ave_precip_ss = sum(pettmp_ss['precip'])/nyrs
-        self.ann_ave_temp_ss = sum(pettmp_ss['tair'])/nmnths
 
 class ReadCropOwNitrogenParms(object, ):
 
-    def __init__(self, xls_inp_fname):
+    def __init__(self, params_xls_fn):
         '''
         read parameters from ORATOR inputs Excel file
         '''
@@ -392,80 +698,9 @@ class ReadCropOwNitrogenParms(object, ):
 
         # Nitrogen params plus r_dry, drying potential
         # ============================================
-        self.n_parms = _read_n_constants_sheet(xls_inp_fname, 'N constants', 0)
+        self.n_parms = _read_n_constants_sheet(params_xls_fn, 'N constants', 0)
 
         # Organic Waste and Crop params e.g. max rooting depths
         # =====================================================
-        self.ow_parms = _read_organic_waste_sheet(xls_inp_fname, 'Org Waste parms', 0)
-        self.crop_vars = _read_crop_vars(xls_inp_fname, 'Crop parms')
-
-class Soil(object,):
-    '''
-
-    '''
-    def __init__(self, soil_slice):
-        """
-        Assumptions:
-        """
-        self.title = 'Soil'
-
-        t_depth = soil_slice[0]
-        self.t_clay = soil_slice[1]
-        self.t_silt = soil_slice[2]
-        self.t_sand = soil_slice[3]
-        t_carbon = soil_slice[4]
-        t_bulk = soil_slice[5]
-        self.t_pH_h2o = soil_slice[6]
-        self.t_salinity = soil_slice[7]
-
-        tot_soc_meas = (10 ** 4) * (t_depth / 100) * t_bulk * (t_carbon / 100)  # tonnes/ha
-
-        self.t_depth = t_depth
-        self.t_carbon = t_carbon
-        self.t_bulk = t_bulk
-        self.tot_soc_meas = tot_soc_meas
-
-class Crop(object,):
-    '''
-
-    '''
-    def __init__(self, crop_slice):
-        """
-        Assumptions:
-        """
-        self.title = 'Crop'
-
-        self.crop_lu = crop_slice[0]
-        self.sowing_mnth = crop_slice[1]
-        self.harvest_mnth = crop_slice[2]
-        self.yield_typ = crop_slice[3]
-
-        # inorganic fertiliser application
-        # ================================
-        self.fert_type = crop_slice[5]
-        self.fert_n = crop_slice[6]
-        self.fert_p = crop_slice[7]
-        self.fert_mnth = crop_slice[8]
-
-        # organic waste
-        # =============
-        self.ow_type = crop_slice[10]
-        self.ow_mnth = crop_slice[11]
-        self.ow_amount = crop_slice[12]
-
-        # irrigation up to 12 months max
-        # ==============================
-        indx_strt = 14
-        irrig = {}
-        nmnths = int(len(crop_slice[indx_strt:])/2)
-        for imnth in range(nmnths):
-            indx = indx_strt + imnth*2
-            mnth = crop_slice[indx]
-            amount = crop_slice[indx + 1]
-            if amount == 0 or mnth == 0:
-                continue
-            else:
-                irrig[mnth] = amount
-
-        self.irrig = irrig
-
+        self.ow_parms = _read_organic_waste_sheet(params_xls_fn, 'Org Waste parms', 0)
+        self.crop_vars = _read_crop_vars(params_xls_fn, 'Crop parms')

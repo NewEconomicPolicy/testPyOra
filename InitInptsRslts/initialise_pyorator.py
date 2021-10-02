@@ -24,18 +24,18 @@ import sys
 from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
-from ora_excel_read import check_excel_input_file, ReadStudy
-from ora_excel_write import retrieve_output_xls_files
-from ora_low_level_fns import extend_out_dir
-from ora_json_read import check_json_input_files
+from ora_excel_read import check_params_excel_file, ReadStudy
+from ora_json_read import check_json_xlsx_inp_files
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
 PROGRAM_ID = 'pyorator'
-EXCEL_EXE_PATH = 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE'
+EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
 ERROR_STR = '*** Error *** '
 sleepTime = 5
+
+FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
 def initiation(form):
     '''
@@ -44,16 +44,11 @@ def initiation(form):
     # retrieve settings
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
-    form.settings['studies'] = []
 
     # initialise bridges across economics, livestock and carbon-nitrogen-water models
     # ===============================================================================
     form.all_runs_output = {}
     form.all_runs_crop_model = {}
-    form.total_an_prod_all_subareas = {}
-    # Set flag to show if livestock and crop modules have been run
-    form.crop_run = False
-    form.livestock_run = False
 
     set_up_logging(form, PROGRAM_ID)
 
@@ -86,7 +81,7 @@ def _read_setup_file(program_id):
     # initialise vars
     # ===============
     settings = setup['setup']
-    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'excel_dir', 'weather_dir']
+    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'excel_dir', 'weather_dir', 'params_xls']
     for key in settings_list:
         if key not in settings:
             print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
@@ -113,9 +108,14 @@ def _read_setup_file(program_id):
 
     settings['excel_path'] = excel_path
 
-    # lookup Excel file is required
-    # =============================
+    # lookup Excel and parameters files are required
+    # ==============================================
     if read_lookup_excel_file(settings) is None:
+        sleep(sleepTime)
+        exit(0)
+
+    params_xls = os.path.normpath(settings['params_xls'])
+    if check_params_excel_file(params_xls) is None:
         sleep(sleepTime)
         exit(0)
 
@@ -135,7 +135,15 @@ def _read_setup_file(program_id):
     settings['config_file'] = config_file
     # print('Using configuration file: ' + config_file)
 
-    settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
+    # essential check to establish results directory
+    # ==============================================
+    root_io_dir, dummy = os.path.split(config_dir)
+    settings['root_io_dir'] = root_io_dir
+    rslts_dir = os.path.join(root_io_dir, 'results')
+    if not os.path.isdir(rslts_dir):
+        os.mkdir(rslts_dir)
+    settings['rslts_dir'] = rslts_dir
+    settings['study'] = ''
 
     return settings
 
@@ -178,15 +186,17 @@ def _write_default_setup_file(setup_file):
         sleep(sleepTime)
         sys.exit(0)
 
+    # typically: 'fname_lookup': "G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx"
+    # ===========================================================================================================
     orator_dir += '\\'
     data_path += '\\'
     _default_setup = {
         'setup': {
             'config_dir': orator_dir + 'config',
-            'fname_png': os.path.join(orator_dir + 'Images', 'Tree_of_life.PNG'),
-            'hwsd_dir': data_path + 'HWSD_NEW',
+            'fname_png': os.path.join(orator_dir + 'run\\Images', 'Tree_of_life.PNG'),
+            'fname_lookup': '',
+            'excel_dir': '',
             'log_dir': orator_dir + 'logs',
-            'shp_dir': data_path + 'CountryShapefiles',
             'weather_dir': data_path
         }
     }
@@ -202,7 +212,7 @@ def _write_default_config_file(config_file):
 
     """
     _default_config = {
-        'inp_xls': '',
+        'params_xls': '',
         'mgmt_dir': '',
         'write_excel': True,
         'out_dir': ''
@@ -231,35 +241,29 @@ def read_config_file(form):
     else:
         config = _write_default_config_file(config_file)
 
-    for attrib in list(['inp_xls', 'mgmt_dir', 'write_excel', 'out_dir']):
+    for attrib in list(['mgmt_dir', 'write_excel']):
         if attrib not in config:
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
             sys.exit(0)
 
-    # must come first
-    # ===============
-    out_dir = os.path.normpath(config['out_dir'])
-    form.settings['out_dir'] = out_dir
-    form.w_lbl15.setText(out_dir)
-
-    inp_xls = os.path.normpath(config['inp_xls'])
-    form.w_lbl13.setText(inp_xls)
-
-    ret_str = check_excel_input_file(form, inp_xls)
-    if ret_str.find('is valid') == -1:
-        sleep(sleepTime)
-        sys.exit(0)
-
-    form.w_lbl14.setText(ret_str)     # needs out_dir from form.settings
-
     # this stanza relates to use of JSON files
     # ========================================
     mgmt_dir = os.path.normpath(config['mgmt_dir'])
+    if not os.path.isdir(mgmt_dir):
+        mess =  '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
+        return
+
     form.w_lbl06.setText(mgmt_dir)
 
-    form.w_lbl07.setText(check_json_input_files(form, mgmt_dir, 'mgmt'))
-    print(check_json_input_files(form, mgmt_dir, 'lvstck'))
+    form.w_lbl07.setText(check_json_xlsx_inp_files(form, mgmt_dir))
+
+    # check run file
+    # =============
+    run_xls_fname = os.path.join(mgmt_dir, FNAME_RUN)
+    if not os.path.isfile(run_xls_fname):
+        print(ERROR_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
+        return
 
     if config['write_excel']:
         form.w_make_xls.setCheckState(2)
@@ -291,37 +295,33 @@ def read_config_file(form):
 
     # enable users to view outputs from previous run
     # ==============================================
-    study = ReadStudy(mgmt_dir, inp_xls, out_dir)
-    extend_out_dir(form)
-    retrieve_output_xls_files(form, study.study_name)
+    form.settings['study'] = ReadStudy(form, mgmt_dir, run_xls_fname)
 
     return True
 
 def write_config_file(form, message_flag=True):
     """
-    # write current selections to config file
+    write current selections to config file
     """
-    study = form.w_study.text()
 
     # only one config file
     # ====================
     config_file = form.settings['config_file']
 
     config = {
-        "inp_xls": form.w_lbl13.text(),
         "mgmt_dir": form.w_lbl06.text(),
-        "write_excel": form.w_make_xls.isChecked(),
-        "out_dir": form.w_lbl15.text()
+        "write_excel": form.w_make_xls.isChecked()
     }
     if os.path.isfile(config_file):
         descriptor = 'Updated existing'
     else:
         descriptor = 'Wrote new'
-    if study != '':
-        with open(config_file, 'w') as fconfig:
-            json.dump(config, fconfig, indent=2, sort_keys=True)
-            if message_flag:
-                print('\n' + descriptor + ' configuration file ' + config_file)
-            else:
-                print()
+
+    with open(config_file, 'w') as fconfig:
+        json.dump(config, fconfig, indent=2, sort_keys=True)
+        if message_flag:
+            print('\n' + descriptor + ' configuration file ' + config_file)
+        else:
+            print()
+
     return
