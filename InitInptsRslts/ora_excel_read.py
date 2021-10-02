@@ -403,6 +403,7 @@ class Crop(object,):
         """
         self.crop_lu = crop_name
         self.yield_typ = yield_typ
+
 def check_params_excel_file(params_xls_fn):
     '''
     validate selected Excel parameters file and disable CN model push button if not valid
@@ -410,6 +411,7 @@ def check_params_excel_file(params_xls_fn):
     retcode = None
 
     if not os.path.isfile(params_xls_fn):
+        print(ERR_MESS + 'Excel parameters file ' + params_xls_fn + ' must exist - check setup file')
         return None
 
     print('ORATOR parameters file: ' + params_xls_fn)
@@ -510,6 +512,26 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
         all_ow_parms = None
 
     return all_ow_parms
+
+def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
+    '''
+    Read data on purchases and sales, required for econ module
+    '''
+
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    purch_sales_df = DataFrame(data)
+
+    return purch_sales_df
+
+def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
+    '''
+    Read data on labour, required for econ module
+    '''
+
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    labour_df = DataFrame(data)
+
+    return labour_df
 
 def repopulate_excel_dropdown(form, study_name):
     '''

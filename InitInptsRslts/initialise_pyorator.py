@@ -135,14 +135,6 @@ def _read_setup_file(program_id):
     settings['config_file'] = config_file
     # print('Using configuration file: ' + config_file)
 
-    # essential check to establish results directory
-    # ==============================================
-    root_io_dir, dummy = os.path.split(config_dir)
-    settings['root_io_dir'] = root_io_dir
-    rslts_dir = os.path.join(root_io_dir, 'results')
-    if not os.path.isdir(rslts_dir):
-        os.mkdir(rslts_dir)
-    settings['rslts_dir'] = rslts_dir
     settings['study'] = ''
 
     return settings
