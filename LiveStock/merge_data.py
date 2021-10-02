@@ -44,6 +44,7 @@ def merge_harvest_land_use(orator_obj):
             crop_yield_dic = {crop : 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
+                # trap to avoid IndexError
                 if len(yld_n_lim) == 0:
                     break
                 crop_yield_dic_values = {crop : yld_n_lim[0]}
@@ -57,6 +58,7 @@ def merge_harvest_land_use(orator_obj):
             crop_yield_dic = {crop : 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
+                # trap to avoid IndexError
                 if len(yld_zaks) > 0:
                     break
                 crop_yield_dic_values = {crop : yld_zaks[0]}
@@ -70,6 +72,7 @@ def merge_harvest_land_use(orator_obj):
             crop_yield_dic = {crop : 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
+                # trap to avoid IndexError
                 if len(yld_miami) > 0:
                     break
                 crop_yield_dic_values = {crop : yld_miami[0]}
