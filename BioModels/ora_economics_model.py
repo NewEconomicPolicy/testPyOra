@@ -68,6 +68,16 @@ class HouseholdMembers:
         self.grow_seas_essential_activities_hrs_day = labour_data[40]
         self.grow_seas_non_essential_activities_hrs_day = labour_data[41]
 
+        # Information on wage rates
+        self.wage_month = labour_data[43]
+        self.wage_year = self.wage_month * 12
+        # Assume work 365 days per year
+        self.wage_day = self.wage_year / 365
+        # Assume work 12 hrs day
+        self.wage_hour = self.wage_day / 12
+
+
+
     def agricultural_labour_calc(self):
         '''
         Function to calculate time spent on agricultural labour, including dung collection
@@ -81,14 +91,17 @@ class HouseholdMembers:
         # Need also hourly rate for wages?
         self.sowing_time_year = self.total_days_sowing_crops * self.daily_average_time_sowing_crops
 
-        # Create 'growing_season variable - how?
+        # Create 'growing_season variable - how? IMPORT FROM CROP MODULE
         grow_season_days_total = 200
         self.tending_crops_time = self.grow_seas_total_time_tending_crops * grow_season_days_total
 
         self.harvest_crops_year = self.harvest_total_days_harvesting * self.harvest_average_day_hrs_spent_harvesting
+        # Total hours spent annually
         self.total_agriculture_labour_yearly = self.livestock_time_annual + self.sowing_time_year + \
                                                self.tending_crops_time
+        self.total_ag_labour_year_value = self.total_agriculture_labour_yearly * self.wage_hour
 
+        return self.total_ag_labour_year_value
         
     def domestic_labour_calc(self):
         '''
@@ -111,8 +124,12 @@ class HouseholdMembers:
         self.non_essential_activites_year = self.grow_seas_non_essential_activities_hrs_day * 365
 
         # Currently only for normal years. Need to define drought years and attacth to form object then add if statement
+        # This is total hours per year spent doing activities
         self.total_domestic_labour = self.year_wood_collect + self.water_collection_yearly_normal + \
                                      self.essential_activities_year + self.non_essential_activites_year
+        self.total_dom_labour_year_value = self.total_domestic_labour * self.wage_hour
+
+        return self.total_dom_labour_year_value
 
 
 class HouseholdPurchasesSales:
@@ -258,13 +275,31 @@ def test_economics_algorithms(form):
     # ----------------------------------------
     # Calculate value of time for each household member undertaking agricultural activities (including dung collection)
     # and other activities (collecting water, firewood, cooking)
+    household_ag_labour_value = []
+    household_dom_labour_value = []
     for person_type in hh_members:
-        person_type.agricultural_labour_calc()
-        person_type.domestic_labour_calc()
+        household_ag_labour_value.append(person_type.agricultural_labour_calc())
+        household_dom_labour_value.append(person_type.domestic_labour_calc())
+
+    total_hh_ag_value = sum(household_ag_labour_value)
+    total_dom_labour_value = sum(household_dom_labour_value)
 
 
     #----------------------------------------
-    # Equation to calculate net household income
+    # Equation to calculate net household income for each year in the forward run, and based on the three crop calc
+    # methods
+    # DAP and Urea not included yet
+    temp_var = 1000
+    all_subareas_dic = {}
+    for subarea, data in all_management_crops_value_dic.items():
+        calc_method_dic = {}
+        for calc_method, fr_years in data.items():
+            fr_total_hh_income = []
+            for year in fr_years:
+                total_hh_income = year['Total Crop Sales'] - total_hh_ag_value - total_dom_labour_value + temp_var
+                fr_total_hh_income.append(total_hh_income)
+            calc_method_dic.update({calc_method : fr_total_hh_income})
+        all_subareas_dic.update({subarea : calc_method_dic})
 
 
 
