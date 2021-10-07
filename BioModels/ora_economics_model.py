@@ -83,7 +83,7 @@ class HouseholdMembers:
 
         # Create 'growing_season variable - how?
         grow_season_days_total = 200
-        self.tending_crops_time = self.grow_seas_total_time_tending_crops *grow_season_days_total
+        self.tending_crops_time = self.grow_seas_total_time_tending_crops * grow_season_days_total
 
         self.harvest_crops_year = self.harvest_total_days_harvesting * self.harvest_average_day_hrs_spent_harvesting
         self.total_agriculture_labour_yearly = self.livestock_time_annual + self.sowing_time_year + \
@@ -149,7 +149,7 @@ def test_economics_algorithms(form):
     # Import data on purchases and sales, and labour, from excel spreadsheet
     # Save as a DataFrame
 
-    xls_inp_fname = os.path.normpath(form.w_lbl13.text())
+    xls_inp_fname = os.path.normpath(form.settings['params_xls'])
     purch_sales_df = read_econ_purch_sales_sheet(xls_inp_fname, 'Purchases & Sales', 3)
     purch_sales_df = purch_sales_df.drop(columns=['Units.2','Units.3', 'Units.4', 'Units.5', 'Units.6', 'Units.7',
                                                   'Unnamed: 18'])
@@ -261,6 +261,10 @@ def test_economics_algorithms(form):
     for person_type in hh_members:
         person_type.agricultural_labour_calc()
         person_type.domestic_labour_calc()
+
+
+    #----------------------------------------
+    # Equation to calculate net household income
 
 
 

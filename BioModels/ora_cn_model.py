@@ -181,6 +181,7 @@ def run_soil_cn_algorithms(form):
 
         form.all_runs_crop_model[sba] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars,
                                                                                         ora_subareas[sba].area_ha)
+        form.crop_run = True
         # outputs only
         # ============
         form.all_runs_output[sba] = complete_run
