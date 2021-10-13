@@ -71,6 +71,9 @@ def fetch_detail_from_varname(lookup_df, metric):
         definition = lookup_df['Definition'][key]
         units = lookup_df['Units'][key]
         out_format = lookup_df['Output format'][key]
+        if out_format is nan:
+            out_format = '2f'
+
         pyora_display = lookup_df[PY_DISP][key]
 
         return definition, units, out_format, pyora_display

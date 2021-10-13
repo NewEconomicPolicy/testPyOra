@@ -91,7 +91,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         # proportion of the optimum supply of N in the soil
         # =================================================
         nut_n_fert = nh4_ow_fert + nh4_inorg_fert
-        prop_n_opt = prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert , nut_n_min, n_crop_dem)   # (eq.3.3.1)
+        prop_n_opt = prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, n_crop_dem)   # (eq.3.3.1)
 
         # Ammonium N (kg/ha) NB required before nitrate due to nitrification
         # ==================================================================

@@ -46,7 +46,7 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     '''
     crop_model.data['crop_name'].append(this_crop_name)
     crop_model.data['cml_n_uptk'].append(cml_n_uptk)
-    crop_model.data['cml_n_uptk_adj'].append(cml_n_uptk_adj)
+    crop_model.data['cml_n_uptk_adj'].append(float(cml_n_uptk_adj))
     yld_typ = crop_model.data['yld_typ'][indx]
     try:
         yld_n_lim = yld_typ * (cml_n_uptk_adj / cml_n_uptk)  # n limited yield
@@ -54,13 +54,34 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
         print(str(err))
         yld_n_lim = 0.0
 
-    crop_model.data['yld_n_lim'].append(yld_n_lim)
+    crop_model.data['yld_n_lim'].append(float(yld_n_lim))
 
     yld_ann_typ += yld_typ
     yld_ann_n_lim += yld_n_lim
 
     indx += 1
     return indx, 0, 0, yld_ann_typ, yld_ann_n_lim       # resets cummulated nitrogen uptakes to zero
+
+class EconoLvstckModel(object, ):
+    '''
+    dummy object
+    '''
+    def __init__(self, complete_run = None, area_ha = None):
+        '''
+        construct a crop model object suitable for livestock model
+        '''
+        self.title = 'EconoLvstckModel'
+        self.data = {}
+
+        var_name_list = list(['manure_prod_typ', 'manure_prod_atyp', 'meat_prod_typ', 'meat_prod_atyp',
+                              'milk_prod_typ', 'milk_prod_atyp', 'n_excrete_typ', 'n_excrete_atyp'])
+        for var_name in var_name_list:
+            self.data[var_name] = []
+
+        self.var_name_list = var_name_list
+
+        if complete_run is not None:
+            self.area_ha = area_ha
 
 class CropModel(object, ):
     '''

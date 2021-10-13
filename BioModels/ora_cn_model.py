@@ -213,8 +213,10 @@ def run_soil_cn_algorithms(form):
 
     if len(form.all_runs_crop_model) > 0:
         form.w_disp_cm.setEnabled(True)
+        form.w_disp_econ.setEnabled(False)
     else:
         form.w_disp_cm.setEnabled(False)
+        form.w_disp_econ.setEnabled(False)
 
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return

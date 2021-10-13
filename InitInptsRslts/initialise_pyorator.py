@@ -26,7 +26,7 @@ from win32api import GetLogicalDriveStrings
 from set_up_logging import set_up_logging
 from ora_excel_read import check_params_excel_file, ReadStudy
 from ora_json_read import check_json_xlsx_inp_files
-from ora_cn_classes import CarbonChange, NitrogenChange, CropModel
+from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
@@ -287,7 +287,12 @@ def read_config_file(form):
     crop_model = CropModel()
     display_names = fetch_display_names_from_metrics(lookup_df, crop_model)
     for display_name in display_names:
-            form.w_combo10.addItem(display_name)
+        form.w_combo10.addItem(display_name)
+
+    econ_model = EconoLvstckModel()
+    display_names = fetch_display_names_from_metrics(lookup_df, econ_model)
+    for display_name in display_names:
+        form.w_combo11.addItem(display_name)
 
     # enable users to view outputs from previous run
     # ==============================================

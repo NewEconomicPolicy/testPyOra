@@ -130,10 +130,10 @@ class Form(QWidget):
         self.w_combo09 = w_combo09
         grid.addWidget(w_combo09, irow, 1, 1, 2)
 
-        # line 10: crop model
-        # ===================
+        # crop model
+        # ==========
         irow += 1
-        w_disp_cm = QPushButton('Display crop model metric')
+        w_disp_cm = QPushButton('Crop production')
         helpText = 'Display crop model chart'
         w_disp_cm.setToolTip(helpText)
         w_disp_cm.clicked.connect(lambda: self.displayMetric(self.w_combo10, 'crop_model'))
@@ -146,8 +146,24 @@ class Form(QWidget):
         self.w_combo10 = w_combo10
         grid.addWidget(w_combo10, irow, 1, 1, 2)
 
+        # crop model
+        # ==========
         irow += 1
-        grid.addWidget(QLabel(), irow, 0, )   # spacer
+        w_disp_econ = QPushButton('Livestock, Economics ')
+        helpText = 'Display crop model chart'
+        w_disp_econ.setToolTip(helpText)
+        w_disp_econ.clicked.connect(lambda: self.displayMetric(self.w_combo11, 'livestock'))
+        w_disp_econ.setEnabled(False)
+        self.w_disp_econ = w_disp_econ
+        grid.addWidget(w_disp_econ, irow, 0)
+
+        w_combo11 = QComboBox()
+        w_combo11.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo11))
+        self.w_combo11 = w_combo11
+        grid.addWidget(w_combo11, irow, 1, 1, 2)
+
+        irow += 1
+        grid.addWidget(QLabel(), irow, 0, )  # spacer
 
         # line 16: generate Excel files
         # =============================
@@ -288,6 +304,7 @@ class Form(QWidget):
             self.w_disp_n.setEnabled(False)
             self.w_disp_w.setEnabled(False)
             self.w_disp_cm.setEnabled(False)
+            self.w_disp_econ.setEnabled(False)
             self.w_disp_out.setEnabled(False)
             self.w_livestock.setEnabled(False)
             self.settings['study'] = ReadStudy(self, mgmt_dir)
