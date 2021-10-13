@@ -37,6 +37,7 @@ class HouseholdMembers:
         self.name = name
         self.number = labour_data[0]
         self.awake = labour_data[1]
+        self.awake_year = self.awake * 365
 
         # Information on wood
         self.wood_bundle_weight = labour_data[3]
@@ -74,7 +75,10 @@ class HouseholdMembers:
         # Assume work 365 days per year
         self.wage_day = self.wage_year / 365
         # Assume work 12 hrs day
-        self.wage_hour = self.wage_day / 12
+        self.wage_hour = self.wage_day / 14
+
+        # Calculation for total labour value
+        self.value_of_labour_year = self.awake_year * self.wage_hour
 
 
 
@@ -275,28 +279,33 @@ def test_economics_algorithms(form):
     # ----------------------------------------
     # Calculate value of time for each household member undertaking agricultural activities (including dung collection)
     # and other activities (collecting water, firewood, cooking)
+    # Total working hours is currently total hours awake NEED TO CHANGE?
+    household_working_hours = []
     household_ag_labour_value = []
     household_dom_labour_value = []
     for person_type in hh_members:
+        household_working_hours.append(person_type.value_of_labour_year)
         household_ag_labour_value.append(person_type.agricultural_labour_calc())
         household_dom_labour_value.append(person_type.domestic_labour_calc())
 
+    total_hh_working_hours = sum(household_working_hours)
     total_hh_ag_value = sum(household_ag_labour_value)
     total_dom_labour_value = sum(household_dom_labour_value)
+
 
 
     #----------------------------------------
     # Equation to calculate net household income for each year in the forward run, and based on the three crop calc
     # methods
     # DAP and Urea not included yet
-    temp_var = 1000
     all_subareas_dic = {}
     for subarea, data in all_management_crops_value_dic.items():
         calc_method_dic = {}
         for calc_method, fr_years in data.items():
             fr_total_hh_income = []
             for year in fr_years:
-                total_hh_income = year['Total Crop Sales'] - total_hh_ag_value - total_dom_labour_value + temp_var
+                total_hh_income = year['Total Crop Sales'] - total_hh_ag_value - total_dom_labour_value + \
+                                  total_hh_working_hours
                 fr_total_hh_income.append(total_hh_income)
             calc_method_dic.update({calc_method : fr_total_hh_income})
         all_subareas_dic.update({subarea : calc_method_dic})
