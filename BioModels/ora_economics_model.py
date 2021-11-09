@@ -190,7 +190,6 @@ def test_economics_algorithms(form):
         hh_ps_instance = HouseholdPurchasesSales(data)
         hh_purchases_sales.append(hh_ps_instance)
 
-
     # ----------------------------------------
     # Create instances of HouseholdMembers Class using Dataframe created from excel sheet. Store in list.
     hh_members = []
@@ -198,9 +197,6 @@ def test_economics_algorithms(form):
     for column_name, column_data in labour_df.iteritems():
         hh_lab_instance =  HouseholdMembers(column_name, column_data)
         hh_members.append(hh_lab_instance)
-
-
-
 
     # ----------------------------------------
     # Check if crop model has been run
@@ -211,8 +207,6 @@ def test_economics_algorithms(form):
 
     else:
         print('No crop data! Please run C and N model first')
-
-
 
     #----------------------------------------
     # Check if livestock model has been run
@@ -292,13 +286,11 @@ def test_economics_algorithms(form):
     total_hh_ag_value = sum(household_ag_labour_value)
     total_dom_labour_value = sum(household_dom_labour_value)
 
-
-
     #----------------------------------------
     # Equation to calculate net household income for each year in the forward run, and based on the three crop calc
     # methods
     # DAP and Urea not included yet
-    all_subareas_dic = {}
+    all_subareas_full_hh_dic = {}
     for subarea, data in all_management_crops_value_dic.items():
         calc_method_dic = {}
         for calc_method, fr_years in data.items():
@@ -308,9 +300,28 @@ def test_economics_algorithms(form):
                                   total_hh_working_hours
                 fr_total_hh_income.append(total_hh_income)
             calc_method_dic.update({calc_method : fr_total_hh_income})
-        all_subareas_dic.update({subarea : calc_method_dic})
+        all_subareas_full_hh_dic.update({subarea : calc_method_dic})
 
-
+    # ----------------------------------------
+    # Equation to calculate per capita consumption. Dummy variables created for now
+    # Only using variables of household income, total livestock units, and land owned
+    y_pcc = 34
+    alpha_0 = 1
+    tlu = 10
+    land = 1000
+    all_subareas_pcc = {}
+    for subarea, calc_methods in all_subareas_full_hh_dic.items():
+        calc_method_dic = {}
+        for calc_method, data in calc_methods.items():
+            fr_pcc = []
+            for year in data:
+                # Put equation here to calculate PCC for each year in the forward run, for each yield calc method, for
+                # each subarea
+                print('s')
+                year_pcc = alpha_0 + (0.154 * year) + (0.0211 * tlu) + (0.0351 * land)
+                fr_pcc.append(year_pcc)
+            calc_method_dic.update({calc_method : fr_pcc})
+        all_subareas_pcc.update({subarea : calc_method_dic})
 
 
 
