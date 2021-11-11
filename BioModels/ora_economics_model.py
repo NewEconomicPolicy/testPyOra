@@ -18,7 +18,7 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
+import os, numpy
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 
@@ -305,20 +305,46 @@ def test_economics_algorithms(form):
     # ----------------------------------------
     # Equation to calculate per capita consumption. Dummy variables created for now
     # Only using variables of household income, total livestock units, and land owned
-    y_pcc = 34
-    alpha_0 = 1
+
+    # Alpha values (allow these to be input by user: update GUI)
+    # Intercept
+    alpha_0 = 9.194
+    # Full Household income
+    alpha_1 = 0.0154
+    # Land
+    alpha_2 = 0.0351
+    # Land squared
+    alpha_3 = -0.0000816
+    # Total land utilised
+    alpha_4 = 0.0211
+    # Total land utilised squared
+    alpha_5 = -0.000396
+    # Log - Household size adult equivalents
+    alpha_6 = -0.399
+    # Regional price index
+    alpha_7 = 1
+
+    # Pull these values from elsewhere in model
+    # Livestock
     tlu = 10
+    tlu_squared = tlu * tlu
+    # Land utilised
     land = 1000
+    land_squared = land * land
+    # Size of household in adult equivalents - how to deal with children (1/2 of adult?)
+    household_size = 4.2
+    household_size_log = numpy.log(household_size)
+
+    # Use Full Household income for each year for each calc method and subarea
     all_subareas_pcc = {}
     for subarea, calc_methods in all_subareas_full_hh_dic.items():
         calc_method_dic = {}
         for calc_method, data in calc_methods.items():
             fr_pcc = []
             for year in data:
-                # Put equation here to calculate PCC for each year in the forward run, for each yield calc method, for
-                # each subarea
-                print('s')
-                year_pcc = alpha_0 + (0.154 * year) + (0.0211 * tlu) + (0.0351 * land)
+                # year is FHH for each year
+                year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
+                           (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
                 fr_pcc.append(year_pcc)
             calc_method_dic.update({calc_method : fr_pcc})
         all_subareas_pcc.update({subarea : calc_method_dic})
