@@ -324,15 +324,33 @@ def test_economics_algorithms(form):
     # Regional price index
     alpha_7 = 1
 
-    # Pull these values from elsewhere in model
-    # Livestock
-    tlu = 10
+    # Livestock: Are all livestock worth the same? I.e do cow, pig, chicken all = 1. For now they do
+    tlu = 0
+    livestock_list = form.livestock_list
+    for animal_type in livestock_list:
+        animal_type_total = animal_type.number
+        tlu = tlu + animal_type_total
     tlu_squared = tlu * tlu
+
     # Land utilised
     land = 1000
     land_squared = land * land
-    # Size of household in adult equivalents - how to deal with children (1/2 of adult?)
-    household_size = 4.2
+
+    # Size of household in adult equivalents - how to deal with children ( assume 1/2 of adult just now)
+    household_size = 0
+    for people in hh_members:
+        if people.name == 'Male adults':
+            household_size = household_size + people.number
+        elif people.name == 'Female adults':
+            household_size = household_size + people.number
+        elif people.name == 'Male children':
+            household_size = household_size + (people.number * 0.5)
+        elif people.name == 'Female children':
+            household_size = household_size + (people.number * 0.5)
+        else:
+            print ('Please enter family members in economics sheet as either '
+                   'Male adults, Female adults, Male children, or Female children')
+            continue
     household_size_log = numpy.log(household_size)
 
     # Use Full Household income for each year for each calc method and subarea
