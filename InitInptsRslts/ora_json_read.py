@@ -191,3 +191,21 @@ def check_json_xlsx_inp_files(form, mgmt_dir):
         mess += 'missing'
 
     return mess
+
+def disp_ow_parms(form):
+    '''
+    display summary of selected organic waste type
+    '''
+    ow_parms = form.ora_parms.ow_parms
+
+    # build message
+    # =============
+    ow_type = form.w_combo13.currentText()
+    pcnt_c = round(ow_parms[ow_type]['pcnt_c']*100, 3)
+    pcnt_urea = round(ow_parms[ow_type]['pcnt_urea']*100, 3)
+    ann_c_input = round(ow_parms[ow_type]['ann_c_input']*100, 3)
+
+    mess = 'Organic waste parameters:\t% Carbon: {}\t'.format(pcnt_c)
+    mess += '%C wrt untreated waste: {}\t% Ammonia or urea-N in manure: {}'.format(ann_c_input, pcnt_urea)
+
+    return mess

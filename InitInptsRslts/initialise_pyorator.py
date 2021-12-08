@@ -24,7 +24,7 @@ import sys
 from win32api import GetLogicalDriveStrings
 
 from set_up_logging import set_up_logging
-from ora_excel_read import check_params_excel_file, ReadStudy
+from ora_excel_read import check_params_excel_file, ReadStudy, ReadCropOwNitrogenParms
 from ora_json_read import check_json_xlsx_inp_files
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
 from ora_water_model import  SoilWaterChange
@@ -36,6 +36,7 @@ ERROR_STR = '*** Error *** '
 sleepTime = 5
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
+MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 def initiation(form):
     '''
@@ -293,6 +294,18 @@ def read_config_file(form):
     display_names = fetch_display_names_from_metrics(lookup_df, econ_model)
     for display_name in display_names:
         form.w_combo11.addItem(display_name)
+
+    # required for extra organic waste
+    # ================================
+    parms_xls_fname = form.settings['params_xls']
+    print('Reading: ' + parms_xls_fname)
+    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
+    for ow_typ in form.ora_parms.ow_parms:
+        if ow_typ != 'Organic waste type':
+            form.w_combo13.addItem(ow_typ)
+
+    for mnth in MNTH_NAMES_SHORT:
+        form.w_mnth_appl.addItem(mnth)
 
     # enable users to view outputs from previous run
     # ==============================================

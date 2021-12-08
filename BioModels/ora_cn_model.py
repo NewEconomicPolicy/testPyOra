@@ -206,10 +206,12 @@ def run_soil_cn_algorithms(form):
         form.w_disp_c.setEnabled(True)
         form.w_disp_n.setEnabled(True)
         form.w_disp_w.setEnabled(True)
+        form.w_recalc.setEnabled(True)
     else:
         form.w_disp_c.setEnabled(False)
         form.w_disp_n.setEnabled(False)
         form.w_disp_w.setEnabled(False)
+        form.w_recalc.setEnabled(False)
 
     if len(form.all_runs_crop_model) > 0:
         form.w_disp_cm.setEnabled(True)
