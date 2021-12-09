@@ -265,6 +265,31 @@ def test_economics_algorithms(form):
             fr_crop_sales_value.update({method : all_yrs_crop_sale_value})
         all_management_crops_value_dic.update({management_type: fr_crop_sales_value})
 
+    # Collapse all subareas into one to show total crop sales for household
+    keys = []
+    values = []
+    items = all_management_crops_value_dic.items()
+    for item in items:
+        keys.append(item[0]), values.append(item[1])
+
+    total_crop_sales = {}
+    for value in values:
+        for man_type, crop_value in value.items():
+            if man_type not in total_crop_sales.keys():
+                fr_crop_values = []
+                for year in crop_value:
+                    value = year['Total Crop Sales']
+                    fr_crop_values.append(value)
+                total_crop_sales.update({man_type : fr_crop_values})
+            else:
+                fr_crop_values = []
+                for year in crop_value:
+                    value = year['Total Crop Sales']
+                    fr_crop_values.append(value)
+                dic_value = total_crop_sales[man_type]
+                new_value = [x + y for x, y in zip(fr_crop_values, dic_value)]
+                total_crop_sales.update({man_type : new_value})
+
     # ----------------------------------------
     # Calculate dry and wet season fixed sales (i.e. those taken from excel input)
     dry_seas_fixed_sales_total = purch_sales_df['dryseas_sales_value'].sum()
@@ -291,16 +316,13 @@ def test_economics_algorithms(form):
     # methods
     # DAP and Urea not included yet
     all_subareas_full_hh_dic = {}
-    for subarea, data in all_management_crops_value_dic.items():
-        calc_method_dic = {}
-        for calc_method, fr_years in data.items():
-            fr_total_hh_income = []
-            for year in fr_years:
-                total_hh_income = year['Total Crop Sales'] - total_hh_ag_value - total_dom_labour_value + \
+    for calc_method, fr_years in total_crop_sales.items():
+        fr_total_hh_income = []
+        for year in fr_years:
+            total_hh_income = year - total_hh_ag_value - total_dom_labour_value + \
                                   total_hh_working_hours
-                fr_total_hh_income.append(total_hh_income)
-            calc_method_dic.update({calc_method : fr_total_hh_income})
-        all_subareas_full_hh_dic.update({subarea : calc_method_dic})
+            fr_total_hh_income.append(total_hh_income)
+        all_subareas_full_hh_dic.update({calc_method : fr_total_hh_income})
 
     # ----------------------------------------
     # Equation to calculate per capita consumption. Dummy variables created for now
@@ -332,7 +354,8 @@ def test_economics_algorithms(form):
         tlu = tlu + animal_type_total
     tlu_squared = tlu * tlu
 
-    # Land utilised
+    # Land utilised (should this be total land or for subarea?)
+
     land = 1000
     land_squared = land * land
 
@@ -353,19 +376,16 @@ def test_economics_algorithms(form):
             continue
     household_size_log = numpy.log(household_size)
 
-    # Use Full Household income for each year for each calc method and subarea
-    all_subareas_pcc = {}
-    for subarea, calc_methods in all_subareas_full_hh_dic.items():
-        calc_method_dic = {}
-        for calc_method, data in calc_methods.items():
-            fr_pcc = []
-            for year in data:
+    # Use Full Household income for each year for each calc method
+    farm_pcc = {}
+    for calc_method, data in all_subareas_full_hh_dic.items():
+        fr_pcc = []
+        for year in data:
                 # year is FHH for each year
-                year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
-                           (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
-                fr_pcc.append(year_pcc)
-            calc_method_dic.update({calc_method : fr_pcc})
-        all_subareas_pcc.update({subarea : calc_method_dic})
+            year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
+                        (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
+            fr_pcc.append(year_pcc)
+        farm_pcc.update({calc_method : fr_pcc})
 
 
 
