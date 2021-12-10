@@ -388,7 +388,5 @@ def test_economics_algorithms(form):
         farm_pcc.update({calc_method : fr_pcc})
 
 
-
-
     print('Economics Calcs completed')
     return
