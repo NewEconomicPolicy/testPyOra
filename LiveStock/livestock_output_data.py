@@ -152,6 +152,9 @@ def calc_livestock_data(form):
             livestock_list.append(subarea_livestock_instance)
     livestock_all_subareas.append(livestock_list)
 
+    # Add livestock list to form object so it can be used in econ module
+    form.livestock_list = livestock_list
+
     # Calculate change in production for each crop sub-area and management type, using each calculation method
     print('Calculating livestock production')
     total_an_prod_all_subareas = {}
