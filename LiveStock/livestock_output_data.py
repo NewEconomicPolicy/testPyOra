@@ -173,6 +173,8 @@ def calc_livestock_data(form):
         total_an_prod_all_subareas.update(tot_prod_data)
     print('livestock calcs completed')
     form.total_an_prod_all_subareas = total_an_prod_all_subareas
+    form.w_disp_econ.setEnabled(True)
+
     return
 
 
