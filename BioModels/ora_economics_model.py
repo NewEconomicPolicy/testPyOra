@@ -386,7 +386,7 @@ def test_economics_algorithms(form):
                         (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
             fr_pcc.append(year_pcc)
         farm_pcc.update({calc_method : fr_pcc})
-
+    form.farm_pcc = farm_pcc
 
     print('Economics Calcs completed')
     return
