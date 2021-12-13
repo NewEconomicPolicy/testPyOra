@@ -24,6 +24,7 @@ from ora_excel_read import ReadAfricaAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
 from livestock_class import Livestock
+from ora_cn_classes import EconoLvstckModel
 
 def _get_pigs_or_poultry_production(anml_type):
     '''
@@ -172,7 +173,45 @@ def calc_livestock_data(form):
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
     print('livestock calcs completed')
+
     form.total_an_prod_all_subareas = total_an_prod_all_subareas
+
+    # Collapse all subareas into one to show total animal production for farm
+    keys = []
+    values = []
+    items = total_an_prod_all_subareas.items()
+    for item in items:
+        keys.append(item[0]), values.append(item[1])
+
+    full_farm_livestock_production = {}
+    for value in values:
+        for man_type, all_livestock in value.items():
+            if man_type not in full_farm_livestock_production.keys():
+                temp_dic = {}
+                for livestock, productions in all_livestock.items():
+                    temp_dic.update({livestock : productions})
+                full_farm_livestock_production.update({man_type : temp_dic})
+            elif man_type in full_farm_livestock_production.keys():
+                temp_dic = {}
+                for livestock, productions in all_livestock.items():
+                    temp_dic_2 = {}
+                    for output, volume in productions.items():
+                        new_values = [x + y for x, y in zip(productions[output], full_farm_livestock_production[man_type][livestock][output])]
+                        temp_dic_2.update({output : new_values})
+                    temp_dic.update({livestock:temp_dic_2})
+                full_farm_livestock_production.update({man_type:temp_dic})
+
+#    livestock_GUI_class = EconoLvstckModel()
+#    for calc_method, livestock in full_farm_livestock_production:
+#        if calc_method == 'n_lim':
+#            livestock_GUI_class.data['full_hh_income_n_lim'] = calcs
+#        elif calc_method == 'zaks':
+#            livestock_GUI_class.data['full_hh_income_zaks'] = calcs
+#        elif calc_method == 'miami':
+#            livestock_GUI_class.data['full_hh_income_miami': calcs]
+
+#    form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
+
     form.w_disp_econ.setEnabled(True)
 
     return

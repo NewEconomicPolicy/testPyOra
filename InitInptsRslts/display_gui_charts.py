@@ -293,7 +293,7 @@ def _select_data_for_display(form, category, metric):
         # ===========
         if group_indx is None:
             if category == 'livestock':
-                all_runs_output = form.total_an_prod_all_subareas
+                all_runs_output = form.all_farm_livestock_production
             elif category == 'crop_model':
                 all_runs_output = form.all_runs_crop_model
             elif category == 'economics':

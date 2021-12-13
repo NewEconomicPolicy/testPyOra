@@ -404,9 +404,9 @@ def test_economics_algorithms(form):
         if calc_method == 'n_lim':
             economics_GUI_class.data['full_hh_income_n_lim'] = calcs
         elif calc_method == 'zaks':
-            economics_GUI_class.data({'full_hh_income_zaks': calcs})
+            economics_GUI_class.data['full_hh_income_zaks'] = calcs
         elif calc_method == 'miami':
-            economics_GUI_class.data({'full_hh_income_miami': calcs})
+            economics_GUI_class.data['full_hh_income_miami'] = calcs
 
     form.economics_calcs = {'full_farm' : economics_GUI_class}
 
