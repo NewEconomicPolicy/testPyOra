@@ -408,7 +408,7 @@ def test_economics_algorithms(form):
         elif calc_method == 'miami':
             economics_GUI_class.data['full_hh_income_miami'] = calcs
 
-    form.economics_calcs = {'full_farm' : economics_GUI_class}
+    form.all_farm_livestock_production = {'full_farm' : economics_GUI_class}
 
 
     print('Economics Calcs completed')

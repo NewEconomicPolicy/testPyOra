@@ -201,10 +201,12 @@ def calc_livestock_data(form):
                     temp_dic.update({livestock:temp_dic_2})
                 full_farm_livestock_production.update({man_type:temp_dic})
 
-#    livestock_GUI_class = EconoLvstckModel()
+    livestock_GUI_class = EconoLvstckModel()
 #    for calc_method, livestock in full_farm_livestock_production:
 #        if calc_method == 'n_lim':
-#            livestock_GUI_class.data['full_hh_income_n_lim'] = calcs
+#            for animal, outputs in livestock.items():
+#                for output, calcs in outputs.items():
+#                    livestock_GUI_class.data['full_hh_income_n_lim'] = calcs
 #        elif calc_method == 'zaks':
 #            livestock_GUI_class.data['full_hh_income_zaks'] = calcs
 #        elif calc_method == 'miami':
