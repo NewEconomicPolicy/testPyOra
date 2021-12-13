@@ -21,6 +21,7 @@ __version__ = '0.0.0'
 import os, numpy
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
+from ora_cn_classes import EconoLvstckModel
 
 #----------------------------------------------------------
 # Create class to store instances of family members, in order to work out labour
@@ -186,8 +187,8 @@ def test_economics_algorithms(form):
     # ----------------------------------------
     # Create instances of HouseholdPurchasesSales Class using Dataframe created from excel sheet. Store in list.
     hh_purchases_sales = []
-    for index, data in purch_sales_df.iterrows():
-        hh_ps_instance = HouseholdPurchasesSales(data)
+    for index, calcs in purch_sales_df.iterrows():
+        hh_ps_instance = HouseholdPurchasesSales(calcs)
         hh_purchases_sales.append(hh_ps_instance)
 
     # ----------------------------------------
@@ -215,9 +216,9 @@ def test_economics_algorithms(form):
     if form.livestock_run:
         manure_data = form.total_an_prod_all_subareas
         management_type_manure_dic = {}
-        for management_type, data in manure_data.items():
+        for management_type, calcs in manure_data.items():
             calc_method_manure_dic = {}
-            for calc_method, livestock in data.items():
+            for calc_method, livestock in calcs.items():
                 # Create variable which stores list of lists, each list is an animals manure production per year
                 manure_fr = []
                 for animal, prod_data in livestock.items():
@@ -378,15 +379,35 @@ def test_economics_algorithms(form):
 
     # Use Full Household income for each year for each calc method
     farm_pcc = {}
-    for calc_method, data in all_subareas_full_hh_dic.items():
+    for calc_method, calcs in all_subareas_full_hh_dic.items():
         fr_pcc = []
-        for year in data:
+        for year in calcs:
                 # year is FHH for each year
             year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
                         (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
             fr_pcc.append(year_pcc)
         farm_pcc.update({calc_method : fr_pcc})
-    form.farm_pcc = farm_pcc
+    farm_pcc = farm_pcc
+
+    # Put all calcs in format that can be ready by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
+    data = {}
+    for calc_method, calcs in all_subareas_full_hh_dic.items():
+        if calc_method == 'n_lim':
+            data.update({'full_hh_income_n_lim' : calcs})
+        elif calc_method == 'zaks':
+            data.update({'full_hh_income_zaks' : calcs})
+        elif calc_method == 'miami':
+            data.update({'full_hh_income_miami': calcs})
+
+    economics_GUI_class = EconoLvstckModel()
+    for calc_method, calcs in all_subareas_full_hh_dic.items():
+        if calc_method == 'n_lim':
+            economics_GUI_class.data['full_hh_income_n_lim'] = calcs
+        else:
+            pass
+
+    form.economics_calcs = {'full_farm' : economics_GUI_class}
+
 
     print('Economics Calcs completed')
     return

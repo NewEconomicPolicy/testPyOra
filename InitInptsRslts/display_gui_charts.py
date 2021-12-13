@@ -28,7 +28,7 @@ from ora_lookup_df_fns import fetch_detail_from_varname
 SUBAREAS = list(['Blackburn', 'Todmorden', 'Bury', 'Oldham', 'Rochdale'])   # for generation of random data
 NTSTEPS = 240
 
-SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2, 'crop_model':None, 'livestock':None}    # lookup table for data object
+SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2, 'crop_model':None, 'livestock':None, 'economics' :None}    # lookup table for data object
 WARNING_STR = '*** Warning *** '
 LRGE_NUM = 99999999
 THRESHOLD = 1e-10
@@ -296,6 +296,8 @@ def _select_data_for_display(form, category, metric):
                 all_runs_output = form.total_an_prod_all_subareas
             elif category == 'crop_model':
                 all_runs_output = form.all_runs_crop_model
+            elif category == 'economics':
+                all_runs_output = form.economics_calcs
         else:
             all_runs_output = form.all_runs_output
         subareas = list(all_runs_output.keys())
