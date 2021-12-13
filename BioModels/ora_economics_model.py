@@ -403,8 +403,10 @@ def test_economics_algorithms(form):
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         if calc_method == 'n_lim':
             economics_GUI_class.data['full_hh_income_n_lim'] = calcs
-        else:
-            pass
+        elif calc_method == 'zaks':
+            economics_GUI_class.data({'full_hh_income_zaks': calcs})
+        elif calc_method == 'miami':
+            economics_GUI_class.data({'full_hh_income_miami': calcs})
 
     form.economics_calcs = {'full_farm' : economics_GUI_class}
 
