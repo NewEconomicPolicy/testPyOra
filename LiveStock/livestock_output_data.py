@@ -201,21 +201,53 @@ def calc_livestock_data(form):
                     temp_dic.update({livestock:temp_dic_2})
                 full_farm_livestock_production.update({man_type:temp_dic})
 
+    # Format data to class object so it can be used in GUI charts. Only do for N Lim, although output data for all
     livestock_GUI_class = EconoLvstckModel()
-    livestock_GUI_class.data['manure_prod_typ'] = 999
     form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
 
-#    for calc_method, livestock in full_farm_livestock_production:
-#        if calc_method == 'n_lim':
-#            for animal, outputs in livestock.items():
-#                for output, calcs in outputs.items():
-#                    livestock_GUI_class.data['full_hh_income_n_lim'] = calcs
+    for calc_method, livestock in full_farm_livestock_production.items():
+        if calc_method == 'n_lim':
+            for animal, outputs in livestock.items():
+                if animal == 'Dairy cattle':
+                    for output, calcs in outputs.items():
+                        if output == 'n_excrete_fr':
+                            livestock_GUI_class.data['dairy_cat_n_excrete_nlim'] = calcs
+                        elif output == 'milk_prod_fr':
+                            livestock_GUI_class.data['dairy_cat_milk_prod_nlim'] = calcs
+                        elif output == 'meat_prod_fr':
+                            livestock_GUI_class.data['dairy_cat_meat_prod_nlim'] = calcs
+                        elif output == 'manure_prod_fr':
+                            livestock_GUI_class.data['dairy_cat_manure_prod_nlim'] = calcs
+                elif animal == 'Beef cattle':
+                    for output, calcs in outputs.items():
+                        if output == 'n_excrete_fr':
+                            livestock_GUI_class.data['beef_cat_n_excrete_nlim'] = calcs
+                        elif output == 'milk_prod_fr':
+                            pass
+                        elif output == 'meat_prod_fr':
+                            livestock_GUI_class.data['beef_cat_meat_prod_nlim'] = calcs
+                        elif output == 'manure_prod_fr':
+                            livestock_GUI_class.data['beef_cat_manure_prod_nlim'] = calcs
+                elif animal == 'Goats/sheep for milk':
+                    for output, calcs in outputs.items():
+                        if output == 'n_excrete_fr':
+                            livestock_GUI_class.data['goats/sheep_n_excrete_nlim'] = calcs
+                        elif output == 'milk_prod_fr':
+                            livestock_GUI_class.data['goats/sheep_milk_prod_nlim'] = calcs
+                        elif output == 'meat_prod_fr':
+                            livestock_GUI_class.data['goats/sheep_meat_prod_nlim'] = calcs
+                        elif output == 'manure_prod_fr':
+                            livestock_GUI_class.data['goats/sheep_manure_prod_nlim'] = calcs
+        else:
+            pass
+
+
 #        elif calc_method == 'zaks':
 #            livestock_GUI_class.data['full_hh_income_zaks'] = calcs
 #        elif calc_method == 'miami':
 #            livestock_GUI_class.data['full_hh_income_miami': calcs]
 
-#    form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
+    form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
 
     form.w_disp_econ.setEnabled(True)
 
