@@ -238,6 +238,9 @@ def calc_livestock_data(form):
                             livestock_GUI_class.data['goats/sheep_meat_prod_nlim'] = calcs
                         elif output == 'manure_prod_fr':
                             livestock_GUI_class.data['goats/sheep_manure_prod_nlim'] = calcs
+                # Need to add in pigs and chickens
+                else:
+                    pass
         else:
             pass
 
