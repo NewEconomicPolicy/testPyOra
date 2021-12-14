@@ -231,13 +231,13 @@ def calc_livestock_data(form):
                 elif animal == 'Goats/sheep for milk':
                     for output, calcs in outputs.items():
                         if output == 'n_excrete_fr':
-                            livestock_GUI_class.data['goats/sheep_n_excrete_nlim'] = calcs
+                            livestock_GUI_class.data['goats_sheep_n_excrete_nlim'] = calcs
                         elif output == 'milk_prod_fr':
-                            livestock_GUI_class.data['goats/sheep_milk_prod_nlim'] = calcs
+                            livestock_GUI_class.data['goats_sheep_milk_prod_nlim'] = calcs
                         elif output == 'meat_prod_fr':
-                            livestock_GUI_class.data['goats/sheep_meat_prod_nlim'] = calcs
+                            livestock_GUI_class.data['goats_sheep_meat_prod_nlim'] = calcs
                         elif output == 'manure_prod_fr':
-                            livestock_GUI_class.data['goats/sheep_manure_prod_nlim'] = calcs
+                            livestock_GUI_class.data['goats_sheep_manure_prod_nlim'] = calcs
                 # Need to add in pigs and chickens
                 else:
                     pass
