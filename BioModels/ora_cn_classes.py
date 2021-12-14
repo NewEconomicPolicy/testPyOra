@@ -73,7 +73,7 @@ class EconoLvstckModel(object, ):
         self.title = 'EconoLvstckModel'
         self.data = {}
 
-        var_name_list = list(['manure_prod_typ', 'manure_prod_atyp', 'meat_prod_typ', 'meat_prod_atyp',
+        var_name_list = list(['manure_prod_typ', 'manure_prod_atyp''meat_prod_typ', 'meat_prod_atyp',
                               'milk_prod_typ', 'milk_prod_atyp', 'n_excrete_typ', 'n_excrete_atyp',
                               'full_hh_income_n_lim', 'full_hh_income_zaks', 'full_hh_income_miami'])
         for var_name in var_name_list:

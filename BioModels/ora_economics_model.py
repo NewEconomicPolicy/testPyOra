@@ -399,17 +399,16 @@ def test_economics_algorithms(form):
         elif calc_method == 'miami':
             data.update({'full_hh_income_miami': calcs})
 
-    economics_GUI_class = EconoLvstckModel()
+    economics_GUI_class = form.all_farm_livestock_production
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         if calc_method == 'n_lim':
-            economics_GUI_class.data['full_hh_income_n_lim'] = calcs
+            economics_GUI_class['full_farm'].data['full_hh_income_n_lim'] = calcs
         elif calc_method == 'zaks':
-            economics_GUI_class.data['full_hh_income_zaks'] = calcs
+            economics_GUI_class['full_farm'].data['full_hh_income_zaks'] = calcs
         elif calc_method == 'miami':
-            economics_GUI_class.data['full_hh_income_miami'] = calcs
+            economics_GUI_class['full_farm'].data['full_hh_income_miami'] = calcs
 
-    form.all_farm_livestock_production = {'full_farm' : economics_GUI_class}
-
+    form.all_farm_livestock_production = economics_GUI_class
 
     print('Economics Calcs completed')
     return

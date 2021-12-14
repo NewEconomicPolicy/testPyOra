@@ -202,6 +202,9 @@ def calc_livestock_data(form):
                 full_farm_livestock_production.update({man_type:temp_dic})
 
     livestock_GUI_class = EconoLvstckModel()
+    livestock_GUI_class.data['manure_prod_typ'] = 999
+    form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
+
 #    for calc_method, livestock in full_farm_livestock_production:
 #        if calc_method == 'n_lim':
 #            for animal, outputs in livestock.items():
