@@ -21,10 +21,9 @@ from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLay
 from subprocess import Popen, DEVNULL
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
-
 from ora_economics_model import test_economics_algorithms
 from livestock_output_data import calc_livestock_data
-from ora_cn_model import run_soil_cn_algorithms
+from ora_cn_model import run_soil_cn_algorithms, recalc_soil_cn
 from ora_excel_read import ReadStudy
 from ora_json_read import check_json_xlsx_inp_files, disp_ow_parms
 from display_gui_charts import display_metric
@@ -68,7 +67,7 @@ class Form(QWidget):
         # rows 4 and 5
         # ============
         irow += 1
-        w_inp_json = QPushButton("Run file location")
+        w_inp_json = QPushButton('Run file location')
         helpText = 'Location with a project file set comprising: livestock JSON file '
         helpText += 'and an Excel file with a farm location, management, soil and weather sheets'
         w_inp_json.setToolTip(helpText)
@@ -173,7 +172,8 @@ class Form(QWidget):
         # ===================
         irow += 1
         w_recalc = QPushButton('Recalculate')
-        helpText = 'Examine the impact of changing the rate of organic waste applied after steady state.'
+        helpText = 'Examine the impact of changing the rate of organic waste applied to the foward run after ' + \
+                                                                                    'steady state has been reached.'
         w_recalc.setToolTip(helpText)
         w_recalc.clicked.connect(self.recalcClicked)
         w_recalc.setEnabled(False)
@@ -226,7 +226,7 @@ class Form(QWidget):
         # =============================
         irow += 1
         w_lbl_ow = QLabel('')
-        grid.addWidget(w_lbl_ow, irow, 0, 1, 5)
+        grid.addWidget(w_lbl_ow, irow, 0, 1, 6)
         self.w_lbl_ow = w_lbl_ow
 
         irow += 1
@@ -254,7 +254,7 @@ class Form(QWidget):
 
         w_combo17 = QComboBox()
         self.w_combo17 = w_combo17
-        grid.addWidget(w_combo17, irow, 1, 1, 3)
+        grid.addWidget(w_combo17, irow, 1)
 
         # user feedback
         # =============
@@ -302,14 +302,14 @@ class Form(QWidget):
         grid.addWidget(w_optimise, irow, 3)
         self.w_optimise = w_optimise
 
-        w_save = QPushButton("Save", self)
+        w_save = QPushButton('Save', self)
         helpText = 'save the configuration file'
         w_save.setToolTip(helpText)
         w_save.setFixedWidth(STD_BTN_SIZE)
         grid.addWidget(w_save, irow, 6)
         w_save.clicked.connect(self.saveClicked)
 
-        w_exit = QPushButton("Exit", self)
+        w_exit = QPushButton('Exit', self)
         helpText = 'Close GUI - the configuration file will be saved'
         w_exit.setToolTip(helpText)
         grid.addWidget(w_exit, irow, 7)
@@ -365,7 +365,7 @@ class Form(QWidget):
 
     def recalcClicked(self):
 
-        ow_type = self.combo13.currentText()
+        recalc_soil_cn(self)
 
         return
 
@@ -470,9 +470,9 @@ class Form(QWidget):
         self.close()
 
 def main():
-    """
+    '''
     program entry point
-    """
+    '''
     app = QApplication(sys.argv)  # create QApplication object
     form = Form() # instantiate form
     # display the GUI and start the event loop if we're not running batch mode

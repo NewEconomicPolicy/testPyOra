@@ -36,7 +36,7 @@ from ora_excel_write_cn_water import write_excel_all_subareas
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_run_xlxs_file
 from ora_rothc_fns import run_rothc
 
-# takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single "Base line mgmt.json"
+# takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
 # =============================================================================================
 MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
@@ -124,10 +124,10 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
     return (carbon_change, nitrogen_change, soil_water)
 
 def run_soil_cn_algorithms(form):
-    """
+    '''
     retrieve weather and soil
-    """
-    func_name = __prog__ + '\ttest_soil_cn_algorithms'
+    '''
+    func_name = __prog__ + '\trun_soil_cn_algorithms'
 
     excel_out_flag = form.w_make_xls.isChecked()
 
@@ -218,5 +218,50 @@ def run_soil_cn_algorithms(form):
     else:
         form.w_disp_cm.setEnabled(False)
 
+    # need these for subsequent functionality
+    # =======================================
+    form.ora_weather = ora_weather
+    form.ora_subareas = ora_subareas
+
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
+    return
+
+def recalc_soil_cn(form):
+    '''
+    apply modified management to the forward run
+    typically additional organic waste or irrigation
+    '''
+    func_name = __prog__ + '\trecalculate_soil_cn'
+
+    ora_weather = form.ora_weather
+    ora_subareas = form.ora_subareas
+    all_runs_output = form.all_runs_output
+    ora_parms = form.ora_parms
+
+    ow_type = form.w_combo13.currentText()
+    owex_min = float(form.w_owex_min.text())
+    owex_max = float(form.w_owex_max.text())
+    mnth_appl = form.w_mnth_appl.currentText()
+
+    # process each subarea
+    # ====================
+    all_runs_out = {}   # clear previously recorded outputs
+    for sba in ora_subareas:
+        carbon_change, nitrogen_change, soil_water = all_runs_output[sba]
+
+        soil_vars = ora_subareas[sba].soil_for_area
+
+        pi_tonnes = carbon_change.data['c_pi_mnth']
+
+        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_parms, pi_tonnes)
+        complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
+                                                                            carbon_change, nitrogen_change, soil_water)
+        if complete_run is None:
+            continue
+
+        # outputs only
+        # ============
+        all_runs_out[sba] = complete_run
+
+    print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs_out)))
     return

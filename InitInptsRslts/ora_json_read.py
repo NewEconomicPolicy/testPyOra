@@ -206,6 +206,6 @@ def disp_ow_parms(form):
     ann_c_input = round(ow_parms[ow_type]['ann_c_input']*100, 3)
 
     mess = 'Organic waste parameters:\t% Carbon: {}\t'.format(pcnt_c)
-    mess += '%C wrt untreated waste: {}\t% Ammonia or urea-N in manure: {}'.format(ann_c_input, pcnt_urea)
+    mess += '\t%C wrt untreated waste: {}\t\t% Ammonia or urea-N in manure: {}'.format(ann_c_input, pcnt_urea)
 
     return mess

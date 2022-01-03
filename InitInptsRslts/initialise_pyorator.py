@@ -1,4 +1,4 @@
-"""
+'''
 #-------------------------------------------------------------------------------
 # Name:        initialise_funcs.py
 # Purpose:     script to read read and write the setup and configuration files
@@ -9,7 +9,7 @@
 #   Notes:
 #       entries for drop-down menus are populated after GUI has been created and config file has been read
 #-------------------------------------------------------------------------------
-"""
+'''
 
 __prog__ = 'initialise_pyorator.py'
 __version__ = '0.0.0'
@@ -60,10 +60,10 @@ def initiation(form):
     return
 
 def _read_setup_file(program_id):
-    """
+    '''
     read settings used for programme from the setup file, if it exists,
     or create setup file using default values if file does not exist
-    """
+    '''
     func_name = __prog__ + ' _read_setup_file'
 
     # validate setup file
@@ -145,9 +145,9 @@ def _read_setup_file(program_id):
     return settings
 
 def _write_default_setup_file(setup_file):
-    """
+    '''
     stanza if setup_file needs to be created
-    """
+    '''
 
     # Windows only for now
     # =====================
@@ -183,7 +183,7 @@ def _write_default_setup_file(setup_file):
         sleep(sleepTime)
         sys.exit(0)
 
-    # typically: 'fname_lookup': "G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx"
+    # typically: 'fname_lookup': 'G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx'
     # ===========================================================================================================
     orator_dir += '\\'
     data_path += '\\'
@@ -205,9 +205,9 @@ def _write_default_setup_file(setup_file):
         return _default_setup
 
 def _write_default_config_file(config_file):
-    """
+    '''
 
-    """
+    '''
     _default_config = {
         'params_xls': '',
         'mgmt_dir': '',
@@ -220,10 +220,10 @@ def _write_default_config_file(config_file):
         return _default_config
 
 def read_config_file(form):
-    """
+    '''
     read widget settings used in the previous programme session from the config file, if it exists,
     or create config file using default settings if config file does not exist
-    """
+    '''
     func_name = __prog__ + ' read_config_file'
 
     config_file = form.settings['config_file']
@@ -243,6 +243,38 @@ def read_config_file(form):
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
             sys.exit(0)
+
+    # required for extra organic waste
+    # ================================
+    parms_xls_fname = form.settings['params_xls']
+    print('Reading: ' + parms_xls_fname)
+    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
+    for ow_typ in form.ora_parms.ow_parms:
+        if ow_typ != 'Organic waste type':
+            form.w_combo13.addItem(ow_typ)
+
+    for mnth in MNTH_NAMES_SHORT:
+        form.w_mnth_appl.addItem(mnth)
+
+    # stanza for extra org waste
+    # ==========================
+    for attrib in list(['owex_min', 'owex_max', 'ow_type_indx', 'mnth_appl_indx']):
+        if attrib not in config:
+            owex_min = 0.0
+            owex_max = 0.0
+            ow_type_indx = 0
+            mnth_appl_indx = 0
+            break
+    else:
+        owex_min = config['owex_min']
+        owex_max = config['owex_max']
+        ow_type_indx = config['ow_type_indx']
+        mnth_appl_indx = config['mnth_appl_indx']
+
+    form.w_owex_min.setText(str(owex_min))
+    form.w_owex_max.setText(str(owex_max))
+    form.w_combo13.setCurrentIndex(ow_type_indx)
+    form.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
     # this stanza relates to use of JSON files
     # ========================================
@@ -295,18 +327,6 @@ def read_config_file(form):
     for display_name in display_names:
         form.w_combo11.addItem(display_name)
 
-    # required for extra organic waste
-    # ================================
-    parms_xls_fname = form.settings['params_xls']
-    print('Reading: ' + parms_xls_fname)
-    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
-    for ow_typ in form.ora_parms.ow_parms:
-        if ow_typ != 'Organic waste type':
-            form.w_combo13.addItem(ow_typ)
-
-    for mnth in MNTH_NAMES_SHORT:
-        form.w_mnth_appl.addItem(mnth)
-
     # enable users to view outputs from previous run
     # ==============================================
     form.settings['study'] = ReadStudy(form, mgmt_dir, run_xls_fname)
@@ -314,17 +334,21 @@ def read_config_file(form):
     return True
 
 def write_config_file(form, message_flag=True):
-    """
+    '''
     write current selections to config file
-    """
+    '''
 
     # only one config file
     # ====================
     config_file = form.settings['config_file']
 
     config = {
-        "mgmt_dir": form.w_lbl06.text(),
-        "write_excel": form.w_make_xls.isChecked()
+        'mgmt_dir': form.w_lbl06.text(),
+        'write_excel': form.w_make_xls.isChecked(),
+        'owex_min': form.w_owex_min.text(),
+        'owex_max': form.w_owex_max.text(),
+        'ow_type_indx': form.w_combo13.currentIndex(),
+        'mnth_appl_indx': form.w_mnth_appl.currentIndex()
     }
     if os.path.isfile(config_file):
         descriptor = 'Updated existing'

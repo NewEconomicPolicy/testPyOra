@@ -127,13 +127,21 @@ def read_run_xlxs_file(run_xls_fn, crop_vars, latitude):
         df = DataFrame(lctn_sht.values, columns=['Attribute', 'Values'])
         lctn_var = list(df['Values'][:])
 
-        # Weather
-        # =======
+        # Weather sheet can have 5 or 6 columns
+        # =====================================
         pettmp_ss = {'precip': [], 'tair': []}
         pettmp_fwd = {'precip': [], 'tair': []}
 
         wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
-        df = DataFrame(wthr_sht.values, columns=['period', 'year', 'month', 'precip', 'tair'])
+        wthr_cols=['period', 'year', 'month', 'precip', 'tair']
+        if wthr_sht.max_column == 6:
+            wthr_cols += ['actl_yr']
+        try:
+            df = DataFrame(wthr_sht.values, columns = wthr_cols)
+        except ValueError as err:
+            print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
+            return ret_var
+
         for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
             if mode == 'steady state':
                 pettmp_ss['precip'].append(precip)
