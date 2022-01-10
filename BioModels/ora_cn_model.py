@@ -24,6 +24,8 @@ __version__ = '0.0.0'
 # ---------------
 #
 import os
+from copy import copy
+from numpy import arange
 from PyQt5.QtWidgets import QApplication
 
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
@@ -41,6 +43,9 @@ from ora_rothc_fns import run_rothc
 MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
 
+MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+WARNING_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
@@ -203,14 +208,14 @@ def run_soil_cn_algorithms(form):
         if study.output_excel:
             retrieve_output_xls_files(form, study.study_name)
 
-        form.w_disp_c.setEnabled(True)
-        form.w_disp_n.setEnabled(True)
-        form.w_disp_w.setEnabled(True)
+        form.w_disp1_c.setEnabled(True)
+        form.w_disp1_n.setEnabled(True)
+        form.w_disp1_w.setEnabled(True)
         form.w_recalc.setEnabled(True)
     else:
-        form.w_disp_c.setEnabled(False)
-        form.w_disp_n.setEnabled(False)
-        form.w_disp_w.setEnabled(False)
+        form.w_disp1_c.setEnabled(False)
+        form.w_disp1_n.setEnabled(False)
+        form.w_disp1_w.setEnabled(False)
         form.w_recalc.setEnabled(False)
 
     if len(form.all_runs_crop_model) > 0:
@@ -226,7 +231,54 @@ def run_soil_cn_algorithms(form):
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return
 
-def recalc_soil_cn(form):
+def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
+    '''
+    amend crop management organic waste application
+    '''
+    crop_mngmnt_mod = copy(crop_mngmnt)
+
+    warn_flag = True
+    org_fert_mod = []
+    for imnth, ow_apl in enumerate(crop_mngmnt['org_fert']):
+        mnth = MNTH_NAMES_SHORT[imnth % 12]
+        if mnth == mnth_appl:
+            if ow_apl is None:
+                new_amt = owex_amnt
+            else:
+                new_amt = ow_apl['amount'] + owex_amnt
+                if ow_type != ow_apl['ow_type']:
+                    if warn_flag:
+                        print(WARNING_STR + 'changing organic waste from ' +  ow_apl['ow_type'] + ' to ' + ow_type)
+                        warn_flag = False
+
+            ow_apl_new = {'ow_type': ow_type, 'amount': new_amt}
+        else:
+            ow_apl_new = ow_apl
+
+        org_fert_mod.append(ow_apl_new)
+
+    crop_mngmnt_mod['org_fert'] = org_fert_mod
+    return crop_mngmnt_mod
+
+def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
+    '''
+    abbreviate carbon, nitrogen and soil water objects to steady state only
+    '''
+    carbon_chng = CarbonChange()
+    for var_name in carbon_chng.var_name_list:
+        carbon_chng.data[var_name] = carbon_change.data[var_name][:nmnths_ss]
+
+    nitrogen_chng = NitrogenChange()
+    for var_name in nitrogen_chng.var_name_list:
+        nitrogen_chng.data[var_name] = nitrogen_change.data[var_name][:nmnths_ss]
+
+    soil_h2o_chng = SoilWaterChange()
+    for var_name in soil_h2o_chng.var_name_list:
+        soil_h2o_chng.data[var_name] = soil_water.data[var_name][:nmnths_ss]
+
+    return carbon_chng, nitrogen_chng, soil_h2o_chng
+
+def recalc_fwd_soil_cn(form):
     '''
     apply modified management to the forward run
     typically additional organic waste or irrigation
@@ -241,27 +293,41 @@ def recalc_soil_cn(form):
     ow_type = form.w_combo13.currentText()
     owex_min = float(form.w_owex_min.text())
     owex_max = float(form.w_owex_max.text())
+    nsteps = 6
+    owext_incr = (owex_max - owex_min) / nsteps
+
     mnth_appl = form.w_mnth_appl.currentText()
 
     # process each subarea
     # ====================
     all_runs_out = {}   # clear previously recorded outputs
     for sba in ora_subareas:
+
+        nmnths_ss = len(ora_subareas[sba].crop_mngmnt_ss['fert_n'])
+
+        all_runs_out[sba] = {}
+
         carbon_change, nitrogen_change, soil_water = all_runs_output[sba]
-
         soil_vars = ora_subareas[sba].soil_for_area
-
         pi_tonnes = carbon_change.data['c_pi_mnth']
+        carbon_chng, nitrogen_chng, soil_h2o = _abbrev_to_steady_state(carbon_change,
+                                                                       nitrogen_change, soil_water, nmnths_ss)
+        for owex_amnt in arange(owex_min, owex_max, owext_incr):
 
-        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_parms, pi_tonnes)
-        complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
-                                                                            carbon_change, nitrogen_change, soil_water)
-        if complete_run is None:
-            continue
+            owext_str = str(round(owex_amnt, 3))
+            crop_mngmnt_fwd = _amend_crop_mngmnt(ora_subareas[sba].crop_mngmnt_fwd, mnth_appl, ow_type, owex_amnt)
 
-        # outputs only
-        # ============
-        all_runs_out[sba] = complete_run
+            mngmnt_fwd = MngmntSubarea(crop_mngmnt_fwd, ora_parms, pi_tonnes)
+            complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_chng,
+                                                                                            nitrogen_chng, soil_h2o)
+            carbon_chng, nitrogen_chng, soil_h2o = _abbrev_to_steady_state(carbon_chng,
+                                                                                    nitrogen_chng, soil_h2o, nmnths_ss)
+            if complete_run is None:
+                continue
 
-    print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs_out)))
-    return
+            # outputs only
+            # ============
+            all_runs_out[sba][owext_str] = complete_run
+
+    print('\nForward run recalculation complete after {} increments processed\n'.format(nsteps))
+    return all_runs_out

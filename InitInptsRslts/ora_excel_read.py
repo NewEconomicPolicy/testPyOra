@@ -19,7 +19,9 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
+from os.path import isfile, isdir, split, normpath, join
+from os import mkdir, sep as os_sep
+
 from copy import copy
 from openpyxl import load_workbook
 from pandas import Series, read_excel, DataFrame
@@ -32,6 +34,7 @@ from numpy import nan, isnan
 from ora_water_model import add_pet_to_weather
 from ora_cn_fns import plant_inputs_crops_distribution
 from ora_low_level_fns import average_weather
+from ora_classes_excel_write import pyoraId as oraId
 
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -418,7 +421,7 @@ def check_params_excel_file(params_xls_fn):
     '''
     retcode = None
 
-    if not os.path.isfile(params_xls_fn):
+    if not isfile(params_xls_fn):
         print(ERR_MESS + 'Excel parameters file ' + params_xls_fn + ' must exist - check setup file')
         return None
 
@@ -545,15 +548,49 @@ def repopulate_excel_dropdown(form, study_name):
     '''
     repopulate Excel drop-down
     '''
+    if hasattr(form, 'w_combo17'):
+        w_combo17 = form.w_combo17
+        w_disp_out = form.w_disp_out
+    else:
+        w_combo17 = form.w_tab_wdgt.w_combo17
+        w_disp_out = form.w_tab_wdgt.w_disp_out
+
     out_dir = form.settings['out_dir']
     xlsx_list = glob(out_dir + '/' + study_name + '*.xlsx')
-    form.w_combo17.clear()
+    w_combo17.clear()
     if len(xlsx_list) > 0:
-        form.w_disp_out.setEnabled(True)
+        w_disp_out.setEnabled(True)
         for out_xlsx in xlsx_list:
-            dummy, short_fn = os.path.split(out_xlsx)
-            form.w_combo17.addItem(short_fn)
+            dummy, short_fn = split(out_xlsx)
+            w_combo17.addItem(short_fn)
     return
+
+def _read_farm_wthr_xlxs_file(wthr_xls):
+    '''
+    check required sheets are present
+    '''
+    wb_obj = load_workbook(wthr_xls, data_only=True)
+
+    subareas = []
+    for sht in wb_obj.sheetnames:
+        if sht in oraId().SUBAREAS:
+            subareas.append(sht)
+
+    subareas.sort()     # returns null value
+    ret_var = list([subareas])
+
+    rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
+    if rqrd_sheet in wb_obj.sheetnames:
+        farm_sht = wb_obj[rqrd_sheet]
+        df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
+        ret_var += list(df['Values'][1:])
+    else:
+        print('Sheet ' + rqrd_sheet + ' not present in ' + wthr_xls)
+        ret_var = None
+
+    wb_obj.close()
+
+    return ret_var
 
 class ReadStudy(object, ):
 
@@ -564,22 +601,25 @@ class ReadStudy(object, ):
         self.output_excel = output_excel
 
         if run_xls_fname is None:
-            run_xls_fname = os.path.normpath(os.path.join(mgmt_dir, FNAME_RUN))
+            run_xls_fname = normpath(join(mgmt_dir, FNAME_RUN))
 
-        if not os.path.isfile(run_xls_fname):
+        if not isfile(run_xls_fname):
             print('No run file ' + FNAME_RUN + ' in directory ' + mgmt_dir)
             return None
 
         # split management directory
         # ==========================
-        norm_path = os.path.normpath(mgmt_dir)
-        path_cmpnts = norm_path.split(os.sep)
+        norm_path = normpath(mgmt_dir)
+        path_cmpnts = norm_path.split(os_sep)
         study_area, farm = path_cmpnts[-2:]
 
         # Farm location
         # =============
-        ret_var = read_farm_wthr_xlxs_file(run_xls_fname, study_flag = True)
-        dum, sub_distr, farm_name, latitude, longitude, area, prnct, dum = ret_var
+        ret_var = _read_farm_wthr_xlxs_file(run_xls_fname)
+        if ret_var is None:
+            return None
+        
+        subareas, sub_distr, farm_name, latitude, longitude, area, prnct, dum = ret_var
 
         # check consistency
         # =================
@@ -589,19 +629,23 @@ class ReadStudy(object, ):
         study_desc = 'Study area: ' + study_area + '\t\tFarm: ' + farm_name
         study_desc += '\t\tLatitude: {}'.format(latitude)
         study_desc += '\tLongitude: {}'.format(longitude)
-        form.w_study.setText(study_desc)
+        if hasattr(form, 'w_study'):
+            form.w_study.setText(study_desc)
+        else:
+            form.w_tab_wdgt.w_study.setText(study_desc)
 
         self.study_name = farm_name
         self.latitude = latitude
         self.longitude = longitude
+        self.subareas = subareas
 
         '''
          base outputs directory on inputs location, check and if necessary create
         '''
-        out_dir = os.path.normpath(os.path.join(mgmt_dir, 'outputs'))
-        if not os.path.isdir(out_dir):
+        out_dir = normpath(join(mgmt_dir, 'outputs'))
+        if not isdir(out_dir):
             try:
-                os.mkdir(out_dir)
+                mkdir(out_dir)
                 print('Created output directory: ' + out_dir)
             except:
                 raise Exception('*** Error *** Could not create output directory: ' + out_dir)
@@ -682,40 +726,6 @@ def read_subarea_sheet(wthr_xls, sba_indx, nyrs_rota, mngmnt_hdrs):
 
     return data_recs
 
-def read_farm_wthr_xlxs_file(wthr_xls, study_flag = False):
-    '''
-    check required sheets are present
-    '''
-    wb_obj = load_workbook(wthr_xls, data_only=True)
-
-    if study_flag:
-        rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
-        if rqrd_sheet in wb_obj.sheetnames:
-            farm_sht = wb_obj[rqrd_sheet]
-            df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
-            ret_var = list(df['Values'][:])
-        else:
-            print('Sheet ' + rqrd_sheet + ' not present in ' + wthr_xls)
-            ret_var = None
-    else:
-        pettmp_ss = {'precip': [], 'tair': []}
-        pettmp_fwd = {'precip': [], 'tair': []}
-
-        wthr_sht = wb_obj['Weather']
-        df = DataFrame(wthr_sht.values, columns=['period', 'year', 'month', 'precip', 'tair'])
-        for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
-            if mode == 'steady state':
-                pettmp_ss['precip'].append(precip)
-                pettmp_ss['tair'].append(tair)
-            else:
-                pettmp_fwd['precip'].append(precip)
-                pettmp_fwd['tair'].append(tair)
-
-        ret_var = (pettmp_ss, pettmp_fwd)
-
-    wb_obj.close()
-
-    return ret_var
 
 class ReadCropOwNitrogenParms(object, ):
 

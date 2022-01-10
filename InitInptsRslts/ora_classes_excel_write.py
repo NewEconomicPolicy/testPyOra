@@ -20,6 +20,21 @@ __version__ = '0.0.0'
 # ---------------
 #
 from operator import add, mul
+from string import ascii_uppercase
+ALPHABET = list(ascii_uppercase)
+
+class pyoraId():
+    '''
+    define unique program identifiers which will be used for setup and configuration files etc.
+    '''
+
+    def __init__(self):
+
+        NSUBAREAS = 8
+
+        self.SUBAREAS = ALPHABET[:NSUBAREAS]
+        self.glbl_ecsse_str = 'glbl_ecss_site_specif_'
+        self.applic_str = 'glbl_ecss_site_spec_mk'
 
 def _setup_sheet_data_dict(pettmp, var_format_dict):
     '''

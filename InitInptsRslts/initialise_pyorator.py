@@ -17,7 +17,10 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 # 
-import os
+from os.path import isfile, isdir, normpath, join, exists, lexists
+from os import mkdir, getcwd, makedirs
+from os import name as name_os
+
 import json
 from time import sleep
 import sys
@@ -45,6 +48,9 @@ def initiation(form):
     # retrieve settings
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
+    parms_xls_fname = form.settings['params_xls']
+    print('Reading: ' + parms_xls_fname)
+    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
 
     # initialise bridges across economics, livestock and carbon-nitrogen-water models
     # ===============================================================================
@@ -70,8 +76,8 @@ def _read_setup_file(program_id):
     # ===================
     fname_setup = program_id + '_setup.json'
 
-    setup_file = os.path.join(os.getcwd(), fname_setup)
-    if os.path.exists(setup_file):
+    setup_file = join(getcwd(), fname_setup)
+    if exists(setup_file):
         try:
             with open(setup_file, 'r') as fsetup:
                 setup = json.load(fsetup)
@@ -96,10 +102,10 @@ def _read_setup_file(program_id):
     # TODO: consider situation when user uses Apache OpenOffice
     # =========================================================
     excel_flag = False
-    if os.path.isdir(settings['excel_dir']):
+    if isdir(settings['excel_dir']):
 
-        excel_path = os.path.join(settings['excel_dir'], 'EXCEL.EXE')
-        if os.path.isfile(excel_path):
+        excel_path = join(settings['excel_dir'], 'EXCEL.EXE')
+        if isfile(excel_path):
             excel_flag = True
         else:
             print(ERROR_STR + 'Excel progam must exist - should be here: ' + excel_path)
@@ -119,7 +125,7 @@ def _read_setup_file(program_id):
         sleep(sleepTime)
         exit(0)
 
-    params_xls = os.path.normpath(settings['params_xls'])
+    params_xls = normpath(settings['params_xls'])
     if check_params_excel_file(params_xls) is None:
         sleep(sleepTime)
         exit(0)
@@ -127,16 +133,16 @@ def _read_setup_file(program_id):
     # make sure directories exist for configuration and log files
     # ===========================================================
     log_dir = settings['log_dir']
-    if not os.path.lexists(log_dir):
-        os.makedirs(log_dir)
+    if not lexists(log_dir):
+        makedirs(log_dir)
 
     config_dir = settings['config_dir']
-    if not os.path.lexists(config_dir):
-        os.makedirs(config_dir)
+    if not lexists(config_dir):
+        makedirs(config_dir)
 
     # only one configuration file for this application
     # ================================================
-    config_file = os.path.normpath(settings['config_dir'] + '/' + program_id + '_config.json')
+    config_file = normpath(settings['config_dir'] + '/' + program_id + '_config.json')
     settings['config_file'] = config_file
     # print('Using configuration file: ' + config_file)
 
@@ -151,7 +157,7 @@ def _write_default_setup_file(setup_file):
 
     # Windows only for now
     # =====================
-    os_system = os.name
+    os_system = name_os
     if os_system != 'nt':
         print('Operating system is ' + os_system + 'should be nt - cannot proceed with writing default setup file')
         sleep(sleepTime)
@@ -166,8 +172,8 @@ def _write_default_setup_file(setup_file):
     orator_flag = False
 
     for drive in drives:
-        orator_dir = os.path.join(drive, 'ORATOR')
-        if os.path.isdir(orator_dir):
+        orator_dir = join(drive, 'ORATOR')
+        if isdir(orator_dir):
             print('Found ' + orator_dir)
             orator_flag = True
             break
@@ -177,8 +183,8 @@ def _write_default_setup_file(setup_file):
         sleep(sleepTime)
         sys.exit(0)
 
-    data_path = os.path.join(drive, 'GlobalEcosseData')
-    if not os.path.isdir(data_path):
+    data_path = join(drive, 'GlobalEcosseData')
+    if not isdir(data_path):
         print(err_mess + 'Could not find ' + data_path)
         sleep(sleepTime)
         sys.exit(0)
@@ -190,7 +196,7 @@ def _write_default_setup_file(setup_file):
     _default_setup = {
         'setup': {
             'config_dir': orator_dir + 'config',
-            'fname_png': os.path.join(orator_dir + 'run\\Images', 'Tree_of_life.PNG'),
+            'fname_png': join(orator_dir + 'run\\Images', 'Tree_of_life.PNG'),
             'fname_lookup': '',
             'excel_dir': '',
             'log_dir': orator_dir + 'logs',
@@ -227,7 +233,7 @@ def read_config_file(form):
     func_name = __prog__ + ' read_config_file'
 
     config_file = form.settings['config_file']
-    if os.path.exists(config_file):
+    if exists(config_file):
         try:
             with open(config_file, 'r') as fconfig:
                 config = json.load(fconfig)
@@ -246,15 +252,12 @@ def read_config_file(form):
 
     # required for extra organic waste
     # ================================
-    parms_xls_fname = form.settings['params_xls']
-    print('Reading: ' + parms_xls_fname)
-    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
     for ow_typ in form.ora_parms.ow_parms:
         if ow_typ != 'Organic waste type':
-            form.w_combo13.addItem(ow_typ)
+            form.w_tab_wdgt.w_combo13.addItem(ow_typ)
 
     for mnth in MNTH_NAMES_SHORT:
-        form.w_mnth_appl.addItem(mnth)
+        form.w_tab_wdgt.w_mnth_appl.addItem(mnth)
 
     # stanza for extra org waste
     # ==========================
@@ -271,33 +274,33 @@ def read_config_file(form):
         ow_type_indx = config['ow_type_indx']
         mnth_appl_indx = config['mnth_appl_indx']
 
-    form.w_owex_min.setText(str(owex_min))
-    form.w_owex_max.setText(str(owex_max))
-    form.w_combo13.setCurrentIndex(ow_type_indx)
-    form.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
+    form.w_tab_wdgt.w_owex_min.setText(str(owex_min))
+    form.w_tab_wdgt.w_owex_max.setText(str(owex_max))
+    form.w_tab_wdgt.w_combo13.setCurrentIndex(ow_type_indx)
+    form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
     # this stanza relates to use of JSON files
     # ========================================
-    mgmt_dir = os.path.normpath(config['mgmt_dir'])
-    if not os.path.isdir(mgmt_dir):
+    mgmt_dir = normpath(config['mgmt_dir'])
+    if not isdir(mgmt_dir):
         mess =  '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
         return
 
-    form.w_lbl06.setText(mgmt_dir)
+    form.w_tab_wdgt.w_lbl06.setText(mgmt_dir)
 
-    form.w_lbl07.setText(check_json_xlsx_inp_files(form, mgmt_dir))
+    form.w_tab_wdgt.w_lbl07.setText(check_json_xlsx_inp_files(form.w_tab_wdgt.w_soil_cn, form.settings, mgmt_dir))
 
     # check run file
     # =============
-    run_xls_fname = os.path.join(mgmt_dir, FNAME_RUN)
-    if not os.path.isfile(run_xls_fname):
+    run_xls_fname = join(mgmt_dir, FNAME_RUN)
+    if not isfile(run_xls_fname):
         print(ERROR_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
         return
 
     if config['write_excel']:
-        form.w_make_xls.setCheckState(2)
+        form.w_tab_wdgt.w_make_xls.setCheckState(2)
     else:
-        form.w_make_xls.setCheckState(0)
+        form.w_tab_wdgt.w_make_xls.setCheckState(0)
 
     # populate popup lists
     # ====================
@@ -305,31 +308,38 @@ def read_config_file(form):
     carbon_change = CarbonChange()
     display_names = fetch_display_names_from_metrics(lookup_df, carbon_change)
     for display_name in display_names:
-        form.w_combo07.addItem(display_name)
+        form.w_tab_wdgt.w_combo07.addItem(display_name)
+        form.w_tab_wdgt.w_combo27.addItem(display_name)
 
     nitrogen_change = NitrogenChange()
     display_names = fetch_display_names_from_metrics(lookup_df, nitrogen_change)
     for display_name in display_names:
-            form.w_combo08.addItem(display_name)
+        form.w_tab_wdgt.w_combo08.addItem(display_name)
+        form.w_tab_wdgt.w_combo28.addItem(display_name)
 
     soil_water = SoilWaterChange()
     display_names = fetch_display_names_from_metrics(lookup_df, soil_water)
     for display_name in display_names:
-            form.w_combo09.addItem(display_name)
+        form.w_tab_wdgt.w_combo09.addItem(display_name)
+        form.w_tab_wdgt.w_combo29.addItem(display_name)
 
     crop_model = CropModel()
     display_names = fetch_display_names_from_metrics(lookup_df, crop_model)
     for display_name in display_names:
-        form.w_combo10.addItem(display_name)
+        form.w_tab_wdgt.w_combo10.addItem(display_name)
 
     econ_model = EconoLvstckModel()
     display_names = fetch_display_names_from_metrics(lookup_df, econ_model)
     for display_name in display_names:
-        form.w_combo11.addItem(display_name)
+        form.w_tab_wdgt.w_combo11.addItem(display_name)
 
     # enable users to view outputs from previous run
     # ==============================================
-    form.settings['study'] = ReadStudy(form, mgmt_dir, run_xls_fname)
+    study = ReadStudy(form, mgmt_dir, run_xls_fname)
+    for sba in study.subareas:
+        form.w_tab_wdgt.w_combo31s.addItem(sba)
+
+    form.settings['study'] = study
 
     return True
 
@@ -343,14 +353,14 @@ def write_config_file(form, message_flag=True):
     config_file = form.settings['config_file']
 
     config = {
-        'mgmt_dir': form.w_lbl06.text(),
-        'write_excel': form.w_make_xls.isChecked(),
-        'owex_min': form.w_owex_min.text(),
-        'owex_max': form.w_owex_max.text(),
-        'ow_type_indx': form.w_combo13.currentIndex(),
-        'mnth_appl_indx': form.w_mnth_appl.currentIndex()
+        'mgmt_dir': form.w_tab_wdgt.w_lbl06.text(),
+        'write_excel': form.w_tab_wdgt.w_make_xls.isChecked(),
+        'owex_min': form.w_tab_wdgt.w_owex_min.text(),
+        'owex_max': form.w_tab_wdgt.w_owex_max.text(),
+        'ow_type_indx': form.w_tab_wdgt.w_combo13.currentIndex(),
+        'mnth_appl_indx': form.w_tab_wdgt.w_mnth_appl.currentIndex()
     }
-    if os.path.isfile(config_file):
+    if isfile(config_file):
         descriptor = 'Updated existing'
     else:
         descriptor = 'Wrote new'
@@ -363,3 +373,18 @@ def write_config_file(form, message_flag=True):
             print()
 
     return
+
+# not yet used - experimental
+# ===========================
+
+class exchangeObj(object, ):
+
+    def __init__(self, lvstck_files, anml_prodn_obj):
+        '''
+        creates object which bridges the different functional areas of PyOrator:
+            Economics - energy, labour, purchases and sales
+            Biophysical model - crop production, soil, carbon, nitrogen and water
+            Livestock - animal production
+        '''
+        self.all_runs_output = {}
+        self.all_runs_crop_model = {}

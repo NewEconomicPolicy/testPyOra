@@ -19,8 +19,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
-import sys
+from os.path import isfile, split, join
+from os import remove
 from glob import glob
 from pandas import DataFrame, ExcelWriter, Series
 from PyQt5.QtWidgets import QApplication
@@ -70,10 +70,10 @@ def generate_excel_outfiles(study, subarea, lookup_df, out_dir,  weather, comple
 
     # make a safe name and
     # ===============
-    fname = os.path.join(out_dir, study_full_name + '.xlsx')
-    if os.path.isfile(fname):
+    fname = join(out_dir, study_full_name + '.xlsx')
+    if isfile(fname):
         try:
-            os.remove(fname)
+            remove(fname)
         except PermissionError as err:
             print(err)
             return -1
@@ -267,6 +267,6 @@ def retrieve_output_xls_files(form, study_name = None):
     if len(xlsx_list) > 0:
         form.w_disp_out.setEnabled(True)
         for out_xlsx in xlsx_list:
-            dummy, short_fn = os.path.split(out_xlsx)
+            dummy, short_fn = split(out_xlsx)
             form.w_combo17.addItem(short_fn)
     return

@@ -19,12 +19,9 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
 import json
 from glob import glob
-from copy import copy
-
-from ora_low_level_fns import get_imnth
+from os.path import isfile, normpath, join
 
 ERROR_STR = '*** Error *** '
 METRIC_LIST = list(['precip', 'tair'])
@@ -123,7 +120,7 @@ class ReadLvstckJsonSubareas(object, ):
 
             # avoid error when user has removed a management file during a session
             # ====================================================================
-            if not os.path.isfile(lvstck_fname):
+            if not isfile(lvstck_fname):
                 continue
 
             with open(lvstck_fname, 'r') as flvstck:
@@ -144,7 +141,7 @@ class ReadLvstckJsonSubareas(object, ):
         self.subareas = subareas
         print()     # cosmetic
 
-def check_json_xlsx_inp_files(form, mgmt_dir):
+def check_json_xlsx_inp_files(w_soil_cn, settings, mgmt_dir):
     '''
     =========== called during initialisation or from GUI ==============
     validate management files
@@ -159,7 +156,7 @@ def check_json_xlsx_inp_files(form, mgmt_dir):
         json_files = glob(mgmt_dir + '/*' + jtype + '.json')
         if len(json_files) > 0:
             for json_fname in json_files:
-                json_fname = os.path.normpath(json_fname)
+                json_fname = normpath(json_fname)
                 try:
                     with open(json_fname, 'r') as fmgmt:
                         mgmt_content = json.load(fmgmt)
@@ -171,7 +168,7 @@ def check_json_xlsx_inp_files(form, mgmt_dir):
                     print('Could not read ' + json_type + ' input file ' + json_fname)
 
 
-        form.settings[jtype + '_files'] = ok_json_files
+        settings[jtype + '_files'] = ok_json_files
 
         # build message
         # =============
@@ -182,12 +179,12 @@ def check_json_xlsx_inp_files(form, mgmt_dir):
     # ==========================================
     farm_wthr_fname = FNAME_RUN
     mess += '\t\trun file, ' + farm_wthr_fname + ', is '
-    wthr_xls = os.path.join(mgmt_dir, farm_wthr_fname)
-    if (os.path.isfile(wthr_xls)):
-        form.w_soil_cn.setEnabled(True)
+    wthr_xls = join(mgmt_dir, farm_wthr_fname)
+    if (isfile(wthr_xls)):
+        w_soil_cn.setEnabled(True)
         mess += 'present'
     else:
-        form.w_soil_cn.setEnabled(False)
+        w_soil_cn.setEnabled(False)
         mess += 'missing'
 
     return mess
@@ -207,5 +204,30 @@ def disp_ow_parms(form):
 
     mess = 'Organic waste parameters:\t% Carbon: {}\t'.format(pcnt_c)
     mess += '\t%C wrt untreated waste: {}\t\t% Ammonia or urea-N in manure: {}'.format(ann_c_input, pcnt_urea)
+
+    return mess
+
+def check_mngmnt_ow(form):
+    '''
+    display summary of selected organic waste type
+    '''
+
+    # TODO - delete if unnecessary
+
+    '''
+    # check first 12 months
+    # =====================
+    if hasattr(form, 'ora_subareas'):
+        subareas = form.ora_subareas
+        for sba in subareas:
+            for imnth in range(12):
+    '''
+
+    # build message
+    # =============
+    ow_type = form.w_combo13.currentText()
+    mnth_appl = form.w_mnth_appl.currentText()
+
+    mess = 'Extra {} will be applied in {}'.format(ow_type, mnth_appl)
 
     return mess

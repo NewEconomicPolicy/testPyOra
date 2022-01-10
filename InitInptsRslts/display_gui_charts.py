@@ -52,12 +52,13 @@ def _check_yaxis_extent(ymin, ymax):
 
     return ymin, ymax
 
-def display_metric(form, category, metric):
+def display_metric(form, category, metric, sba, recalc_flag):
 
-    subareas, data_for_display, ntsteps, description, units, out_format, pyora_display, yaxis_min, yaxis_max = \
-                                                                _select_data_for_display(form, category, metric)
-    if subareas is None:
+    rslts_set = _select_data_for_display(form, category, metric, sba, recalc_flag)
+    if rslts_set is None:
         return
+
+    subareas, data_for_display, ntsteps, description, units, out_format, pyora_display, yaxis_min, yaxis_max = rslts_set
 
     form.second = Second('example sub-window', subareas, ntsteps, description)
     form.second.post_line_series(yaxis_min, yaxis_max, subareas, data_for_display, ntsteps, units,
@@ -266,28 +267,41 @@ class Second(QWidget):
 
         print('Garbage')
 
-def _select_data_for_display(form, category, metric):
+def _generate_random_data(w_report):
+
+    w_report.append('Will generate random data')
+    #                 =========================
+    subareas = SUBAREAS
+
+    descrip = 'Randomly generated data'
+    ntsteps = 240;
+    yaxis_min = 0.0;
+    yaxis_max = 50.0;
+    pyora_display = 'Random data';
+    units = 'km**2'
+    out_format = '2f'
+
+    NTSTEPS = 240
+
+    data_for_display = {}
+    for subarea in subareas:
+        series = []
+        for tstep in range(NTSTEPS):
+            series.append(random() * 33)
+        data_for_display[subarea] = series
+
+    rslts_set = (subareas, data_for_display, ntsteps, descrip, units, out_format, pyora_display, yaxis_min, yaxis_max)
+
+    return rslts_set
+
+def _select_data_for_display(form, category, metric, sba, recalc_flag):
     '''
 
     '''
     group_indx = SET_INDICES[category]
 
     if metric is None:
-        form.w_report.append('Will generate random data')
-        #                     =========================
-        subareas = SUBAREAS
-        description = 'Randomly generated data'
-        ntsteps = 240; yaxis_min = 0.0; yaxis_max = 50.0; pyora_display = 'Random data'; units = 'km**2'
-        out_format = '2f'
-
-        NTSTEPS = 240
-
-        data_for_display = {}
-        for subarea in subareas:
-            series = []
-            for tstep in range(NTSTEPS):
-                series.append(random() * 33)
-            data_for_display[subarea] = series
+        rslts_set = _generate_random_data(form.w_report)
     else:
         # actual data
         # ===========
@@ -299,7 +313,13 @@ def _select_data_for_display(form, category, metric):
             elif category == 'economics':
                 all_runs_output = form.economics_calcs
         else:
-            all_runs_output = form.all_runs_output
+            if recalc_flag:
+                # instead of subareas use increments
+                # ==================================
+                all_runs_output = form.recalc_runs_fwd[sba]
+            else:
+                all_runs_output = form.all_runs_output
+
         subareas = list(all_runs_output.keys())
         description, units, out_format, pyora_display = fetch_detail_from_varname(form.settings['lookup_df'], metric)
 
@@ -314,7 +334,7 @@ def _select_data_for_display(form, category, metric):
 
             if len(this_data) == 0:
                 form.w_report.append(WARNING_STR + 'could not display metric: ' + metric)
-                return 9*[None]
+                return None
 
             data_for_display[subarea] = this_data
             yaxis_min = min(yaxis_min, min(this_data))
@@ -322,5 +342,6 @@ def _select_data_for_display(form, category, metric):
 
         ntsteps = len(data_for_display[subareas[0]])
         ndecimals = int(out_format.rstrip('f'))
-
-    return  subareas, data_for_display, ntsteps, description, units, out_format, pyora_display, yaxis_min, yaxis_max
+        rslts_set = (subareas, data_for_display, ntsteps, description, units, out_format, pyora_display,
+                                                                                            yaxis_min, yaxis_max)
+    return rslts_set
