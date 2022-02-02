@@ -52,6 +52,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\InitInptsRslts\ora_json_read.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\LiveStock\livestock_class.py">
           <value>
             <Attribute>

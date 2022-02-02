@@ -389,6 +389,7 @@ def test_economics_algorithms(form):
         farm_pcc.update({calc_method : fr_pcc})
     farm_pcc = farm_pcc
 
+    # ----------------------------------------
     # Put all calcs in format that can be ready by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
     data = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
