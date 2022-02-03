@@ -93,7 +93,6 @@ class HouseholdMembers:
         self.livestock_time_annual = livestock_time * 365
 
         # How to differentriate sowing time from growing season from harvest time? Attatch to form object for calcs
-        # Need also hourly rate for wages?
         self.sowing_time_year = self.total_days_sowing_crops * self.daily_average_time_sowing_crops
 
         # Create 'growing_season variable - how? IMPORT FROM CROP MODULE
@@ -207,6 +206,7 @@ def test_economics_algorithms(form):
         crop_data = form.crop_production
 
     else:
+        crop_data = {}
         print('No crop data! Please run C and N model first')
 
     #----------------------------------------
@@ -253,7 +253,7 @@ def test_economics_algorithms(form):
                 for single_crop_name, single_crop_yield in year.items():
                     for good in crop_purch_sales:
                         if good.name == single_crop_name:
-                            # Only calculating for dry season just now
+                            # USING DRY SEASON PRICE TO CALCULATE - SHOULD IT BE WET SEASON? OR AVERAGE?
                             # Assume input is in ETB/$ per kg, so multiply by 1000 to get ETB/$ per tonne
                             value_of_good = (good.dryseas_sale_price * 1000) * single_crop_yield
                             value_of_good_dic = {single_crop_name : value_of_good}
