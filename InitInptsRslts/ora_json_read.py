@@ -85,7 +85,7 @@ class LivestockEntity:
             if key.find('feed') > -1:
                 feed_type = lvstck_content[key]['type']
                 if feed_type ==  'bought in':
-                    value = None
+                    value = lvstck_content[key]['value']
                 else:
                     if feed_type not in anml_prodn_obj.crop_names:
                         feed_type = anml_prodn_obj.crop_names[-1]
