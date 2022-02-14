@@ -232,61 +232,87 @@ def _make_current_crop_list(crop_names):
 
     return crop_currs
 
-def _homologate_list(base_list, inp_list, func_name, padding_val = 0):
+def _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes):
     '''
-    check input list against base list and, if necessary adjust input list
+
     '''
-    nelems = len(base_list)
+    crop = this_crop[0]
+    ngrow_mnths = len(this_crop)
+    indx_end = indx_strt + ngrow_mnths
 
-    if len(inp_list) != nelems:
-        print(WARNING_STR + 'repaired inconsistent list lengths in ' + func_name)
-        ndiff = len(inp_list) - nelems
-        if ndiff > 0:
-            inp_list = inp_list[:nelems]
-        else:
-            inp_list = inp_list + abs(ndiff)*[padding_val]
+    if ngrow_mnths == crop_vars[crop]['t_grow']:
+        pi_tonnes[indx_strt:indx_end] = crop_vars[crop]['pi_tonnes']
+        pi_props[indx_strt:indx_end] = crop_vars[crop]['pi_prop']
+    else:
+        pi_tonnes[indx_strt:indx_end] = ngrow_mnths*[999]
+        pi_props[indx_strt:indx_end] = ngrow_mnths*[999]
 
-    return inp_list
+    yield_typ = crop_vars[crop]['max_yld']  # TODO: should get yield from run file
+
+    return Crop(crop, yield_typ)
 
 def _make_pi_props_tonnes(crop_names, indx_mode, crop_vars):
     '''
     accumulate growing months for each crop
+    consider contiguous perennial crops - grassland, scrubland, coffee
     '''
     func_name = __prog__ + '\t_make_pi_props_tonnes'
 
+    ntsteps = len(crop_names)
+    pi_props = ntsteps*[0]
+    pi_tonnes = ntsteps*[0]
+
     crops_ss = []
     crops_fwd = []
-    pi_props = []
-    pi_tonnes = []
+
+    indx_strt = None
     prev_crop = None
+    this_crop = []
 
-    indx_pi = 0
     for indx, crop in enumerate(crop_names):
-        if crop is None:
-            pi_tonnes.append(0)
-            pi_props.append(0)
-            indx_pi += 1
-        elif crop != prev_crop:
-            # consider contiguous perennial crops - grassland, scrubland, coffee
-            # ==================================================================
-            pi_tonnes += crop_vars[crop]['pi_tonnes']
-            pi_props += crop_vars[crop]['pi_prop']
-            indx_pi += crop_vars[crop]['t_grow']
+        if crop is not None:
+            if indx_strt is None:
+                indx_strt = indx
+                this_crop = [crop]
 
-            yield_typ = crop_vars[crop]['max_yld']      # TODO: should get yield from run file
-            if indx < indx_mode:
-                crops_ss.append(Crop(crop, yield_typ))
+            elif crop == prev_crop:
+                this_crop.append(crop)
+
+            # elif prev_crop is None and len(this_crop) == 1:
+            #     this_crop = [crop]
             else:
-                crops_fwd.append(Crop(crop, yield_typ))
+                if len(this_crop) > 0:
+                    # record plant inputs for this crop
+                    # =================================
+                    crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
+                    if indx_strt < indx_mode:
+                        crops_ss.append(crop_obj)
+                    else:
+                        crops_fwd.append(crop_obj)
+
+                    this_crop = [crop]
+                    indx_strt = indx
 
         prev_crop = crop
 
-    # check list length consistency - should not be necessary
-    # =======================================================
-    pi_tonnes = _homologate_list(crop_names, pi_tonnes, func_name)
-    pi_props  = _homologate_list(crop_names, pi_props, func_name)
+    if len(this_crop) > 0:
+        # check if final crop remains
+        # ===========================
+        crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
+        crops_fwd.append(crop_obj)
 
     return pi_props, pi_tonnes, crops_ss, crops_fwd
+
+class Crop(object,):
+    '''
+
+    '''
+    def __init__(self, crop_name, yield_typ):
+        """
+        Assumptions:
+        """
+        self.crop_lu = crop_name
+        self.yield_typ = yield_typ
 
 class ReadMngmntSubareas(object, ):
 
@@ -403,17 +429,6 @@ class Soil(object,):
         self.t_carbon = t_carbon
         self.t_bulk = t_bulk
         self.tot_soc_meas = tot_soc_meas
-
-class Crop(object,):
-    '''
-
-    '''
-    def __init__(self, crop_name, yield_typ):
-        """
-        Assumptions:
-        """
-        self.crop_lu = crop_name
-        self.yield_typ = yield_typ
 
 def check_params_excel_file(params_xls_fn):
     '''

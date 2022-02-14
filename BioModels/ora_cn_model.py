@@ -42,6 +42,7 @@ from ora_rothc_fns import run_rothc
 # =============================================================================================
 MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
+# SOC_MIN_DIFF = 0.0005000   # convergence criteria tonne/hectare
 
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -283,7 +284,7 @@ def recalc_fwd_soil_cn(form):
     apply modified management to the forward run
     typically additional organic waste or irrigation
     '''
-    func_name = __prog__ + '\trecalculate_soil_cn'
+    func_name = __prog__ + '\trecalc_fwd_soil_cn'
 
     ora_weather = form.ora_weather
     ora_subareas = form.ora_subareas
