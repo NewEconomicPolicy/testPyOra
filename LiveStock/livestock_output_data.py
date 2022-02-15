@@ -30,6 +30,7 @@ def _get_pigs_or_poultry_production(anml_type):
     '''
     pigs are based on goats
     poultry are guessed
+    NOT USED NOW
     '''
 
     if anml_type == 'Pigs':
@@ -61,21 +62,36 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
         for lvstck in lvstck_defn['lvstck_grp']:
             num = lvstck.number
             anml_type = lvstck.type
-            if anml_type == 'Pigs' or anml_type == 'Poultry':
-                manure, n_excrete, meat, milk = _get_pigs_or_poultry_production(anml_type)
-            else:
-                res = anml_prodn_df[(anml_prodn_df.Region == region) &
+            res = anml_prodn_df[(anml_prodn_df.Region == region) &
                                     (anml_prodn_df.System == system) & (anml_prodn_df.Type == anml_type)]
+            manure = res.Manure.values[0]
+            n_excrete = res.ExcreteN.values[0]
+            meat = res.Meat.values[0]
+            milk = res.Milk.values[0]
+
+            # capture instances where production system data isn't available, and default to 'ANY' in Herrero table
+
+            if  np.isnan(manure) == True:
+                print(f'No {anml_type} data available for {system} production system for {region}. '
+                      f'"ANY" data used instead.')
+                res = anml_prodn_df[(anml_prodn_df.Region == region) &
+                                    (anml_prodn_df.System == 'ANY') & (anml_prodn_df.Type == anml_type)]
                 manure = res.Manure.values[0]
                 n_excrete = res.ExcreteN.values[0]
                 meat = res.Meat.values[0]
                 milk = res.Milk.values[0]
+                lvstck.manure = manure
+                lvstck.n_excrete = n_excrete
+                lvstck.meat = meat
+                lvstck.milk = milk
+                new_lvstck_grp.append(lvstck)
 
-            lvstck.manure = manure
-            lvstck.n_excrete = n_excrete
-            lvstck.meat = meat
-            lvstck.milk = milk
-            new_lvstck_grp.append(lvstck)
+            else:
+                lvstck.manure = manure
+                lvstck.n_excrete = n_excrete
+                lvstck.meat = meat
+                lvstck.milk = milk
+                new_lvstck_grp.append(lvstck)
 
         lvstck_defn['lvstck_grp'] = new_lvstck_grp
         all_lvstck.subareas[subarea] = lvstck_defn
@@ -238,7 +254,26 @@ def calc_livestock_data(form):
                             livestock_GUI_class.data['goats_sheep_meat_prod_nlim'] = calcs
                         elif output == 'manure_prod_fr':
                             livestock_GUI_class.data['goats_sheep_manure_prod_nlim'] = calcs
-                # Need to add in pigs and chickens
+                elif animal == 'Poultry':
+                    for output, calcs in outputs.items():
+                        if output == 'n_excrete_fr':
+                            livestock_GUI_class.data['poultry_n_excrete_nlim'] = calcs
+                        elif output == 'milk_prod_fr':
+                            livestock_GUI_class.data['poultry_eggs_prod_nlim'] = calcs
+                        elif output == 'meat_prod_fr':
+                            livestock_GUI_class.data['poultry_meat_prod_nlim'] = calcs
+                        elif output == 'manure_prod_fr':
+                            livestock_GUI_class.data['poultry_manure_prod_nlim'] = calcs
+                elif animal == 'Pigs':
+                    for output, calcs in outputs.items():
+                        if output == 'n_excrete_fr':
+                            livestock_GUI_class.data['pigs_n_excrete_nlim'] = calcs
+                        elif output == 'milk_prod_fr':
+                            pass
+                        elif output == 'meat_prod_fr':
+                            livestock_GUI_class.data['pigs_meat_prod_nlim'] = calcs
+                        elif output == 'manure_prod_fr':
+                            livestock_GUI_class.data['pigs_manure_prod_nlim'] = calcs
                 else:
                     pass
         else:

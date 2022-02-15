@@ -45,6 +45,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\InitInptsRslts\multiTabsGUI.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\InitInptsRslts\ora_excel_read.py">
           <value>
             <Attribute>
