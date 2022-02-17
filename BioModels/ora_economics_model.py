@@ -355,9 +355,11 @@ def test_economics_algorithms(form):
         tlu = tlu + animal_type_total
     tlu_squared = tlu * tlu
 
-    # Land utilised (should this be total land or for subarea?)
-
-    land = 1000
+    # Land utilised in Ha (calculated by adding up all subareas)
+    land = 0
+    for subarea, data in form.all_runs_crop_model.items():
+        subarea_area = data.area_ha
+        land = land + subarea_area
     land_squared = land * land
 
     # Size of household in adult equivalents - how to deal with children ( assume 1/2 of adult just now)
