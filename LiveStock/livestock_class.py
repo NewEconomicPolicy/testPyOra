@@ -57,8 +57,14 @@ class Livestock:
                             total_feed_year = total_feed_year + proportion
                         except TypeError:
                             continue
+                    # Assume grassland is constant
+                    elif foodstuff == 'Grassland':
+                        try:
+                            total_feed_year = total_feed_year + proportion
+                        except TypeError:
+                            pass
                     else:
-                        continue
+                        pass
             total_food_change_fr.append(total_feed_year)
 
         milk_prod_fr = [(item/100) * self.milk * self.number for item in total_food_change_fr]

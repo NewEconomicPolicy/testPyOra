@@ -77,7 +77,9 @@ class EconoLvstckModel(object, ):
                               'dairy_cat_n_excrete_nlim','dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
                               'dairy_cat_manure_prod_nlim', 'beef_cat_n_excrete_nlim', 'beef_cat_meat_prod_nlim',
                               'beef_cat_manure_prod_nlim', 'goats_sheep_n_excrete_nlim', 'goats_sheep_milk_prod_nlim',
-                              'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim'])
+                              'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim', 'poultry_n_excrete_nlim',
+                              'poultry_eggs_prod_nlim', 'poultry_meat_prod_nlim', 'poultry_manure_prod_nlim',
+                              'pigs_n_excrete_nlim', 'pigs_meat_prod_nlim', 'pigs_manure_prod_nlim'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
