@@ -19,6 +19,7 @@ __version__ = '0.0.0'
 # ---------------
 #
 import os, numpy
+from scipy.stats import norm
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 from ora_cn_classes import EconoLvstckModel
@@ -361,7 +362,7 @@ def test_economics_algorithms(form):
     household_size_log = numpy.log(household_size)
 
     # ----------------------------------------
-    # Equation to calculate per capita consumption.
+    # Equation to calculate PER CAPITA CONSUMPTION
     # Only using variables of household income, total livestock units, and land owned
 
     # Alpha values for PCC
@@ -387,7 +388,7 @@ def test_economics_algorithms(form):
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         fr_pcc = []
         for year in calcs:
-                # year is FHH for each year
+                # year is FHI for each year
             year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
                         (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
             fr_pcc.append(year_pcc)
@@ -395,7 +396,7 @@ def test_economics_algorithms(form):
 #    farm_pcc = farm_pcc
 
     # ----------------------------------------
-    # Equation to calculate relative food insecurity. Each year will return value between 0 and 1
+    # Equation to calculate RELATIVE FOOD INSECURITY. Each year will return value between 0 and 1
     # Only using variables of household income, total livestock units, and land owned
 
     # Alpha values for PCC
@@ -418,16 +419,18 @@ def test_economics_algorithms(form):
     # CHECK!!!!
     alpha_7 = 1
 
-    # Use Full Household income for each year for each calc method to calculate yearly PCC
+    # Use Full Household income for each year for each calc method to calculate yearly relative food insecurity
     farm_rfi = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         fr_rfi = []
         for year in calcs:
-                # year is FHH for each year
+                # year is FHI for each year
             year_rfi = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
                         (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
+            # Calculate probit to return value between 0 and 1
+            year_rfi = norm.cdf(year_rfi)
             fr_rfi.append(year_rfi)
-        farm_pcc.update({calc_method : fr_rfi})
+        farm_rfi.update({calc_method : fr_rfi})
 #    farm_rfi = farm_rfi
 
     # ----------------------------------------
