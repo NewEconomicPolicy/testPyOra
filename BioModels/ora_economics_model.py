@@ -313,7 +313,7 @@ def test_economics_algorithms(form):
     total_dom_labour_value = sum(household_dom_labour_value)
 
     #----------------------------------------
-    # Equation to calculate net household income for each year in the forward run, and based on the three crop calc
+    # Equation to calculate full household income for each year in the forward run, and based on the three crop calc
     # methods
     # DAP and Urea not included yet
     all_subareas_full_hh_dic = {}
@@ -326,10 +326,45 @@ def test_economics_algorithms(form):
         all_subareas_full_hh_dic.update({calc_method : fr_total_hh_income})
 
     # ----------------------------------------
-    # Equation to calculate per capita consumption. Dummy variables created for now
+    # Calculate values to be used in equations for PCC, food insecurity, and dietary diversity
+    # Livestock: Are all livestock worth the same? I.e do cow, pig, chicken all = 1. For now they do
+    tlu = 0
+    livestock_list = form.livestock_list
+    for animal_type in livestock_list:
+        animal_type_total = animal_type.number
+        tlu = tlu + animal_type_total
+    tlu_squared = tlu * tlu
+
+    # Land utilised in Ha (calculated by adding up all subareas)
+    land = 0
+    for subarea, data in form.all_runs_crop_model.items():
+        subarea_area = data.area_ha
+        land = land + subarea_area
+    land_squared = land * land
+
+    # Size of household in adult equivalents - how to deal with children ( assume 1/2 of adult just now)
+    # Using simple equivalence scales
+    household_size = 0
+    for people in hh_members:
+        if people.name == 'Male adults':
+            household_size = household_size + people.number
+        elif people.name == 'Female adults':
+            household_size = household_size + people.number
+        elif people.name == 'Male children':
+            household_size = household_size + (people.number * 0.5)
+        elif people.name == 'Female children':
+            household_size = household_size + (people.number * 0.5)
+        else:
+            print ('Please enter family members in economics sheet as either '
+                   'Male adults, Female adults, Male children, or Female children')
+            continue
+    household_size_log = numpy.log(household_size)
+
+    # ----------------------------------------
+    # Equation to calculate per capita consumption.
     # Only using variables of household income, total livestock units, and land owned
 
-    # Alpha values (allow these to be input by user: update GUI)
+    # Alpha values for PCC
     # Intercept
     alpha_0 = 9.194
     # Full Household income
@@ -347,39 +382,7 @@ def test_economics_algorithms(form):
     # Regional price index
     alpha_7 = 1
 
-    # Livestock: Are all livestock worth the same? I.e do cow, pig, chicken all = 1. For now they do
-    tlu = 0
-    livestock_list = form.livestock_list
-    for animal_type in livestock_list:
-        animal_type_total = animal_type.number
-        tlu = tlu + animal_type_total
-    tlu_squared = tlu * tlu
-
-    # Land utilised in Ha (calculated by adding up all subareas)
-    land = 0
-    for subarea, data in form.all_runs_crop_model.items():
-        subarea_area = data.area_ha
-        land = land + subarea_area
-    land_squared = land * land
-
-    # Size of household in adult equivalents - how to deal with children ( assume 1/2 of adult just now)
-    household_size = 0
-    for people in hh_members:
-        if people.name == 'Male adults':
-            household_size = household_size + people.number
-        elif people.name == 'Female adults':
-            household_size = household_size + people.number
-        elif people.name == 'Male children':
-            household_size = household_size + (people.number * 0.5)
-        elif people.name == 'Female children':
-            household_size = household_size + (people.number * 0.5)
-        else:
-            print ('Please enter family members in economics sheet as either '
-                   'Male adults, Female adults, Male children, or Female children')
-            continue
-    household_size_log = numpy.log(household_size)
-
-    # Use Full Household income for each year for each calc method
+    # Use Full Household income for each year for each calc method to calculate yearly PCC
     farm_pcc = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         fr_pcc = []
@@ -389,10 +392,46 @@ def test_economics_algorithms(form):
                         (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
             fr_pcc.append(year_pcc)
         farm_pcc.update({calc_method : fr_pcc})
-    farm_pcc = farm_pcc
+#    farm_pcc = farm_pcc
 
     # ----------------------------------------
-    # Put all calcs in format that can be ready by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
+    # Equation to calculate relative food insecurity. Each year will return value between 0 and 1
+    # Only using variables of household income, total livestock units, and land owned
+
+    # Alpha values for PCC
+    # Intercept
+    alpha_0 = -1.782
+    # Full Household income
+    alpha_1 = -0.0333
+    # Land
+    alpha_2 = -0.102
+    # Land squared
+    alpha_3 = 0.000222
+    # Total land utilised
+    alpha_4 = -0.008400
+    # Total land utilised squared
+    # CHECK!!!!
+    alpha_5 = 000000000000000000000000
+    # Log - Household size adult equivalents
+    alpha_6 = 0.0766
+    # Regional price index
+    # CHECK!!!!
+    alpha_7 = 1
+
+    # Use Full Household income for each year for each calc method to calculate yearly PCC
+    farm_rfi = {}
+    for calc_method, calcs in all_subareas_full_hh_dic.items():
+        fr_rfi = []
+        for year in calcs:
+                # year is FHH for each year
+            year_rfi = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
+                        (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
+            fr_rfi.append(year_rfi)
+        farm_pcc.update({calc_method : fr_rfi})
+#    farm_rfi = farm_rfi
+
+    # ----------------------------------------
+    # Put all calcs in format that can be read by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
     data = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         if calc_method == 'n_lim':
