@@ -333,7 +333,11 @@ def _select_data_for_display(form, category, metric, sba, recalc_flag):
                 this_data = all_runs_output[subarea][group_indx].data[metric]
 
             if len(this_data) == 0:
-                form.w_report.append(WARNING_STR + 'could not display metric: ' + metric)
+                mess = WARNING_STR + 'could not display metric: ' + metric
+                if hasattr(form, 'w_report'):
+                    form.w_report.append(mess)
+                else:
+                    print(mess)
                 return None
 
             data_for_display[subarea] = this_data
