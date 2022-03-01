@@ -66,6 +66,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\InitInptsRslts\ora_lookup_df_fns.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\LiveStock\livestock_class.py">
           <value>
             <Attribute>
