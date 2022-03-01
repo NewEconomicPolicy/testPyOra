@@ -411,10 +411,10 @@ def test_economics_algorithms(form):
     # Total land utilised
     alpha_4 = -0.008400
     # Total land utilised squared
-    # CHECK!!!!
-    alpha_5 = 000000000000000000000000
+    # NO DATA SO REMOVED FROM EQUATION
+    # alpha_5 = 000000000000000000000000
     # Log - Household size adult equivalents
-    alpha_6 = 0.0766
+    alpha_6 = 0.802
     # Regional price index
     # CHECK!!!!
     alpha_7 = 1
@@ -426,7 +426,7 @@ def test_economics_algorithms(form):
         for year in calcs:
                 # year is FHI for each year
             year_rfi = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
-                        (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
+                        (alpha_4 * tlu) + (alpha_6 * household_size_log) + alpha_7
             # Calculate probit to return value between 0 and 1
             year_rfi = norm.cdf(year_rfi)
             fr_rfi.append(year_rfi)
@@ -434,15 +434,62 @@ def test_economics_algorithms(form):
 #    farm_rfi = farm_rfi
 
     # ----------------------------------------
-    # Put all calcs in format that can be read by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
-    data = {}
+    # Equation to calculate DIETARY DIVERSITY.
+    # Each year will return value that estimates number of food items consumed
+    # Only using variables of household income, total livestock units, and land owned
+
+    # Alpha values for Dietary Diversity
+    # Intercept
+    alpha_0 = 1.782
+    # Full Household income
+    alpha_1 = 0.000182
+    # Land
+    alpha_2 = 0.00718
+    # Land squared
+    alpha_3 = -0.0000185
+    # Total land utilised
+    alpha_4 = 0.00544
+    # Agriculutrual Diversity (Number of crops)
+    alpha_5 = 0.0269
+    # Log - Household size adult equivalents
+    alpha_6 = 0.0784
+    # Regional price index
+    # CHECK!!!!
+    alpha_7 = 1
+
+    # Number of crops grown by household in year
+    # Bug in crop model so this is hard coded for now
+    number_of_crops = 5
+    crop_data = form.all_runs_crop_model
+    for subarea, crops in crop_data.items():
+        crop_list = crops.data['crops_ann']
+        fr_years = crops.nyears_fwd
+        crops_fr = crop_list[-fr_years:]
+
+        # Use Full Household income for each year for each calc method to calculate yearly dietary diversity
+    farm_diet_div = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
-        if calc_method == 'n_lim':
-            data.update({'full_hh_income_n_lim' : calcs})
-        elif calc_method == 'zaks':
-            data.update({'full_hh_income_zaks' : calcs})
-        elif calc_method == 'miami':
-            data.update({'full_hh_income_miami': calcs})
+        diet_div = []
+        for year in calcs:
+            # year is FHI for each year
+            year_dd = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
+                        (alpha_4 * tlu) + (alpha_5 * number_of_crops) + (alpha_6 * household_size_log) + alpha_7
+            diet_div.append(year_dd)
+        farm_diet_div.update({calc_method: diet_div})
+
+
+
+#    data = {}
+#    for calc_method, calcs in all_subareas_full_hh_dic.items():
+#        if calc_method == 'n_lim':
+#            data.update({'full_hh_income_n_lim' : calcs})
+#        elif calc_method == 'zaks':
+#            data.update({'full_hh_income_zaks' : calcs})
+#        elif calc_method == 'miami':
+#            data.update({'full_hh_income_miami': calcs})
+    # ----------------------------------------
+    # Put all calcs in format that can be read by GUI graph constructor THIS NEEDS TO BE A CLASS OBJECT
+    # Start woth full household income
 
     economics_GUI_class = form.all_farm_livestock_production
     for calc_method, calcs in all_subareas_full_hh_dic.items():
@@ -452,6 +499,33 @@ def test_economics_algorithms(form):
             economics_GUI_class['full_farm'].data['full_hh_income_zaks'] = calcs
         elif calc_method == 'miami':
             economics_GUI_class['full_farm'].data['full_hh_income_miami'] = calcs
+
+    # Add PCC to form object for GUI graph constructor
+    for calc_method, calcs in farm_pcc.items():
+        if calc_method == 'n_lim':
+            economics_GUI_class['full_farm'].data['per_capita_consumption_n_lim'] = calcs
+        elif calc_method == 'zaks':
+            economics_GUI_class['full_farm'].data['per_capita_consumption_zaks'] = calcs
+        elif calc_method == 'miami':
+            economics_GUI_class['full_farm'].data['per_capita_consumption_miami'] = calcs
+
+    # Add RFI to form object for GUI graph constructor
+    for calc_method, calcs in farm_rfi.items():
+        if calc_method == 'n_lim':
+            economics_GUI_class['full_farm'].data['relative_food_insecurity_n_lim'] = calcs
+        elif calc_method == 'zaks':
+            economics_GUI_class['full_farm'].data['relative_food_insecurity_zaks'] = calcs
+        elif calc_method == 'miami':
+            economics_GUI_class['full_farm'].data['relative_food_insecurity_miami'] = calcs
+
+    # Add dietary divertsity to form object for GUI graph constructor
+    for calc_method, calcs in farm_diet_div.items():
+        if calc_method == 'n_lim':
+            economics_GUI_class['full_farm'].data['dietary_diversity_n_lim'] = calcs
+        elif calc_method == 'zaks':
+            economics_GUI_class['full_farm'].data['dietary_diversity_zaks'] = calcs
+        elif calc_method == 'miami':
+            economics_GUI_class['full_farm'].data['dietary_diversity_miami'] = calcs
 
     form.all_farm_livestock_production = economics_GUI_class
 
