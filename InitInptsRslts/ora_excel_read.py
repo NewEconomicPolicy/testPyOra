@@ -107,6 +107,27 @@ def _add_tgdd_to_weather(tair_list):
 
     return grow_dds
 
+def check_integrity_run_xlxs_file(run_xls_fn):
+    '''
+    check required sheets are present and return list of management sheets
+     '''
+    ret_var = None
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+    # check required sheets are present
+    # =================================
+    integrity_flag = True
+    for rqrd_sheet in RUN_SHT_NAMES.values():
+        if rqrd_sheet not in wb_obj.sheetnames:
+            print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
+            integrity_flag = False
+    wb_obj.close()
+
+    if integrity_flag:
+        ret_var = _read_farm_wthr_xlxs_file(run_xls_fn)
+
+    return ret_var
+
 def read_run_xlxs_file(run_xls_fn, crop_vars, latitude):
     '''
     check required sheets are present
