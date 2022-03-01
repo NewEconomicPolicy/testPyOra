@@ -23,6 +23,8 @@ import json
 from glob import glob
 from os.path import isfile, normpath, join
 
+from ora_excel_read import check_integrity_run_xlxs_file
+
 ERROR_STR = '*** Error *** '
 METRIC_LIST = list(['precip', 'tair'])
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
@@ -177,15 +179,27 @@ def check_json_xlsx_inp_files(w_soil_cn, settings, mgmt_dir):
 
     # activate carbon nitrogen model push button
     # ==========================================
+    w_soil_cn.setEnabled(False)
     farm_wthr_fname = FNAME_RUN
     mess += '\t\trun file, ' + farm_wthr_fname + ', is '
+
     wthr_xls = join(mgmt_dir, farm_wthr_fname)
     if (isfile(wthr_xls)):
-        w_soil_cn.setEnabled(True)
-        mess += 'present'
+        ret_var = check_integrity_run_xlxs_file(wthr_xls)
+        if ret_var is None:
+            mess += 'uncompliant'
+        else:
+            subareas = ret_var[0]
+            if len(subareas) == 0:
+                mess += 'present but with no subareas'
+            else:
+                w_soil_cn.setEnabled(True)
+                mess += 'present with subareas: '
+                for sba in subareas:
+                    mess += sba + ', '
+                mess = mess.rstrip(', ')
     else:
-        w_soil_cn.setEnabled(False)
-        mess += 'missing'
+        mess += 'does not exist'
 
     return mess
 
