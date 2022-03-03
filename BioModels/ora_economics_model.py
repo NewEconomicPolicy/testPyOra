@@ -317,6 +317,7 @@ def test_economics_algorithms(form):
     # Equation to calculate full household income for each year in the forward run, and based on the three crop calc
     # methods
     # DAP and Urea not included yet
+    # CHECK THIS EQUATION IS CORRECT
     all_subareas_full_hh_dic = {}
     for calc_method, fr_years in total_crop_sales.items():
         fr_total_hh_income = []
