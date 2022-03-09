@@ -55,7 +55,7 @@ class Form(QWidget):
 
         irow = 20  # main layout is a grid therefore line and row spacing is important
 
-        w_cancel = QPushButton('Save', self)
+        w_cancel = QPushButton('Cancel', self)
         helpText = 'leave program without saving the configuration file'
         w_cancel.setToolTip(helpText)
         w_cancel.setFixedWidth(STD_BTN_SIZE)
