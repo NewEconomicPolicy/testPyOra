@@ -23,11 +23,12 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
+from os.path import isfile, join
 from copy import copy
 from numpy import arange
 from PyQt5.QtWidgets import QApplication
 
+from livestock_output_data import check_livestock_run_data
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropModel
@@ -35,7 +36,7 @@ from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
-from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_run_xlxs_file
+from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_run_xls_file
 from ora_rothc_fns import run_rothc
 
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
@@ -143,9 +144,9 @@ def run_soil_cn_algorithms(form):
     if ora_parms.ow_parms is None:
         return
 
-    mgmt_dir = form.w_lbl06.text()
-    run_xls_fname = os.path.join(mgmt_dir, FNAME_RUN)
-    if not os.path.isfile(run_xls_fname):
+    mgmt_dir = form.w_run_dir3.text()
+    run_xls_fname = join(mgmt_dir, FNAME_RUN)
+    if not isfile(run_xls_fname):
         print(ERROR_STR + 'Excel run file ' + run_xls_fname + 'must exist')
         return
 
@@ -154,8 +155,8 @@ def run_soil_cn_algorithms(form):
     # read input Excel workbook
     # =========================
     print('Reading: Run file: ' + run_xls_fname)
-    study = ReadStudy(form, form.w_lbl06.text(), run_xls_fname, form.settings['out_dir'])
-    retcode = read_run_xlxs_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
+    study = ReadStudy(form, mgmt_dir, run_xls_fname, form.settings['out_dir'])
+    retcode = read_run_xls_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
     if retcode is None:
         return
     else:
@@ -203,8 +204,12 @@ def run_soil_cn_algorithms(form):
 
         # update GUI by activating the livestock and new Excel output files push buttons
         # ==============================================================================
-        if len(form.settings['lvstck_files']) > 0:
+        ngrps = check_livestock_run_data(form)
+        if ngrps > 0:
             form.w_livestock.setEnabled(True)
+        else:
+            print('\nNo livestock to process')
+            form.w_livestock.setEnabled(False)
 
         if study.output_excel:
             retrieve_output_xls_files(form, study.study_name)

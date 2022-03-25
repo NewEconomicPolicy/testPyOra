@@ -12,19 +12,48 @@ __version__ = '1.0.1'
 __author__ = 's02dm4'
 
 
-import os
-import csv
-from datetime import datetime
-import matplotlib.pyplot as plt
+from os.path import isfile, isdir, normpath, join, exists, lexists
 import numpy as np
 from pathlib import Path
-from pandas import DataFrame
-from ora_json_read import ReadLvstckJsonSubareas
+from ora_excel_read import ReadLivestockSheet
 from ora_excel_read import ReadAfricaAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
 from livestock_class import Livestock
 from ora_cn_classes import EconoLvstckModel
+
+def check_livestock_run_data(form, ntab = 3):
+    '''
+    Test livestock data
+    '''
+
+    # read inputs and create folder to store graphs in
+    # =================================================
+    xls_inp_fname = normpath(form.settings['params_xls'])
+    if not isfile(xls_inp_fname):
+        print('Excel input file ' + xls_inp_fname + 'must exist')
+        return
+
+    # read sheets from input Excel workbook
+    # =====================================
+    print('Loading: ' + xls_inp_fname)
+    ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
+
+    # create animal production object which includes crop names for validation purposes
+    # =================================================================================
+    anml_prodn_obj = ReadAfricaAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
+    if anml_prodn_obj.retcode is None:
+        return
+
+    # read and validate livestock JSON files
+    # ======================================
+    if ntab == 3:
+        all_lvstck = ReadLivestockSheet(form.w_run_dir3, anml_prodn_obj)
+    else:
+        all_lvstck = ReadLivestockSheet(form.w_run_dir0, anml_prodn_obj)
+    _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
+
+    return len(all_lvstck.subareas['all']['lvstck_grp'])
 
 def _get_pigs_or_poultry_production(anml_type):
     '''
@@ -108,15 +137,15 @@ def calc_livestock_data(form):
 
     # read inputs and create folder to store graphs in
     # =================================================
-    xls_inp_fname = os.path.normpath(form.settings['params_xls'])
-    if not os.path.isfile(xls_inp_fname):
+    xls_inp_fname = normpath(form.settings['params_xls'])
+    if not isfile(xls_inp_fname):
         print('Excel input file ' + xls_inp_fname + 'must exist')
         return
 
     # read sheets from input Excel workbook
     # =====================================
     print('Loading: ' + xls_inp_fname)
-    study = ReadStudy(form.w_lbl06.text(), xls_inp_fname, form.settings['out_dir'])
+    study = ReadStudy(form.w_run_dir3.text(), xls_inp_fname, form.settings['out_dir'])
     ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     out_dir = form.settings['out_dir']
     Path(out_dir + "/Livestock/Graphs").mkdir(parents = True, exist_ok = True)
@@ -129,7 +158,7 @@ def calc_livestock_data(form):
 
     # read and validate livestock JSON files
     # ======================================
-    all_lvstck = ReadLvstckJsonSubareas(form.settings['lvstck_files'], anml_prodn_obj)
+    all_lvstck = ReadLivestockSheet(form.w_run_dir3, anml_prodn_obj)
     _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
 
     # Access crop production data
@@ -297,22 +326,22 @@ def calc_livestock_data(form):
 '''
     print('Creating livestock charts')
     parent_dir = 'c:/livestockoutputtest'
-    if not os.path.exists(parent_dir):
+    if not exists(parent_dir):
         os.makedirs(parent_dir)
     run_time = datetime.now()
     directory = f'Livestock run at {run_time.day}_{run_time.month}_{run_time.year} ' \
                 f'{run_time.hour}_{run_time.minute}_{run_time.second}'
-    path = os.path.join(parent_dir, directory)
+    path = join(parent_dir, directory)
     os.makedirs(path)
     all_livestock_df = DataFrame.from_dict(total_an_prod_all_subareas)
     all_livestock_df.to_csv(path+'\\all_data.csv')
     for subarea in total_an_prod_all_subareas.items():
         subarea_path = f'{subarea[0]}'
-        join_path = os.path.join(path, subarea_path)
+        join_path = join(path, subarea_path)
         os.makedirs(join_path)
         for calc_method in subarea[1].items():
             calc_method_path = f'{calc_method[0]}'
-            calc_method_full = os.path.join(join_path, calc_method_path)
+            calc_method_full = join(join_path, calc_method_path)
             os.makedirs(calc_method_full)
             for animal_type in calc_method[1].items():
                 for output, values in animal_type[1].items():
@@ -342,7 +371,7 @@ def calc_livestock_data(form):
                         filename = f'Goats or sheep for milk {output}'
                     else:
                         filename = f'{animal_type[0]} {output}'
-                    filename_path = os.path.join(calc_method_full,filename)
+                    filename_path = join(calc_method_full,filename)
                     plt.savefig(filename_path)
                     plt.close()
 '''

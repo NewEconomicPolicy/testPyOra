@@ -14,12 +14,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
-import sys
-from time import time
-from openpyxl import load_workbook
-from pandas import read_excel
-from zipfile import BadZipFile
+from os.path import isfile, join, isdir, normpath, split
+from os import mkdir
 from PyQt5.QtWidgets import QApplication
 
 from thornthwaite import thornthwaite
@@ -167,15 +163,15 @@ def extend_out_dir(form):
      check and if necessary create extended output directory
     '''
     mgmt_dir = form.w_lbl06.text()
-    dummy, short_dir = os.path.split(mgmt_dir)
+    dummy, short_dir = split(mgmt_dir)
     curr_out_dir = form.w_lbl15.text()
 
-    out_dir = os.path.normpath(os.path.join(curr_out_dir, short_dir))
-    if os.path.isdir(out_dir):
+    out_dir = normpath(join(curr_out_dir, short_dir))
+    if isdir(out_dir):
         form.settings['out_dir'] = out_dir
     else:
         try:
-            os.mkdir(out_dir)
+            mkdir(out_dir)
             print('Created output directory: ' + out_dir)
             form.settings['out_dir'] = out_dir
         except PermissionError as err:

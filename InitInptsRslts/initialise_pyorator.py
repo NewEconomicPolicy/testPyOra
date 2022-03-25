@@ -17,25 +17,34 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 # 
-from os.path import isfile, isdir, normpath, join, exists, lexists
-from os import mkdir, getcwd, makedirs
-from os import name as name_os
+from os.path import isfile, isdir, normpath, join, exists, lexists, split
+from os import getcwd, makedirs, name as name_os
 
-import json
+from json import load as load_json, dump as dump_json
+from json.decoder import JSONDecodeError
+
 from time import sleep
 import sys
 from win32api import GetLogicalDriveStrings
 
+from ora_excel_read_misc import identify_study_areas
+from farm_detailGui import repopulate_farms_dropdown
+from hwsd_bil import check_hwsd_integrity
+from weather_datasets import read_weather_dsets_detail
+
 from set_up_logging import set_up_logging
-from ora_excel_read import check_params_excel_file, ReadStudy, ReadCropOwNitrogenParms
-from ora_json_read import check_json_xlsx_inp_files
+from ora_excel_read import check_params_excel_file, check_xls_run_file, \
+                                                                ReadStudy, ReadCropOwNitrogenParms, ReadAfricaAnmlProdn
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 
 PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
+NOTEPAD_EXE_PATH = 'C:\\Windows\\System32\\notepad.exe'
+
 ERROR_STR = '*** Error *** '
+WARNING_STR = '*** Warning *** '
 sleepTime = 5
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
@@ -43,14 +52,26 @@ MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
 
 def initiation(form):
     '''
-    this function is called to initiate the programme to process all settings
+    this function is called to initiate the programme and process all settings
     '''
     # retrieve settings
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
-    parms_xls_fname = form.settings['params_xls']
-    print('Reading: ' + parms_xls_fname)
-    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
+    parms_xls_fn = form.settings['params_xls']
+    print('Reading: ' + parms_xls_fn)
+    form.ora_parms = ReadCropOwNitrogenParms(parms_xls_fn)
+
+    # create animal production object which includes crop names for validation purposes
+    # =================================================================================
+    form.anml_prodn = ReadAfricaAnmlProdn(parms_xls_fn, form.ora_parms.crop_vars)
+
+    # check weather data
+    # ==================
+    if form.settings['wthr_dir'] is None:
+        form.wthr_sets = None
+    else:
+        form.wthr_sets = read_weather_dsets_detail(form)
+    form.wthr_rsrces_gnrc = list(['CRU'])
 
     # initialise bridges across economics, livestock and carbon-nitrogen-water models
     # ===============================================================================
@@ -80,24 +101,30 @@ def _read_setup_file(program_id):
     if exists(setup_file):
         try:
             with open(setup_file, 'r') as fsetup:
-                setup = json.load(fsetup)
+                setup = load_json(fsetup)
 
-        except (OSError, IOError) as e:
+        except (JSONDecodeError, OSError, IOError) as err:
             sleep(sleepTime)
             exit(0)
     else:
-        setup = _write_default_setup_file(setup_file)
-        print('Read default setup file ' + setup_file)
+        print(ERROR_STR + 'setup file ' + setup_file + ' must exist')
+        sleep(sleepTime)
+        exit(0)
+
+
 
     # initialise vars
     # ===============
     settings = setup['setup']
-    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'excel_dir', 'weather_dir', 'params_xls']
+    settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'study_area_dir', 'hwsd_dir',
+                'nsubareas', 'irrig_dflt', 'nrota_yrs_dflt', 'areas_dflt', 'excel_dir', 'wthr_dir', 'params_xls']
     for key in settings_list:
         if key not in settings:
             print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
             sleep(sleepTime)
             exit(0)
+
+    print('Read setup file: {}\nLogs will be written to: {}'.format(setup_file, settings['log_dir']))
 
     # TODO: consider situation when user uses Apache OpenOffice
     # =========================================================
@@ -108,7 +135,7 @@ def _read_setup_file(program_id):
         if isfile(excel_path):
             excel_flag = True
         else:
-            print(ERROR_STR + 'Excel progam must exist - should be here: ' + excel_path)
+            print(ERROR_STR + 'Excel progam must exist - expected here: ' + excel_path)
 
     else:
         print(ERROR_STR + 'Excel directory must exist - usually here: ' + EXCEL_EXE_PATH)
@@ -127,11 +154,21 @@ def _read_setup_file(program_id):
 
     params_xls = normpath(settings['params_xls'])
     if check_params_excel_file(params_xls) is None:
+        print('Excel input file ' + params_xls + 'must exist')
         sleep(sleepTime)
         exit(0)
 
-    # make sure directories exist for configuration and log files
-    # ===========================================================
+    # used to display weather data
+    # ============================
+    notepad_path = NOTEPAD_EXE_PATH
+    if isfile(notepad_path):
+        settings['notepad_path'] = notepad_path
+    else:
+        print(WARNING_STR + 'Could not find notepad exe file - usually here: ' + NOTEPAD_EXE_PATH)
+        settings['notepad_path'] = None
+
+    # make sure directories exist for weather, configuration and log files paths
+    # ==========================================================================
     log_dir = settings['log_dir']
     if not lexists(log_dir):
         makedirs(log_dir)
@@ -139,6 +176,49 @@ def _read_setup_file(program_id):
     config_dir = settings['config_dir']
     if not lexists(config_dir):
         makedirs(config_dir)
+
+    wthr_dir = settings['wthr_dir']
+    if wthr_dir is not None:
+        if not lexists(wthr_dir):
+            print(WARNING_STR + ' weather datasets path ' + wthr_dir + ' does not exist')
+            wthr_dir = None
+
+    settings['wthr_dir'] = wthr_dir
+
+    # validate study areas
+    # ====================
+    settings['fname_run'] = FNAME_RUN
+    study_areas = identify_study_areas(None, settings['study_area_dir'], settings['fname_run'])
+
+    if len(study_areas) == 0:
+        print(ERROR_STR + 'No valid study areas in: ' + settings['study_area_dir'])
+        sleep(sleepTime)
+        exit(0)
+
+    studies = []
+    for dirname in study_areas:
+        dummy, study = split(dirname)
+        studies.append(study)
+
+    settings['studies'] = studies
+    settings['farms'] = {}
+
+    # only one configuration file for this application
+    # ================================================
+    config_file = normpath(settings['config_dir'] + '/' + program_id + '_config.json')
+    settings['config_file'] = config_file
+    print('Using configuration file: ' + config_file)
+
+    # verify HWSD
+    # ===========
+    hwsd_dir = settings['hwsd_dir']
+    if lexists(hwsd_dir):
+        check_hwsd_integrity(hwsd_dir)
+    else:
+        print('HWSD not detected')
+        settings['hwsd_dir'] = None
+
+    settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
 
     # only one configuration file for this application
     # ================================================
@@ -149,66 +229,6 @@ def _read_setup_file(program_id):
     settings['study'] = ''
 
     return settings
-
-def _write_default_setup_file(setup_file):
-    '''
-    stanza if setup_file needs to be created
-    '''
-
-    # Windows only for now
-    # =====================
-    os_system = name_os
-    if os_system != 'nt':
-        print('Operating system is ' + os_system + 'should be nt - cannot proceed with writing default setup file')
-        sleep(sleepTime)
-        sys.exit(0)
-
-    # auto find ORATOR location from list of drive
-    # ============================================
-    err_mess = '*** Error creating setup file *** '
-    drives = GetLogicalDriveStrings()
-    drives = drives.split('\000')[:-1]
-
-    orator_flag = False
-
-    for drive in drives:
-        orator_dir = join(drive, 'ORATOR')
-        if isdir(orator_dir):
-            print('Found ' + orator_dir)
-            orator_flag = True
-            break
-
-    if not orator_flag:
-        print(err_mess + 'Could not find ' + orator_dir + ' on any of the drives ' + str(drives).strip('[]'))
-        sleep(sleepTime)
-        sys.exit(0)
-
-    data_path = join(drive, 'GlobalEcosseData')
-    if not isdir(data_path):
-        print(err_mess + 'Could not find ' + data_path)
-        sleep(sleepTime)
-        sys.exit(0)
-
-    # typically: 'fname_lookup': 'G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx'
-    # ===========================================================================================================
-    orator_dir += '\\'
-    data_path += '\\'
-    _default_setup = {
-        'setup': {
-            'config_dir': orator_dir + 'config',
-            'fname_png': join(orator_dir + 'run\\Images', 'Tree_of_life.PNG'),
-            'fname_lookup': '',
-            'excel_dir': '',
-            'log_dir': orator_dir + 'logs',
-            'weather_dir': data_path
-        }
-    }
-    # create setup file
-    # =================
-    with open(setup_file, 'w') as fsetup:
-        json.dump(_default_setup, fsetup, indent=2, sort_keys=True)
-        fsetup.close()
-        return _default_setup
 
 def _write_default_config_file(config_file):
     '''
@@ -222,7 +242,7 @@ def _write_default_config_file(config_file):
     }
     # if config file does not exist then create it...
     with open(config_file, 'w') as fconfig:
-        json.dump(_default_config, fconfig, indent=2, sort_keys=True)
+        dump_json(_default_config, fconfig, indent=2, sort_keys=True)
         return _default_config
 
 def read_config_file(form):
@@ -235,11 +255,11 @@ def read_config_file(form):
     config_file = form.settings['config_file']
     if exists(config_file):
         try:
-            with open(config_file, 'r') as fconfig:
-                config = json.load(fconfig)
+            with open(config_file, 'r') as fcnfg:
+                config = load_json(fcnfg)
                 print('Read config file ' + config_file)
-        except (OSError, IOError) as e:
-            print(e)
+        except (JSONDecodeError, OSError, IOError) as err:
+            print(ERROR_STR + err)
             return False
     else:
         config = _write_default_config_file(config_file)
@@ -279,16 +299,15 @@ def read_config_file(form):
     form.w_tab_wdgt.w_combo13.setCurrentIndex(ow_type_indx)
     form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
-    # this stanza relates to use of JSON files
-    # ========================================
+    # process runfile
+    # ===============
     mgmt_dir = normpath(config['mgmt_dir'])
     if not isdir(mgmt_dir):
         mess =  '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
         return
 
-    form.w_tab_wdgt.w_lbl06.setText(mgmt_dir)
-
-    form.w_tab_wdgt.w_lbl07.setText(check_json_xlsx_inp_files(form.w_tab_wdgt.w_soil_cn, form.settings, mgmt_dir))
+    form.w_tab_wdgt.w_run_dir0.setText(mgmt_dir)
+    form.w_tab_wdgt.w_run_dir3.setText(mgmt_dir)
 
     # check run file
     # =============
@@ -296,6 +315,8 @@ def read_config_file(form):
     if not isfile(run_xls_fname):
         print(ERROR_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
         return
+
+    form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir))
 
     if config['write_excel']:
         form.w_tab_wdgt.w_make_xls.setCheckState(2)
@@ -309,19 +330,19 @@ def read_config_file(form):
     display_names = fetch_display_names_from_metrics(lookup_df, carbon_change)
     for display_name in display_names:
         form.w_tab_wdgt.w_combo07.addItem(display_name)
-        form.w_tab_wdgt.w_combo27.addItem(display_name)
+        form.w_tab_wdgt.w_combo37.addItem(display_name)
 
     nitrogen_change = NitrogenChange()
     display_names = fetch_display_names_from_metrics(lookup_df, nitrogen_change)
     for display_name in display_names:
         form.w_tab_wdgt.w_combo08.addItem(display_name)
-        form.w_tab_wdgt.w_combo28.addItem(display_name)
+        form.w_tab_wdgt.w_combo38.addItem(display_name)
 
     soil_water = SoilWaterChange()
     display_names = fetch_display_names_from_metrics(lookup_df, soil_water)
     for display_name in display_names:
         form.w_tab_wdgt.w_combo09.addItem(display_name)
-        form.w_tab_wdgt.w_combo29.addItem(display_name)
+        form.w_tab_wdgt.w_combo39.addItem(display_name)
 
     crop_model = CropModel()
     display_names = fetch_display_names_from_metrics(lookup_df, crop_model)
@@ -337,9 +358,65 @@ def read_config_file(form):
     # ==============================================
     study = ReadStudy(form, mgmt_dir, run_xls_fname)
     for sba in study.subareas:
-        form.w_tab_wdgt.w_combo31s.addItem(sba)
+        form.w_tab_wdgt.w_combo36.addItem(sba)      # Test forward run tab
 
     form.settings['study'] = study
+
+    # from constructor
+    # ================
+    for attrib in list(['clim_scnr_indx', 'strt_yr_ss_indx', 'strt_yr_fwd_indx', 'study', 'farm_name',
+                                                            'use_isda', 'use_csv', 'nyrs_ss', 'nyrs_fwd']):
+        if attrib not in config:
+            print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
+            sleep(sleepTime)
+            sys.exit(0)
+
+    # TODO: improve understanding of check boxes
+    # ==========================================
+    if config['use_isda']:
+        form.w_tab_wdgt.w_use_isda.setCheckState(2)
+    else:
+        form.w_tab_wdgt.w_use_isda.setCheckState(0)
+
+    if config['use_csv']:
+        form.w_tab_wdgt.w_use_csv.setCheckState(2)
+    else:
+        form.w_tab_wdgt.w_use_csv.setCheckState(0)
+
+    # populate widgets relating to study and farms
+    # ============================================
+    stdy_indx = form.w_tab_wdgt.w_combo00.findText(config['study'])
+    if stdy_indx >= 0:
+        form.w_tab_wdgt.w_combo00.setCurrentIndex(stdy_indx)
+
+    repopulate_farms_dropdown(form)
+    farm_indx = form.w_tab_wdgt.w_combo02.findText(config['farm_name'])
+    if farm_indx >= 0:
+        form.w_tab_wdgt.w_combo02.setCurrentIndex(farm_indx)
+
+    # populate widgets relating to weather
+    # ====================================
+    if form.settings['wthr_dir'] is None:
+        form.w_use_csv.setChecked(True)
+    else:
+        form.w_tab_wdgt.w_combo30.setCurrentIndex(config['clim_scnr_indx'])
+        form.w_tab_wdgt.w_combo29s.setCurrentIndex(config['strt_yr_ss_indx'])
+        form.w_tab_wdgt.w_combo31s.setCurrentIndex(config['strt_yr_fwd_indx'])
+
+    form.w_tab_wdgt.w_nyrs_ss.setText(str(config['nyrs_ss']))
+    form.w_tab_wdgt.w_nyrs_fwd.setText(str(config['nyrs_fwd']))
+
+    # view weather button
+    # ===================
+    if form.settings['notepad_path'] is None:
+        form.w_tab_wdgt.w_view_csv.setEnabled(False)
+    else:
+        form.w_tab_wdgt.w_view_csv.setEnabled(True)
+
+    # post path to CSV weather file
+    # =============================
+    if 'csv_wthr_fn' in config:
+        form.w_tab_wdgt.w_csv_fn.setText(config['csv_wthr_fn'])
 
     return True
 
@@ -351,22 +428,31 @@ def write_config_file(form, message_flag=True):
     # only one config file
     # ====================
     config_file = form.settings['config_file']
-
     config = {
-        'mgmt_dir': form.w_tab_wdgt.w_lbl06.text(),
+        'mgmt_dir': form.w_tab_wdgt.w_run_dir3.text(),
         'write_excel': form.w_tab_wdgt.w_make_xls.isChecked(),
         'owex_min': form.w_tab_wdgt.w_owex_min.text(),
         'owex_max': form.w_tab_wdgt.w_owex_max.text(),
         'ow_type_indx': form.w_tab_wdgt.w_combo13.currentIndex(),
-        'mnth_appl_indx': form.w_tab_wdgt.w_mnth_appl.currentIndex()
+        'mnth_appl_indx': form.w_tab_wdgt.w_mnth_appl.currentIndex(),
+        "clim_scnr_indx": form.w_tab_wdgt.w_combo30.currentIndex(),
+        'csv_wthr_fn': form.w_tab_wdgt.w_csv_fn.text(),
+        "use_isda": form.w_tab_wdgt.w_use_isda.isChecked(),
+        "use_csv": form.w_tab_wdgt.w_use_csv.isChecked(),
+        "farm_name": form.w_tab_wdgt.w_combo02.currentText(),
+        "nyrs_ss": int(form.w_tab_wdgt.w_nyrs_ss.text()),
+        "nyrs_fwd": int(form.w_tab_wdgt.w_nyrs_fwd.text()),
+        "strt_yr_ss_indx": form.w_tab_wdgt.w_combo29s.currentIndex(),
+        "strt_yr_fwd_indx": form.w_tab_wdgt.w_combo31s.currentIndex(),
+        "study": form.w_tab_wdgt.w_combo00.currentText()
     }
     if isfile(config_file):
         descriptor = 'Updated existing'
     else:
         descriptor = 'Wrote new'
 
-    with open(config_file, 'w') as fconfig:
-        json.dump(config, fconfig, indent=2, sort_keys=True)
+    with open(config_file, 'w') as fcnfg:
+        dump_json(config, fcnfg, indent=2, sort_keys=True)
         if message_flag:
             print('\n' + descriptor + ' configuration file ' + config_file)
         else:

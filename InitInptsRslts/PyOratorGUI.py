@@ -17,7 +17,6 @@ import sys
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout,  \
                                                                                                 QPushButton, QTextEdit
-
 from multiTabsGUI import AllTabs
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
@@ -25,7 +24,7 @@ from initialise_pyorator import read_config_file, initiation, write_config_file
 from set_up_logging import OutLog
 
 STD_FLD_SIZE = 60
-STD_BTN_SIZE = 100
+STD_BTN_SIZE = 75
 STD_CMBO_SIZE = 150
 
 class Form(QWidget):
@@ -49,11 +48,19 @@ class Form(QWidget):
         grid = QGridLayout()
         grid.setSpacing(10)	    # set spacing between widgets
 
-        w_tab_wdgt = AllTabs(self.settings, self.lggr, self.ora_parms)
+        w_tab_wdgt = AllTabs(self.settings, self.lggr, self.ora_parms, self.wthr_sets, self.wthr_rsrces_gnrc,
+                                                                                                    self.anml_prodn)
         grid.addWidget(w_tab_wdgt, 0, 0, 20, 8)  # row, column, rowSpan, columnSpan
         self.w_tab_wdgt = w_tab_wdgt
 
         irow = 20  # main layout is a grid therefore line and row spacing is important
+
+        w_clr_psh = QPushButton('Clear', self)
+        helpText = 'Clear reporting window'
+        w_clr_psh.setToolTip(helpText)
+        w_clr_psh.setFixedWidth(STD_BTN_SIZE)
+        grid.addWidget(w_clr_psh, irow, 4)
+        w_clr_psh.clicked.connect(self.clearReporting)
 
         w_cancel = QPushButton('Cancel', self)
         helpText = 'leave program without saving the configuration file'
@@ -72,6 +79,7 @@ class Form(QWidget):
         w_exit = QPushButton('Exit', self)
         helpText = 'Close GUI - the configuration file will be saved'
         w_exit.setToolTip(helpText)
+        w_exit.setFixedWidth(STD_BTN_SIZE)
         grid.addWidget(w_exit, irow, 7)
         w_exit.clicked.connect(self.exitClicked)
 
@@ -114,7 +122,7 @@ class Form(QWidget):
         self.setLayout(outer_layout)
 
         # posx, posy, width, height
-        self.setGeometry(500, 100, 750, 400)
+        self.setGeometry(500, 50, 750, 400)
         self.setWindowTitle('Run ORATOR analysis')
 
         # reads and set values from last run
@@ -122,6 +130,10 @@ class Form(QWidget):
         read_config_file(self)
         sys.stdout = OutLog(self.w_report, sys.stdout)
         # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
+
+    def clearReporting(self):
+        #
+        self.w_report.clear()
 
     def cancelClicked(self):
 

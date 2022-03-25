@@ -19,7 +19,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
+from os.path import isfile, join, exists
+from os import remove
 
 from string import ascii_uppercase
 from openpyxl import load_workbook
@@ -192,7 +193,7 @@ def _generate_charts(fname, metric, sub_system, lookup_df):
 
     # load workbook previously created
     # ================================
-    if not os.path.exists(fname):
+    if not exists(fname):
         print('File ' + fname + ' must exist')
         return -1
 
@@ -247,10 +248,10 @@ def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
         # make a safe name
         # ===============
         sht_abbrev = sub_system
-        fname = os.path.join(out_dir, study.study_name + ' z_' + sht_abbrev + '.xlsx')   # add 'z' to force order
-        if os.path.isfile(fname):
+        fname = join(out_dir, study.study_name + ' z_' + sht_abbrev + '.xlsx')   # add 'z' to force order
+        if isfile(fname):
             try:
-                os.remove(fname)
+                remove(fname)
             except PermissionError as err:
                 print(err)
                 return -1

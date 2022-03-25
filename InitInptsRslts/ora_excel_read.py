@@ -35,15 +35,19 @@ from ora_water_model import add_pet_to_weather
 from ora_cn_fns import plant_inputs_crops_distribution
 from ora_low_level_fns import average_weather
 from ora_classes_excel_write import pyoraId as oraId
+from ora_gui_misc_fns import format_sbas, farming_system, region_validate, LivestockEntity
 
 METRIC_LIST = list(['precip', 'tair'])
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+ANML_ABBREVS = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
 ANML_PRODN_SHEET = 'Typical animal production'   # Herrero table
+
 REQUIRED_SHEET_NAMES = list(['N constants', 'Crop parms', 'Org Waste parms', ANML_PRODN_SHEET])
 FARM_WTHR_SHEET_NAMES = {'lctn': 'Farm location', 'wthr':'Weather'}
 
-RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas'}
+RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas',
+                                                                                            'lvstck':'Livestock'}
 SOIL_METRICS = list(['t_depth', 't_clay', 't_sand', 't_silt', 't_carbon', 't_bulk', 't_pH', 't_salinity'])
 MNGMNT_SHT_HDRS = ['period', 'year', 'month', 'crop_name', 'yld', 'fert_type', 'fert_n', 'ow_type', 'ow_amnt', 'irrig']
 T_DEPTH = 30
@@ -57,6 +61,135 @@ WARNING_STR = '*** Warning ***\t'
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 MAX_SUB_AREAS = 8
+NFEED_TYPES = 5
+
+def rommel_jotter():
+    '''
+    not called - for Jupyter QtConsole 4.3.1
+    '''
+    RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas',
+                     'lvstck': 'Livestock'}
+    from openpyxl import load_workbook
+    from pandas import Series, read_excel, DataFrame
+
+    run_xls_fn = 'E:\\ORATOR_INTGR\\study areas\\North Gondar (ETH)\\Robe_nocnvrg\\FarmWthrMgmt.xlsx'
+    anml_abbrevs = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
+
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+    lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
+    df = DataFrame(lvstck_sht.values, columns=['descr'] + anml_abbrevs)
+
+    wb_obj.close()
+
+    for row in df.values:
+        break
+
+class ReadLivestockSheet(object, ):
+
+    def __init__(self, w_run_dir3, anml_prodn_obj):
+        '''
+
+        '''
+
+        mgmt_dir = w_run_dir3.text()
+        run_xls_fn = join(mgmt_dir, FNAME_RUN)
+
+        wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+        print('Reading livestock sheet ')
+        anml_abbrevs = ANML_ABBREVS
+
+        lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
+        max_row = lvstck_sht.max_row
+        max_col = lvstck_sht.max_column
+
+        df = DataFrame(lvstck_sht.values, columns=['descr'] + anml_abbrevs)
+        lvstck_dscrs = list(df.values[0][1:])
+
+        wb_obj.close()
+
+        # construct previous JSON derived dictionary
+        lvstck_content = {'site definition': {'area name': 'all', 'area (ha)': 3.5, 'region': 'Eastern Africa',
+                                                                                                    'system': 'MRA'}}
+        # step through each animal type
+        # =============================
+        lvstck_indx = 0
+        for anml, descr in zip(anml_abbrevs, lvstck_dscrs):
+            nanmls = df[anml].values[1]
+            if nanmls == 0:
+                continue
+            strtgy =  df[anml].values[2]
+            lvstck = {'type': descr, 'number': nanmls, 'strategy': strtgy}
+
+            indx = 3
+            feed_indx = 0
+            for ic in range(NFEED_TYPES):
+                feed_type = df[anml].values[indx]
+                val = df[anml].values[indx + 1]
+                if feed_type != 'None' and val > 0:
+                    feed_indx += 1
+                    feed_id = 'feed' + str(feed_indx)
+                    lvstck[feed_id] = {'type': feed_type, 'value': val}
+
+                indx += 2
+
+            # check for bought in
+            # ===================
+            val = df[anml].values[-1]
+            if val is not None:
+                feed_indx += 1
+                feed_id = 'feed' + str(feed_indx)
+                lvstck[feed_id] = {'type': 'bought in', 'value': float(val)}
+
+
+            if feed_indx > 0:
+                lvstck_indx += 1
+                lvstck_id = 'livestock' + str(lvstck_indx)
+                lvstck_content['site definition'][lvstck_id] = lvstck
+
+        # from JSON legacy
+        # ================
+        site_defn = lvstck_content['site definition']
+        area = site_defn['area name']
+
+        region = region_validate(site_defn, anml_prodn_obj)
+        system = farming_system(site_defn)
+
+        lvstck_grp = []
+        for key in site_defn:
+            if key.find('livestock') > -1:
+                lvstck_grp.append(LivestockEntity(site_defn[key], anml_prodn_obj))
+
+        subareas = {}
+        subareas[area] = {'region': region, 'system': system, 'lvstck_grp': lvstck_grp}
+
+        self.subareas = subareas
+
+        print()  # cosmetic
+        '''
+        for anml, nmbr in zip(anml_abbrevs, df.values[irow][1:]):  # numbers of animals
+            if nmbr is not None:
+                pass
+        irow += 1
+        for anml, strtg in zip(anml_abbrevs, df.values[irow][1:]):  # strategies
+            pass    # strtg
+
+        for findx in range(NFEED_TYPES):
+            irow += 1
+            fd_typ = str(findx + 1)
+            for anml, feed_typ in zip(anml_abbrevs, df.values[irow][1:]):  # feed type
+                pass  # feed_typ
+
+            irow += 1
+            for anml, feed_qty in zip(anml_abbrevs, df.values[irow][1:]):  # feed quantity as a percentage
+                pass  # feed_qty
+
+        irow += 1
+        for anml, pcnt in zip(anml_abbrevs, df.values[irow][1:]):  # percentage bought in
+            if pcnt is not None:
+                pass  # pcnt     
+        '''
 
 def _create_ow_fert(df):
     '''
@@ -107,120 +240,136 @@ def _add_tgdd_to_weather(tair_list):
 
     return grow_dds
 
-def check_integrity_run_xlxs_file(run_xls_fn):
+def check_xls_run_file(w_soil_cn, mgmt_dir):
     '''
-    check required sheets are present and return list of management sheets
-     '''
-    ret_var = None
-    wb_obj = load_workbook(run_xls_fn, data_only=True)
+    =========== called during initialisation or from GUI when changing farm ==============
+    validate xls run file
+    '''
+    w_soil_cn.setEnabled(False)
+    farm_wthr_fname = FNAME_RUN
+    mess = 'Run file, ' + farm_wthr_fname + ', is '
+
+    run_xls_fn = join(mgmt_dir, farm_wthr_fname)
+    if not isfile(run_xls_fn):
+        mess += 'non existent'
+        return mess
 
     # check required sheets are present
     # =================================
     integrity_flag = True
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
     for rqrd_sheet in RUN_SHT_NAMES.values():
         if rqrd_sheet not in wb_obj.sheetnames:
             print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
             integrity_flag = False
     wb_obj.close()
 
-    if integrity_flag:
-        ret_var = _read_farm_wthr_xlxs_file(run_xls_fn)
+    if not integrity_flag:
+        mess += 'uncompliant'
+        return mess
 
-    return ret_var
+    ret_var = read_farm_wthr_xls_file(run_xls_fn)
+    if ret_var is None:
+        mess += 'uncompliant'
+    else:
+        subareas = ret_var[0]
+        if len(subareas) == 0:
+            mess += 'present but with no subareas'
+        else:
+            w_soil_cn.setEnabled(True)      # activate carbon nitrogen model push button
+            mess = format_sbas('present with subareas: ', subareas, mess)
 
-def read_run_xlxs_file(run_xls_fn, crop_vars, latitude):
+    return mess
+
+def read_run_xls_file(run_xls_fn, crop_vars, latitude):
     '''
-    check required sheets are present
+    check required sheets are present and read data from these
      '''
     ret_var = None
     wb_obj = load_workbook(run_xls_fn, data_only=True)
 
     # check required sheets are present
     # =================================
-    integrity_flag = True
     for rqrd_sheet in RUN_SHT_NAMES.values():
         if rqrd_sheet not in wb_obj.sheetnames:
             print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
-            integrity_flag = False
-
-    if integrity_flag:
-
-        # Farm location - not used
-        # =============
-        lctn_sht = wb_obj[RUN_SHT_NAMES['lctn']]
-        df = DataFrame(lctn_sht.values, columns=['Attribute', 'Values'])
-        lctn_var = list(df['Values'][:])
-
-        # Weather sheet can have 5 or 6 columns
-        # =====================================
-        pettmp_ss = {'precip': [], 'tair': []}
-        pettmp_fwd = {'precip': [], 'tair': []}
-
-        wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
-        wthr_cols=['period', 'year', 'month', 'precip', 'tair']
-        if wthr_sht.max_column == 6:
-            wthr_cols += ['actl_yr']
-        try:
-            df = DataFrame(wthr_sht.values, columns = wthr_cols)
-        except ValueError as err:
-            print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
             return ret_var
 
-        for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
-            if mode == 'steady state':
-                pettmp_ss['precip'].append(precip)
-                pettmp_ss['tair'].append(tair)
-            else:
-                pettmp_fwd['precip'].append(precip)
-                pettmp_fwd['tair'].append(tair)
+    # Farm location - not used
+    # =============
+    lctn_sht = wb_obj[RUN_SHT_NAMES['lctn']]
+    df = DataFrame(lctn_sht.values, columns=['Attribute', 'Values'])
+    lctn_var = list(df['Values'][:])
 
-        ora_weather = ReadWeather(pettmp_ss, pettmp_fwd, latitude)
+    # Weather sheet can have 5 or 6 columns
+    # =====================================
+    pettmp_ss = {'precip': [], 'tair': []}
+    pettmp_fwd = {'precip': [], 'tair': []}
 
-        # Subareas - read subareas lookup sheet which includes soil definition
-        # ====================================================================
-        sbas_sht = wb_obj[RUN_SHT_NAMES['sbas']]
-        rows_generator = sbas_sht.values
-        header_row = next(rows_generator)
-        data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]
+    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
+    wthr_cols=['period', 'year', 'month', 'precip', 'tair']
+    if wthr_sht.max_column == 6:
+        wthr_cols += ['actl_yr']
+    try:
+        df = DataFrame(wthr_sht.values, columns = wthr_cols)
+    except ValueError as err:
+        print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
+        return ret_var
 
-        ora_subareas = {}
-        for rec in data_rows:
-            descr = rec[1]
+    for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
+        if mode == 'steady state':
+            pettmp_ss['precip'].append(precip)
+            pettmp_ss['tair'].append(tair)
+        else:
+            pettmp_fwd['precip'].append(precip)
+            pettmp_fwd['tair'].append(tair)
 
-            # if subarea description is present then make sure the corresponding subarea sheet is present
-            # ===========================================================================================
-            if descr is not None:
-                sba = rec[0]
-                if sba not in wb_obj:
-                    print(WARNING_STR + 'Management sheet ' + sba + ' not in run file')
-                    continue
+    ora_weather = WeatherRelated(pettmp_ss, pettmp_fwd, latitude)  # construct weather object including degree days etc
 
-                area_ha = rec[4]
+    # Subareas - read subareas lookup sheet which includes soil definition
+    # ====================================================================
+    sbas_sht = wb_obj[RUN_SHT_NAMES['sbas']]
+    rows_generator = sbas_sht.values
+    hdr_row = next(rows_generator)  # skip headers
+    data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]
 
-                # soils
-                # =====
-                soil_defn = {}
-                for val, metric in zip([T_DEPTH] + rec[5:], SOIL_METRICS):
-                    if val is None:
-                        print(ERR_MESS + 'Soil for subarea ' + sba + ' not defined in run file')
-                        integrity_flag = False
-                        break
+    ora_subareas = {}
+    for rec in data_rows:
+        descr = rec[1]
+
+        # if subarea description is present then make sure the corresponding subarea sheet is present
+        # ===========================================================================================
+        if descr is not None:
+            sba = rec[0]
+            if sba not in wb_obj:
+                print(WARNING_STR + 'Management sheet ' + sba + ' not in run file')
+                continue
+
+            area_ha = rec[4]
+
+            # soils
+            # =====
+            soil_defn = {}
+            for val, metric in zip([T_DEPTH] + rec[5:], SOIL_METRICS):
+                if val is None:
+                    print(ERR_MESS + 'Soil for subarea ' + sba + ' not defined in run file')
+                    return ret_var
+                else:
                     soil_defn[metric] = val
 
-                if integrity_flag:
-                    # read subarea sheet
-                    # ==================
-                    soil_for_area = Soil(soil_defn)
-                    ora_subareas[sba] = ReadMngmntSubareas(wb_obj, sba, soil_for_area, crop_vars, area_ha)
-                else:
-                    break
-
-        if integrity_flag:
-            ret_var = (ora_weather, ora_subareas)
-        else:
-            ret_var = None
+            # read subarea sheet
+            # ==================
+            soil_for_area = Soil(soil_defn)
+            ora_subareas[sba] = ReadMngmntSubareas(wb_obj, sba, soil_for_area, crop_vars, area_ha)
 
     wb_obj.close()
+
+    # wrap up
+    # =======
+    if len(ora_subareas) == 0:
+        print(ERR_MESS + 'the Subareas sheet must have at least one subarea with a description - check run file')
+    else:
+        ret_var = (ora_weather, ora_subareas)
 
     return ret_var
 
@@ -392,11 +541,11 @@ class ReadMngmntSubareas(object, ):
         self.crop_mngmnt_fwd = crop_mngmnt_fwd
         self.area_ha = area_ha
 
-class ReadWeather(object, ):
+class WeatherRelated(object, ):
 
     def __init__(self, pettmp_ss, pettmp_fwd, latitude):
         '''
-        read parameters from ORATOR inputs Excel file
+        onstruct weather object including degree days
         '''
         # generate PET from weather
         # =========================
@@ -580,9 +729,9 @@ def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
 
     return labour_df
 
-def repopulate_excel_dropdown(form, study_name):
+def _repopulate_excel_dropdown(form, study_name):
     '''
-    repopulate Excel drop-down
+    repopulate Excel drop-down associated with Display output Excel files
     '''
     if hasattr(form, 'w_combo17'):
         w_combo17 = form.w_combo17
@@ -601,11 +750,11 @@ def repopulate_excel_dropdown(form, study_name):
             w_combo17.addItem(short_fn)
     return
 
-def _read_farm_wthr_xlxs_file(wthr_xls):
+def read_farm_wthr_xls_file(run_xls_fn):
     '''
     check required sheets are present
     '''
-    wb_obj = load_workbook(wthr_xls, data_only=True)
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
 
     subareas = []
     for sht in wb_obj.sheetnames:
@@ -621,7 +770,7 @@ def _read_farm_wthr_xlxs_file(wthr_xls):
         df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
         ret_var += list(df['Values'][1:])
     else:
-        print('Sheet ' + rqrd_sheet + ' not present in ' + wthr_xls)
+        print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
         ret_var = None
 
     wb_obj.close()
@@ -651,7 +800,7 @@ class ReadStudy(object, ):
 
         # Farm location
         # =============
-        ret_var = _read_farm_wthr_xlxs_file(run_xls_fname)
+        ret_var = read_farm_wthr_xls_file(run_xls_fname)
         if ret_var is None:
             return None
         
@@ -687,7 +836,7 @@ class ReadStudy(object, ):
                 raise Exception('*** Error *** Could not create output directory: ' + out_dir)
 
         form.settings['out_dir'] = out_dir
-        repopulate_excel_dropdown(form, farm_name)
+        _repopulate_excel_dropdown(form, farm_name)
 
 class ReadAfricaAnmlProdn(object, ):
 
@@ -715,11 +864,20 @@ class ReadAfricaAnmlProdn(object, ):
 
         # allowable values required for validation
         # ========================================
-        self.africa_anml_types = list(africa_anml_prodn['Type'].unique()) + list(['Pigs','Poultry'])
+        self.africa_anml_types = list(africa_anml_prodn['Type'].unique())   # + list(['Pigs','Poultry'])
         self.africa_prodn_systms = list(africa_anml_prodn['ProdSystem'].unique())
         self.africa_regions = list(africa_anml_prodn['Region'].unique())
         self.africa_systems = list(africa_anml_prodn['System'].unique())
-        self.crop_names = list(crop_vars.keys())
+        self.crop_names = ['None'] + list(crop_vars.keys())
+
+        # TODO: a patch to get through transition
+        # create dictionary of generic animal types
+        # =======================================
+        anml_abbrevs = ['catdry','catmt','rumdry','rummt','pigs','pltry']
+        gnrc_anml_types = {}
+        for abbrev, anml_typ in zip(anml_abbrevs, self.africa_anml_types):
+            gnrc_anml_types[abbrev] = anml_typ
+        self.gnrc_anml_types = gnrc_anml_types
 
         self.retcode = 0
 

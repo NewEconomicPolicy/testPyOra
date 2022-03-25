@@ -15,8 +15,7 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os
-import sys
+from os.path import isfile
 from numpy import nan
 from openpyxl import load_workbook
 from pandas import read_excel
@@ -145,7 +144,7 @@ def read_lookup_excel_file(settings):
     lookup_df = None
     fname_lookup = settings['fname_lookup']
 
-    if os.path.isfile(fname_lookup):
+    if isfile(fname_lookup):
 
         # validate lookup Excel by checking required sheets
         # =================================================
