@@ -154,7 +154,7 @@ def _read_setup_file(program_id):
 
     params_xls = normpath(settings['params_xls'])
     if check_params_excel_file(params_xls) is None:
-        print('Excel input file ' + params_xls + 'must exist')
+        print('Excel input file ' + params_xls + ' must exist')
         sleep(sleepTime)
         exit(0)
 

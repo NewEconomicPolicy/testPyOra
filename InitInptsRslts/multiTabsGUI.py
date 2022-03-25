@@ -126,7 +126,8 @@ class AllTabs(QTabWidget):
         w_run_lbl = QLabel('Run file path:')
         helpText = 'Location for the Excel run file consisting of farm details, weather, crop management and livestock'
         w_run_lbl.setToolTip(helpText)
-        w_run_lbl.setAlignment(Qt.AlignRight, Qt.AlignBottom)
+        w_run_lbl.setAlignment(Qt.AlignRight)
+        w_run_lbl.setAlignment(Qt.AlignBottom)
         grid.addWidget(w_run_lbl, irow, 0)
 
         w_run_dir = QLabel()
