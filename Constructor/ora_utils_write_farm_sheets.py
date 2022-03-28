@@ -28,6 +28,7 @@ from socket import gethostname
 from ora_excel_read_misc import setup_sheet_data_dict, retrieve_hwsd_soil_recs, fetch_isda_soil_data
 from getClimGenNC import ClimGenNC
 from ora_wthr_misc_fns import associate_climate, fetch_csv_wthr
+from ora_gui_misc_fns import simulation_yrs_validate, rotation_yrs_validate
 
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
@@ -120,7 +121,8 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
         subarea_dict['Description'].append(descr)
         # TODO: subarea_dict['Irrigation (mm)'].append(int(form.w_typ_irri[sba_indx].text()))
         subarea_dict['Irrig (mm)'].append(50)
-        subarea_dict['Rota (yrs)'].append(int(form.w_nrota_ss[sba_indx].text()))
+        nyrs_rota = rotation_yrs_validate(form.w_nrota_ss[sba_indx])
+        subarea_dict['Rota (yrs)'].append(nyrs_rota)
         subarea_dict['Area (ha)'].append(float(form.w_areas[sba_indx].text()))
         subarea_dict['t_clay'].append(t_clay)
         subarea_dict['t_sand'].append(t_sand)
@@ -182,10 +184,8 @@ def make_or_update_farm(form):
 
     # weather
     # =======
-    nyrs_ss = int(form.w_nyrs_ss.text())
+    nyrs_ss, nyrs_fwd = simulation_yrs_validate(form.w_nyrs_ss, form.w_nyrs_fwd)
     end_yr_ss = strt_yr_ss + nyrs_ss
-
-    nyrs_fwd = int(form.w_nyrs_fwd.text())
     end_yr_fwd = strt_yr_fwd + nyrs_fwd
 
     if form.wthr_sets is None or form.w_use_csv.isChecked():

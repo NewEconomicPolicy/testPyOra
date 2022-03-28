@@ -23,6 +23,7 @@ import json
 from csv import reader
 from os.path import isfile, join
 
+WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 METRIC_LIST = list(['precip', 'tair'])
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
@@ -31,6 +32,39 @@ CLIMATE_TYPES = {'A':'Arid/semi-arid', 'H': 'humid/sub-humid', 'T':'Tropical hig
 FARMING_TYPES = {'LG':'Livestock grazing', 'MR':'Mixed rotation'}
 STRATEGIES = list(['On farm production', 'Buy/sell'])
 
+'''
+=========== BioModels ==============
+'''
+def rotation_yrs_validate(w_nrota_ss):
+    '''
+    check number of rotation years
+    '''
+    try:
+        nyrs_rota  = int(w_nrota_ss.text())
+    except ValueError as err:
+        nyrs_rota = 1
+        print(WARN_STR + 'number of rotation years years must be an integer')
+
+    return nyrs_rota
+
+
+def simulation_yrs_validate(w_nyrs_ss, w_nyrs_fwd):
+    '''
+    number of steady state and forward run years must be integers - subsitute defaults in event of non-compliance
+    '''
+    try:
+        nyrs_ss = int(w_nyrs_ss.text())
+    except ValueError as err:
+        nyrs_ss = 10
+        print(WARN_STR + 'number of steady state years must be an integer')
+
+    try:
+        nyrs_fwd = int(w_nyrs_fwd.text())
+    except ValueError as err:
+        nyrs_fwd = 10
+        print(WARN_STR + 'number of forward run years must be an integer')
+
+    return nyrs_ss, nyrs_fwd
 '''
 =========== Livestock ==============
 '''
