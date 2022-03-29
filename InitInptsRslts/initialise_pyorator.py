@@ -72,6 +72,8 @@ def initiation(form):
         form.wthr_sets = None
     else:
         form.wthr_sets = read_weather_dsets_detail(form)
+        if len(form.wthr_sets) == 0:
+            form.wthr_sets = None
     form.wthr_rsrces_gnrc = list(['CRU'])
 
     # initialise bridges across economics, livestock and carbon-nitrogen-water models

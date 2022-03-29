@@ -400,7 +400,7 @@ def test_economics_algorithms(form):
     # Equation to calculate RELATIVE FOOD INSECURITY. Each year will return value between 0 and 1
     # Only using variables of household income, total livestock units, and land owned
 
-    # Alpha values for PCC
+    # Alpha values for RFI
     # Intercept
     alpha_0 = -1.782
     # Full Household income
@@ -519,7 +519,7 @@ def test_economics_algorithms(form):
         elif calc_method == 'miami':
             economics_GUI_class['full_farm'].data['relative_food_insecurity_miami'] = calcs
 
-    # Add dietary divertsity to form object for GUI graph constructor
+    # Add dietary diversity to form object for GUI graph constructor
     for calc_method, calcs in farm_diet_div.items():
         if calc_method == 'n_lim':
             economics_GUI_class['full_farm'].data['dietary_diversity_n_lim'] = calcs
