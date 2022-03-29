@@ -20,6 +20,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QWidget, QGridLayout, QPushButton, QLineEdit, QLabel,
                              QMessageBox, QComboBox, QAction, QScrollArea, QMainWindow)
 
+from ora_gui_misc_fns import simulation_yrs_validate, rotation_yrs_validate
 from ora_utils_write_mgmt_sheet import write_mgmt_sht
 from ora_excel_read_misc import get_mnth_yr_names
 from ora_excel_read import read_subarea_sheet
@@ -46,9 +47,8 @@ def display_subarea(form, sba_indx):
     # irrig = form.w_typ_irri[sba_indx].text()
     irrig = str(50)
     crop_vars = form.ora_parms.crop_vars
-    nyrs_rota = int(form.w_nrota_ss[sba_indx].text())
-    nyrs_ss = int(form.w_nyrs_ss.text())
-    nyrs_fwd = int(form.w_nyrs_fwd.text())
+    nyrs_rota = rotation_yrs_validate(form.w_nrota_ss[sba_indx])
+    nyrs_ss, nyrs_fwd = simulation_yrs_validate(form.w_nyrs_ss, form.w_nyrs_fwd)
 
     # construct name of farm run file as management sheets will need to be added
     # ==========================================================================

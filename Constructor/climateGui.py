@@ -141,7 +141,7 @@ def climate_gui(form, grid, irow):
 
     w_nyrs_fwd = QLineEdit()
     w_nyrs_fwd.setFixedWidth(40)
-    # w_nyrs_fwd.setEnabled(False)
+    # w_nyrs_fwd.textChanged[str].connect(form.checkNyrsFwd())
     grid.addWidget(w_nyrs_fwd, irow, 3)
     form.w_nyrs_fwd = w_nyrs_fwd
 

@@ -38,6 +38,7 @@ from ora_excel_read import check_params_excel_file, check_xls_run_file, \
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
+from ora_gui_misc_fns import simulation_yrs_validate
 
 PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
@@ -224,7 +225,6 @@ def _read_setup_file(program_id):
     # ================================================
     config_file = normpath(settings['config_dir'] + '/' + program_id + '_config.json')
     settings['config_file'] = config_file
-    # print('Using configuration file: ' + config_file)
 
     settings['study'] = ''
 
@@ -397,7 +397,10 @@ def read_config_file(form):
     # populate widgets relating to weather
     # ====================================
     if form.settings['wthr_dir'] is None:
-        form.w_use_csv.setChecked(True)
+        form.w_tab_wdgt.w_use_csv.setChecked(True)
+        form.w_tab_wdgt.w_combo30.setEnabled(False)
+        form.w_tab_wdgt.w_combo29s.setEnabled(False)
+        form.w_tab_wdgt.w_combo31s.setEnabled(False)
     else:
         form.w_tab_wdgt.w_combo30.setCurrentIndex(config['clim_scnr_indx'])
         form.w_tab_wdgt.w_combo29s.setCurrentIndex(config['strt_yr_ss_indx'])
@@ -424,6 +427,7 @@ def write_config_file(form, message_flag=True):
     '''
     write current selections to config file
     '''
+    nyrs_ss, nyrs_fwd = simulation_yrs_validate(form.w_tab_wdgt.w_nyrs_ss, form.w_tab_wdgt.w_nyrs_fwd)
 
     # only one config file
     # ====================
@@ -440,8 +444,8 @@ def write_config_file(form, message_flag=True):
         "use_isda": form.w_tab_wdgt.w_use_isda.isChecked(),
         "use_csv": form.w_tab_wdgt.w_use_csv.isChecked(),
         "farm_name": form.w_tab_wdgt.w_combo02.currentText(),
-        "nyrs_ss": int(form.w_tab_wdgt.w_nyrs_ss.text()),
-        "nyrs_fwd": int(form.w_tab_wdgt.w_nyrs_fwd.text()),
+        "nyrs_ss": nyrs_ss,
+        "nyrs_fwd": nyrs_fwd,
         "strt_yr_ss_indx": form.w_tab_wdgt.w_combo29s.currentIndex(),
         "strt_yr_fwd_indx": form.w_tab_wdgt.w_combo31s.currentIndex(),
         "study": form.w_tab_wdgt.w_combo00.currentText()

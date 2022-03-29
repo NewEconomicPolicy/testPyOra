@@ -224,6 +224,14 @@ class AllTabs(QTabWidget):
         excel_path = self.settings['excel_path']
         Popen(list([excel_path, run_xls_fname]), stdout = DEVNULL)
 
+    def checkForInteger(self):
+        '''
+        TODO: not used as yet
+        '''
+        s = 1.2
+        isinstance(s, float)
+        isinstance(s, int)
+
     def checkWthrSrces(self):
         '''
         invoked when user clicks use CSV checkbox

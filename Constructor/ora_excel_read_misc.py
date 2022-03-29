@@ -256,7 +256,6 @@ def validate_farm_var_fields(form):
 
     return validate_flag
 
-
 def get_mnth_yr_names(nyears):
     '''
     returns unique month year strings
