@@ -72,6 +72,8 @@ def initiation(form):
         form.wthr_sets = None
     else:
         form.wthr_sets = read_weather_dsets_detail(form)
+        if len(form.wthr_sets) == 0:
+            form.wthr_sets = None
     form.wthr_rsrces_gnrc = list(['CRU'])
 
     # initialise bridges across economics, livestock and carbon-nitrogen-water models
@@ -111,8 +113,6 @@ def _read_setup_file(program_id):
         print(ERROR_STR + 'setup file ' + setup_file + ' must exist')
         sleep(sleepTime)
         exit(0)
-
-
 
     # initialise vars
     # ===============
@@ -245,6 +245,19 @@ def _write_default_config_file(config_file):
         dump_json(_default_config, fconfig, indent=2, sort_keys=True)
         return _default_config
 
+def _check_run_file(w_run_dir, mgmt_dir, config_file):
+    '''
+
+    '''
+    mgmt_dir = normpath(mgmt_dir)
+    if isdir(mgmt_dir):
+        w_run_dir.setText(mgmt_dir)
+    else:
+        mess = '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
+        print(mess)
+
+    return mgmt_dir
+
 def read_config_file(form):
     '''
     read widget settings used in the previous programme session from the config file, if it exists,
@@ -264,7 +277,7 @@ def read_config_file(form):
     else:
         config = _write_default_config_file(config_file)
 
-    for attrib in list(['mgmt_dir', 'write_excel']):
+    for attrib in list(['mgmt_dir0', 'mgmt_dir3', 'write_excel']):
         if attrib not in config:
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
@@ -299,24 +312,19 @@ def read_config_file(form):
     form.w_tab_wdgt.w_combo13.setCurrentIndex(ow_type_indx)
     form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
-    # process runfile
-    # ===============
-    mgmt_dir = normpath(config['mgmt_dir'])
-    if not isdir(mgmt_dir):
-        mess =  '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
-        return
-
-    form.w_tab_wdgt.w_run_dir0.setText(mgmt_dir)
-    form.w_tab_wdgt.w_run_dir3.setText(mgmt_dir)
+    # check runfiles
+    # ================
+    mgmt_dir0 = _check_run_file(form.w_tab_wdgt.w_run_dir0, config['mgmt_dir0'], config_file)
+    mgmt_dir3 = _check_run_file(form.w_tab_wdgt.w_run_dir3, config['mgmt_dir3'], config_file)
 
     # check run file
     # =============
-    run_xls_fname = join(mgmt_dir, FNAME_RUN)
+    run_xls_fname = join(mgmt_dir3, FNAME_RUN)
     if not isfile(run_xls_fname):
         print(ERROR_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
         return
 
-    form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir))
+    form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir3))
 
     if config['write_excel']:
         form.w_tab_wdgt.w_make_xls.setCheckState(2)
@@ -356,7 +364,7 @@ def read_config_file(form):
 
     # enable users to view outputs from previous run
     # ==============================================
-    study = ReadStudy(form, mgmt_dir, run_xls_fname)
+    study = ReadStudy(form, mgmt_dir3, run_xls_fname)
     for sba in study.subareas:
         form.w_tab_wdgt.w_combo36.addItem(sba)      # Test forward run tab
 
@@ -433,7 +441,8 @@ def write_config_file(form, message_flag=True):
     # ====================
     config_file = form.settings['config_file']
     config = {
-        'mgmt_dir': form.w_tab_wdgt.w_run_dir3.text(),
+        'mgmt_dir0': form.w_tab_wdgt.w_run_dir0.text(),
+        'mgmt_dir3': form.w_tab_wdgt.w_run_dir3.text(),
         'write_excel': form.w_tab_wdgt.w_make_xls.isChecked(),
         'owex_min': form.w_tab_wdgt.w_owex_min.text(),
         'owex_max': form.w_tab_wdgt.w_owex_max.text(),
