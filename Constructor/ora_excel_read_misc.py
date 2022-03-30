@@ -60,7 +60,7 @@ def fetch_isda_soil_data(lggr, lat, lon):
     request_str = ISDA_URL + '?key=' + SOIL_DATA_API_KEY + '&lat={}&lon={}'.format(lat, lon)
     soil_data = requests.get(request_str)
     if soil_data.ok:
-
+        '''
         # create a soil file and a formatted string of the JSON object
         # ============================================================
         soil_file = 'E:\\temp\\soil.json'
@@ -69,7 +69,7 @@ def fetch_isda_soil_data(lggr, lat, lon):
 
         with open(soil_file, 'w') as fsetup:
             json.dump(soil_data.json(), fsetup, indent=2, sort_keys=True)
-
+        '''
         t_depth = 20
         isda_data = soil_data.json()
         isda = isda_data['property']

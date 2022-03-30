@@ -15,10 +15,10 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 # 
-from os.path import join, isfile, normpath, isdir
-import netCDF4 as cdf
+from os.path import join, normpath, isdir
+import cftime
+from netCDF4 import Dataset, num2date
 from glob import glob
-from thornthwaite import thornthwaite
 
 GRANULARITY = 120
 MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -41,7 +41,7 @@ def _fetch_weather_nc_parms(nc_fname, weather_resource, resol_time, scenario):
         lon = 'lon'
 
     nc_fname = normpath(nc_fname)
-    nc_dset = cdf.Dataset(nc_fname, 'r')
+    nc_dset = Dataset(nc_fname, 'r')
     time_var = nc_dset.variables[time_var_name]
     if 'calendar' in time_var.ncattrs():
         calendar_attr = time_var.calendar
@@ -83,13 +83,13 @@ def _fetch_weather_nc_parms(nc_fname, weather_resource, resol_time, scenario):
         time_var_units = time_var.units
         start_day = time_var[0]
         try:
-            start_date = cdf.num2date(start_day, units = time_var_units, calendar = calendar_attr)
+            start_date = num2date(start_day, units = time_var_units, calendar = calendar_attr)
         except (TypeError) as e:
             print('Error deriving start and end year for dataset: ' + nc_fname)
             return None
 
         end_day = int(time_var[-1])
-        end_date = cdf.num2date(end_day, units = time_var_units, calendar = calendar_attr)
+        end_date = num2date(end_day, units = time_var_units, calendar = calendar_attr)
         start_year = start_date.year
         end_year = end_date.year
 

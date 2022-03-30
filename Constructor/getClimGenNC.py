@@ -12,7 +12,7 @@
 __prog__ = 'getClimGenNC.py'
 __author__ = 's03mm5'
 
-import netCDF4 as cdf
+from netCDF4 import Dataset
 from math import ceil
 from numpy import arange, seterr, ma
 import warnings
@@ -211,7 +211,7 @@ class ClimGenNC(object,):
         for varname, fname in zip(varnams, list([self.fut_precip_fname, self.fut_tas_fname])):
             varnam_map = varnams_mapped[varname]
             pettmp[varnam_map] = {}
-            ncfile = cdf.Dataset(fname, mode='r')
+            ncfile = Dataset(fname, mode='r')
 
             # collect readings for all time values
             # ====================================
@@ -277,7 +277,7 @@ class ClimGenNC(object,):
         for varname, fname in zip(varnams, list([self.hist_precip_fname, self.hist_tas_fname])):
             varnam_map = varnams_mapped[varname]
             pettmp[varnam_map] = {}
-            ncfile = cdf.Dataset(fname, mode='r')
+            ncfile = Dataset(fname, mode='r')
 
             # collect readings for all time values
             # ====================================

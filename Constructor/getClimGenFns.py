@@ -12,13 +12,6 @@
 __prog__ = 'getClimGenFns.py'
 __author__ = 's03mm5'
 
-import time
-import sys
-from glob import glob
-import netCDF4 as cdf
-import numpy as np
-import math
-
 GRANULARITY = 120
 
 def read_csv_wthr(csv_fn_cur, nyrs_ss, nyrs_fwd):
