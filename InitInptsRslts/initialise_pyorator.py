@@ -235,10 +235,23 @@ def _write_default_config_file(config_file):
 
     '''
     _default_config = {
-        'params_xls': '',
-        'mgmt_dir': '',
-        'write_excel': True,
-        'out_dir': ''
+        'clim_scnr_indx': 0,
+        'csv_wthr_fn': '',
+        'farm_name': 'Robe_nocnvrg',
+        'mgmt_dir0': 'E:\\ORATOR\\study areas\\North Gondar (ETH)\\Robe_nocnvrg',
+        'mgmt_dir3': 'E:\\ORATOR\\study areas\\North Gondar (ETH)\\Zerai',
+        'mnth_appl_indx': 4,
+        'nyrs_fwd': 10,
+        'nyrs_ss': 10,
+        'ow_type_indx': 4,
+        'owex_max': '10.0',
+        'owex_min': '0.1',
+        'strt_yr_fwd_indx': 0,
+        'strt_yr_ss_indx': 0,
+        'study': 'North Gondar (ETH)',
+        'use_csv': False,
+        'use_isda': False,
+        'write_excel': False
     }
     # if config file does not exist then create it...
     with open(config_file, 'w') as fconfig:
@@ -448,16 +461,16 @@ def write_config_file(form, message_flag=True):
         'owex_max': form.w_tab_wdgt.w_owex_max.text(),
         'ow_type_indx': form.w_tab_wdgt.w_combo13.currentIndex(),
         'mnth_appl_indx': form.w_tab_wdgt.w_mnth_appl.currentIndex(),
-        "clim_scnr_indx": form.w_tab_wdgt.w_combo30.currentIndex(),
+        'clim_scnr_indx': form.w_tab_wdgt.w_combo30.currentIndex(),
         'csv_wthr_fn': form.w_tab_wdgt.w_csv_fn.text(),
-        "use_isda": form.w_tab_wdgt.w_use_isda.isChecked(),
-        "use_csv": form.w_tab_wdgt.w_use_csv.isChecked(),
-        "farm_name": form.w_tab_wdgt.w_combo02.currentText(),
-        "nyrs_ss": nyrs_ss,
-        "nyrs_fwd": nyrs_fwd,
-        "strt_yr_ss_indx": form.w_tab_wdgt.w_combo29s.currentIndex(),
-        "strt_yr_fwd_indx": form.w_tab_wdgt.w_combo31s.currentIndex(),
-        "study": form.w_tab_wdgt.w_combo00.currentText()
+        'use_isda': form.w_tab_wdgt.w_use_isda.isChecked(),
+        'use_csv': form.w_tab_wdgt.w_use_csv.isChecked(),
+        'farm_name': form.w_tab_wdgt.w_combo02.currentText(),
+        'nyrs_ss': nyrs_ss,
+        'nyrs_fwd': nyrs_fwd,
+        'strt_yr_ss_indx': form.w_tab_wdgt.w_combo29s.currentIndex(),
+        'strt_yr_fwd_indx': form.w_tab_wdgt.w_combo31s.currentIndex(),
+        'study': form.w_tab_wdgt.w_combo00.currentText()
     }
     if isfile(config_file):
         descriptor = 'Updated existing'
