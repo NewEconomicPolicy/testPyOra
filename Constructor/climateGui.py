@@ -182,6 +182,5 @@ def climate_gui(form, grid, irow):
     grid.addWidget(w_use_csv, irow, 7)
     form.w_use_csv = w_use_csv
 
-
     return irow
 

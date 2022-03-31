@@ -10,7 +10,6 @@
 #-------------------------------------------------------------------------------
 #
 """
-
 __prog__ = 'farm_detailGui.py'
 __version__ = '0.0.1'
 __author__ = 's03mm5'
@@ -95,7 +94,7 @@ def farm_detail_gui(form, grid, irow):
     grid.addWidget(lbl02a, irow, 4)
 
     w_farm_desc = QLineEdit()
-    grid.addWidget(w_farm_desc, irow, 5, 1, 2)
+    grid.addWidget(w_farm_desc, irow, 5, 1, 3)
     form.w_farm_desc = w_farm_desc
 
     # lon/lat

@@ -247,10 +247,12 @@ class AllTabs(QTabWidget):
         if csv_fn != '' and csv_fn != csv_fn_cur:
             if check_or_read_csv_wthr(csv_fn):
                 self.w_csv_fn.setText(csv_fn)
+                dum, dum, csv_detail = check_or_read_csv_wthr(csv_fn_cur, check_only=False)
+                self.w_csv_dscr.setText(csv_detail)
 
     def viewCsvFile(self):
         '''
-        invoke notepad
+        invoke notepad to display weather file and report details
         '''
         csv_fn_cur = self.w_csv_fn.text()
         notepad_path = self.settings['notepad_path']

@@ -30,6 +30,8 @@ def check_or_read_csv_wthr(csv_fn, check_only = True):
     delim = dialect.delimiter       # "delimiter" is a 1-character string
 
     csv_valid_flag = False
+    csv_detail = ''
+
     pettmp = {'precip': [], 'tair': []}
     with open(csv_fn, 'r') as fobj:
         wthr_reader = reader(fobj, delimiter = delim)
@@ -43,20 +45,20 @@ def check_or_read_csv_wthr(csv_fn, check_only = True):
     # ===============
     print('Read ' + csv_fn)
     nmnths_read = len(pettmp['precip'])
+    csv_detail += 'Read {} years of data'.format(round(nmnths_read / 12))
     if nmnths_read < 12:
-        print(ERROR_STR + 'found {} months - should be at least 12 in ' + csv_fn)
+        print(ERROR_STR + csv_detail + ' - should be at least 12')
     else:
         nmnths_srpls = nmnths_read % 12
         if nmnths_srpls > 0:
             print(ERROR_STR + '12 should be a factor of number of months - read {} surplus months'.format(nmnths_srpls))
-            return None
         else:
             csv_valid_flag = True
 
     if check_only:
         return csv_valid_flag
     else:
-        return csv_valid_flag, pettmp
+        return csv_valid_flag, pettmp, csv_detail
 
 def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     """
