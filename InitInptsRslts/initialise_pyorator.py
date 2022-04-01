@@ -39,6 +39,7 @@ from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckM
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 from ora_gui_misc_fns import simulation_yrs_validate
+from ora_wthr_misc_fns import check_or_read_csv_wthr
 
 PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
@@ -333,11 +334,10 @@ def read_config_file(form):
     # check run file
     # =============
     run_xls_fname = join(mgmt_dir3, FNAME_RUN)
-    if not isfile(run_xls_fname):
-        print(ERROR_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
-        return
-
-    form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir3))
+    if isfile(run_xls_fname):
+        form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir3))
+    else:
+        print(WARNING_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
 
     if config['write_excel']:
         form.w_tab_wdgt.w_make_xls.setCheckState(2)
@@ -441,7 +441,8 @@ def read_config_file(form):
     # =============================
     if 'csv_wthr_fn' in config:
         form.w_tab_wdgt.w_csv_fn.setText(config['csv_wthr_fn'])
-
+        dum, dum, csv_detail = check_or_read_csv_wthr(config['csv_wthr_fn'], check_only=False)
+        form.w_tab_wdgt.w_csv_dscr.setText(csv_detail)
     return True
 
 def write_config_file(form, message_flag=True):
