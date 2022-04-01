@@ -197,7 +197,10 @@ def test_economics_algorithms(form):
     labour_df = labour_df.iloc[: , 1:]
     for column_name, column_data in labour_df.iteritems():
         hh_lab_instance =  HouseholdMembers(column_name, column_data)
-        hh_members.append(hh_lab_instance)
+        if hh_lab_instance.number == 0:
+            pass
+        else:
+            hh_members.append(hh_lab_instance)
 
     # ----------------------------------------
     # Check if crop model has been run
@@ -322,8 +325,9 @@ def test_economics_algorithms(form):
     for calc_method, fr_years in total_crop_sales.items():
         fr_total_hh_income = []
         for year in fr_years:
-            total_hh_income = year - total_hh_ag_value - total_dom_labour_value + \
-                                  total_hh_working_hours
+            # values divided by 1000 to normalise data
+            total_hh_income = (year/1000) - (total_hh_ag_value/1000) - (total_dom_labour_value/1000) + \
+                              (total_hh_working_hours/1000)
             fr_total_hh_income.append(total_hh_income)
         all_subareas_full_hh_dic.update({calc_method : fr_total_hh_income})
 
