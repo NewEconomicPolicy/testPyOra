@@ -7,7 +7,7 @@
     <content url="file://$MODULE_DIR$/InitInptsRslts" />
     <content url="file://$MODULE_DIR$/LiveStock" />
     <content url="file://$MODULE_DIR$/OratorRun" />
-    <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.8 from Mike" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

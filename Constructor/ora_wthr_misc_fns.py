@@ -67,7 +67,7 @@ def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     """
     func_name =  __prog__ + ' read_csv_wthr'
 
-    csv_valid_flag, pettmp = check_or_read_csv_wthr(csv_fn, check_only=False)
+    csv_valid_flag, pettmp, dum = check_or_read_csv_wthr(csv_fn, check_only=False)
     if not csv_valid_flag:
         return None
 
