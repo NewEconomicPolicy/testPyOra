@@ -15,8 +15,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 # 
+import cftime  # required for pyinstaller
 from os.path import join, normpath, isdir
-import cftime
 from netCDF4 import Dataset, num2date
 from glob import glob
 
