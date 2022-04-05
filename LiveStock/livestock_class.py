@@ -79,6 +79,31 @@ class Livestock:
 
         return animal_prod_dic_fr
 
+    def calc_steady_prod(self, hrv_change):
+        "Calculate steady production of livestock if 'buy/sell' is selected"
+
+        harv_chnge_data = hrv_change
+        total_food_change_fr = []
+        for year in harv_chnge_data[1]:
+            total_feed_year = 1
+            total_food_change_fr.append(total_feed_year)
+
+        milk_prod_fr = [(item/100) * self.milk * self.number for item in total_food_change_fr]
+        meat_prod_fr = [(item/100) * self.meat * self.number for item in total_food_change_fr]
+        manure_prod_fr = [(item/100) * self.manure * self.number for item in total_food_change_fr]
+        n_excrete_fr = [(item/100) * self.n_excrete * self.number for item in total_food_change_fr]
+
+        animal_prod_dic_fr = {'milk_prod_fr' : milk_prod_fr,
+                              'meat_prod_fr' : meat_prod_fr,
+                              'manure_prod_fr' : manure_prod_fr,
+                              'n_excrete_fr' : n_excrete_fr}
+
+        return animal_prod_dic_fr
+
+
+
+
+
     '''
     def get_monthly_harvest_change(self, orator_obj, harvest_land_use_merged):
 

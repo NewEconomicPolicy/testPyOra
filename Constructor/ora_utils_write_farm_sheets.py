@@ -188,6 +188,7 @@ def make_or_update_farm(form):
     end_yr_ss = strt_yr_ss + nyrs_ss
     end_yr_fwd = strt_yr_fwd + nyrs_fwd
 
+
     if form.wthr_sets is None or form.w_use_csv.isChecked():
         wthr_src = 'CSV file'
         csv_fn = form.w_csv_fn.text()

@@ -21,6 +21,8 @@ from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
 from livestock_class import Livestock
 from ora_cn_classes import EconoLvstckModel
+from ora_gui_misc_fns import simulation_yrs_validate
+
 
 def check_livestock_run_data(form, ntab = 3):
     '''
@@ -210,9 +212,18 @@ def calc_livestock_data(form):
             subarea_prod = {}
             for livestock_subarea in livestock_all_subareas:
                 for livestock in livestock_subarea:
-                    prod = livestock.calc_prod_chng(calc_method)
-                    prod_dic = {livestock.livestock_name : prod}
-                    subarea_prod.update(prod_dic)
+                    # Delineate whether feeding strategy is bought in or using on farm production
+                    if livestock.strat == 'On farm production':
+                        prod = livestock.calc_prod_chng(calc_method)
+                        prod_dic = {livestock.livestock_name : prod}
+                        subarea_prod.update(prod_dic)
+                    else:
+                        # Right now keep production steady, but don't 'use' crops
+                        # Need data on how much crop to 'use' per animal if we want to reduce crop available for sale
+                        prod = livestock.calc_steady_prod(calc_method)
+                        prod_dic = {livestock.livestock_name : prod}
+                        subarea_prod.update(prod_dic)
+
             calc_dic = {calc_method[0] : subarea_prod}
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
