@@ -36,11 +36,13 @@ def merge_harvest_land_use(orator_obj):
         crops_per_year = crop_model.data['crops_ann']
         ss_years = crop_model.nyears_ss
         fr_crops_per_year = crops_per_year[ss_years:]
+        # Add this to bypass above, as SS perhaps already removed
+        fr_crops_per_year = crops_per_year
 
         # Get each years crop production data into a list of dictionaries for each calc method
         # Use only forward run years
         yld_n_lim = crop_model.data['yld_ann_n_lim']
-        yld_n_lim = yld_n_lim[ss_years:]
+#        yld_n_lim = yld_n_lim[ss_years:]
         yld_n_lim_dic = []
         for year in fr_crops_per_year:
             crop_yield_dic = {crop : 0 for crop in year}
@@ -55,7 +57,7 @@ def merge_harvest_land_use(orator_obj):
             yld_n_lim_dic.append(temp_dic)
 
         yld_zaks = crop_model.data['yld_ann_zaks']
-        yld_zaks = yld_zaks[ss_years:]
+#        yld_zaks = yld_zaks[ss_years:]
         yld_zaks_dic = []
         for year in fr_crops_per_year:
             crop_yield_dic = {crop : 0 for crop in year}
@@ -70,7 +72,7 @@ def merge_harvest_land_use(orator_obj):
             yld_zaks_dic.append(temp_dic)
 
         yld_miami = crop_model.data['yld_ann_miami']
-        yld_miami = yld_miami[ss_years:]
+#        yld_miami = yld_miami[ss_years:]
         yld_miami_dic = []
         for year in fr_crops_per_year:
             crop_yield_dic = {crop : 0 for crop in year}

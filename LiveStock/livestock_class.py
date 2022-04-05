@@ -68,7 +68,7 @@ class Livestock:
             total_food_change_fr.append(total_feed_year)
 
         milk_prod_fr = [(item/100) * self.milk * self.number for item in total_food_change_fr]
-        meat_prod_fr = [(item/100) * self.meat * self.number for item in total_food_change_fr]
+        meat_prod_fr = [(item/100)  * self.meat * self.number for item in total_food_change_fr]
         manure_prod_fr = [(item/100) * self.manure * self.number for item in total_food_change_fr]
         n_excrete_fr = [(item/100) * self.n_excrete * self.number for item in total_food_change_fr]
 
@@ -88,10 +88,10 @@ class Livestock:
             total_feed_year = 1
             total_food_change_fr.append(total_feed_year)
 
-        milk_prod_fr = [(item/100) * self.milk * self.number for item in total_food_change_fr]
-        meat_prod_fr = [(item/100) * self.meat * self.number for item in total_food_change_fr]
-        manure_prod_fr = [(item/100) * self.manure * self.number for item in total_food_change_fr]
-        n_excrete_fr = [(item/100) * self.n_excrete * self.number for item in total_food_change_fr]
+        milk_prod_fr = [item * self.milk * self.number for item in total_food_change_fr]
+        meat_prod_fr = [item * self.meat * self.number for item in total_food_change_fr]
+        manure_prod_fr = [item * self.manure * self.number for item in total_food_change_fr]
+        n_excrete_fr = [item * self.n_excrete * self.number for item in total_food_change_fr]
 
         animal_prod_dic_fr = {'milk_prod_fr' : milk_prod_fr,
                               'meat_prod_fr' : meat_prod_fr,
