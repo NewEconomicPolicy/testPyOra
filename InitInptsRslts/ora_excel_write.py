@@ -24,6 +24,7 @@ from os import remove
 from glob import glob
 from pandas import DataFrame, ExcelWriter, Series
 from PyQt5.QtWidgets import QApplication
+from warnings import filterwarnings
 
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference
@@ -133,6 +134,7 @@ def _write_excel_out(sheet_name, out_obj, writer, wb_map):
     condition data before outputting
     '''
     func_name =  __prog__ +  ' write_excel_out'
+    # filterwarnings('error')
 
     # create data frame from dictionary
     # =================================
@@ -140,6 +142,8 @@ def _write_excel_out(sheet_name, out_obj, writer, wb_map):
     for var_name in out_obj.var_name_list:
 
         tmp_list = out_obj.sheet_data[var_name]
+        if len(tmp_list) == 0:
+            print(WARNING_STR + 'no data for variable ' + var_name + ' in function ' + func_name)
 
         var_fmt = out_obj.var_formats[var_name]
         if var_fmt[-1] == 'f':
@@ -149,6 +153,12 @@ def _write_excel_out(sheet_name, out_obj, writer, wb_map):
                     data_frame[var_name] = Series(tmp_list)
                 else:
                     data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
+                    '''
+                    try:
+                        data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
+                    except FutureWarning as warn:
+                        print(warn)
+                    '''
             except TypeError as err:
                 print(err)
                 return -1

@@ -240,6 +240,33 @@ def _add_tgdd_to_weather(tair_list):
 
     return grow_dds
 
+def _validate_timesteps(run_xls_fn, subareas):
+    '''
+    for each subarea, check number of months against weather
+    '''
+    ret_code = True
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
+    nmths_wthr = wthr_sht.max_row - 1
+
+    nmnths_subsareas = {}
+    for sba in subareas:
+        sba_sht = wb_obj[sba]
+        nmnths_sba = sba_sht.max_row - 1
+        if nmnths_sba > nmths_wthr:
+            nmnths_subsareas[sba] = nmnths_sba
+            ret_code = False
+
+    wb_obj.close
+
+    if ret_code:
+        print('Weather and subareas months {} match'.format(nmths_wthr))
+    else:
+        mess = ERR_MESS + 'number of weather months: {} are too few for subareas: '.format(nmths_wthr)
+        print(mess + str(nmnths_subsareas))
+
+    return ret_code
+
 def check_xls_run_file(w_soil_cn, mgmt_dir):
     '''
     =========== called during initialisation or from GUI when changing farm ==============
@@ -276,8 +303,9 @@ def check_xls_run_file(w_soil_cn, mgmt_dir):
         if len(subareas) == 0:
             mess += 'present but with no subareas'
         else:
-            w_soil_cn.setEnabled(True)      # activate carbon nitrogen model push button
-            mess = format_sbas('present with subareas: ', subareas, mess)
+            if (_validate_timesteps(run_xls_fn, subareas)):
+                mess = format_sbas('present with subareas: ', subareas, mess)
+                w_soil_cn.setEnabled(True)      # activate carbon nitrogen model push button
 
     return mess
 
