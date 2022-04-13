@@ -17,7 +17,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
                                                                         QApplication, QComboBox, QPushButton, QCheckBox
 from subprocess import Popen, DEVNULL
-from os.path import normpath, join, isdir
+from os.path import normpath, join, isdir, split
 
 from shutil import rmtree
 # from ora_classes_excel_write import pyoraId as oraId
@@ -123,12 +123,12 @@ class AllTabs(QTabWidget):
         # run file
         # ========
         irow += 1
-        w_run_lbl = QLabel('Run file path:')
+        w_run_lbl0 = QLabel('Run file path:')
         helpText = 'Location for the Excel run file consisting of farm details, weather, crop management and livestock'
-        w_run_lbl.setToolTip(helpText)
-        w_run_lbl.setAlignment(Qt.AlignRight)
-        w_run_lbl.setAlignment(Qt.AlignBottom)
-        grid.addWidget(w_run_lbl, irow, 0)
+        w_run_lbl0.setToolTip(helpText)
+        w_run_lbl0.setAlignment(Qt.AlignRight)
+        # w_run_lbl0.setAlignment(Qt.AlignBottom)
+        grid.addWidget(w_run_lbl0, irow, 0)
 
         w_run_dir = QLabel()
         grid.addWidget(w_run_dir, irow, 1, 1, 5)
@@ -313,6 +313,7 @@ class AllTabs(QTabWidget):
 
     def postFarmDetail(self):
         '''
+        when the farm changes disable action push buttons
         '''
         farm_name = self.w_combo02.currentText()
         self.w_farm_name.setText(farm_name)
@@ -320,6 +321,24 @@ class AllTabs(QTabWidget):
         run_xls_fn = post_farm_detail(self)
         if run_xls_fn is not None:
             post_sbas_detail(self, run_xls_fn)
+
+            mgmt_dir, dum = split(run_xls_fn)
+            self.w_run_dscr.setText(check_xls_run_file(self.w_soil_cn, mgmt_dir))
+            self.w_disp1_c.setEnabled(False)
+            self.w_disp1_n.setEnabled(False)
+            self.w_disp1_w.setEnabled(False)
+            self.w_disp_cm.setEnabled(False)
+            self.w_disp_econ.setEnabled(False)
+            self.w_recalc.setEnabled(False)
+            self.w_disp_out.setEnabled(False)
+            self.w_livestock.setEnabled(False)
+
+            # repopulate combo in Sensitivity Analysis tab
+            # ============================================
+            study = ReadStudy(self, mgmt_dir)
+            self.w_combo36.clear()
+            for sba in study.subareas:
+                self.w_combo36.addItem(sba)
 
     def saveFarmClicked(self):
         '''
@@ -660,46 +679,44 @@ class AllTabs(QTabWidget):
 
     def tab3UI(self):
         '''
-        Main tab for PyOrator operations
+        Enables user to run PyOrator operations
         creates these QComboBox names:  w_combo07, w_combo08, w_combo09, w_combo10, w_combo11, w_combo17
         '''
 
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
 
-        # line 0 for study details
-        # ========================
-        irow = 0  # main layout is a grid therefore line and row spacing is important
-        irow += 1
+        # study details
+        # =============
+        irow = 1  # main layout is a grid therefore line and row spacing is important
         w_study = QLabel()
         grid.addWidget(w_study, irow, 0, 1, 5)
         self.w_study = w_study
 
-        # rows 4 and 5
         # ============
         irow += 1
-        w_run_psh = QPushButton('Run file path')
-        helpText = 'Location with an Excel run file with a farm location, management, soil and weather sheets'
-        w_run_psh.setToolTip(helpText)
-        grid.addWidget(w_run_psh, irow, 0)
-        w_run_psh.clicked.connect(self.fetchRunFile)
+        w_run_lbl3 = QLabel('Run file path:')
+        helpText = 'Location of Excel run file comprising farm location, management, soil and weather sheets'
+        w_run_lbl3.setToolTip(helpText)
+        w_run_lbl3.setAlignment(Qt.AlignRight)
+        grid.addWidget(w_run_lbl3, irow, 0)
 
         w_run_dir = QLabel('')
         grid.addWidget(w_run_dir, irow, 1, 1, 5)
         self.w_run_dir3 = w_run_dir
 
-        # for message describing run file
-        # ===============================
-        irow += 1
-        w_run_dscr = QLabel('')
-        grid.addWidget(w_run_dscr, irow, 0, 1, 5)
+        w_run_dscr = QLabel('')     # for message describing run file
+        grid.addWidget(w_run_dscr, irow, 6)
         self.w_run_dscr = w_run_dscr
 
         w_view_run = QPushButton('View run file')
         helpText = 'View Excel run file with a farm location, management, soil and weather sheets'
         w_view_run.setToolTip(helpText)
-        grid.addWidget(w_view_run, irow, 6)
+        grid.addWidget(w_view_run, irow, 7)
         w_view_run.clicked.connect(self.viewRunFile)
+
+        irow += 1
+        grid.addWidget(QLabel(), irow, 0)  # spacer
 
         # carbon
         # ======
@@ -857,7 +874,7 @@ class AllTabs(QTabWidget):
         ntab = 3
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
-        self.setTabText(ntab,'Main')
+        self.setTabText(ntab,'Run')
         self.w_tab3.setLayout(grid)
 
     def viewRunFile(self):
@@ -881,33 +898,6 @@ class AllTabs(QTabWidget):
         self.w_lbl_ow.setText(disp_ow_parms(self))
 
         return
-
-    def fetchRunFile(self):
-        '''
-        when the directory changes disable action push buttons
-        '''
-        mgmt_dir_cur = self.w_run_dir3.text()
-        mgmt_dir = QFileDialog.getExistingDirectory(self, 'Select directory', mgmt_dir_cur)
-        if mgmt_dir != '' and mgmt_dir != mgmt_dir_cur:
-            self.w_run_dir3.setText(mgmt_dir)
-            self.w_run_dscr.setText(check_xls_run_file(self.w_soil_cn, mgmt_dir))
-            self.w_disp1_c.setEnabled(False)
-            self.w_disp1_n.setEnabled(False)
-            self.w_disp1_w.setEnabled(False)
-            self.w_disp_cm.setEnabled(False)
-            self.w_disp_econ.setEnabled(False)
-            self.w_recalc.setEnabled(False)
-            self.w_disp_out.setEnabled(False)
-            self.w_livestock.setEnabled(False)
-
-            # repopulate combo in Test forward run tab
-            # ========================================
-            study = ReadStudy(self, mgmt_dir)
-            self.w_combo36.clear()
-            for sba in study.subareas:
-                self.w_combo36.addItem(sba)
-
-            self.settings['study'] = study
 
     def changeHelpText(self, w_combo):
         '''
@@ -1116,7 +1106,7 @@ class AllTabs(QTabWidget):
         ntab = 4
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
-        self.setTabText(ntab,'Test forward run')
+        self.setTabText(ntab,'Sensitivity Analysis')
         self.w_tab4.setLayout(grid)
 
     def recalcClicked(self):

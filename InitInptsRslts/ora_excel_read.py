@@ -259,11 +259,13 @@ def _validate_timesteps(run_xls_fn, subareas):
 
     wb_obj.close
 
+    dum, farm_name = split(split(run_xls_fn)[0])
+    mess = 'Farm: {}\tweather and subareas months {} '.format(farm_name, nmths_wthr)
     if ret_code:
-        print('Weather and subareas months {} match'.format(nmths_wthr))
+        print(mess + 'match')
     else:
-        mess = ERR_MESS + 'number of weather months: {} are too few for subareas: '.format(nmths_wthr)
-        print(mess + str(nmnths_subsareas))
+        mess = ERR_MESS + mess
+        print(mess +  ' are too few for subareas: ' + str(nmnths_subsareas))
 
     return ret_code
 
@@ -304,7 +306,7 @@ def check_xls_run_file(w_soil_cn, mgmt_dir):
             mess += 'present but with no subareas'
         else:
             if (_validate_timesteps(run_xls_fn, subareas)):
-                mess = format_sbas('present with subareas: ', subareas, mess)
+                mess = format_sbas('Subareas: ', subareas)
                 w_soil_cn.setEnabled(True)      # activate carbon nitrogen model push button
 
     return mess

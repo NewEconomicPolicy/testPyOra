@@ -195,6 +195,7 @@ def post_farm_detail(form):
 
     farm_dir = join(normpath(study_dir), farm_name)
     form.w_run_dir0.setText(farm_dir)
+    form.w_run_dir3.setText(farm_dir)
 
     if isfile(farm_wthr_fname):
         farm_vars = read_farm_wthr_xls_file(farm_wthr_fname)
