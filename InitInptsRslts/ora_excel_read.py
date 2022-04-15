@@ -780,6 +780,22 @@ def _repopulate_excel_dropdown(form, study_name):
             w_combo17.addItem(short_fn)
     return
 
+def _make_retvar_safe(ret_var):
+    '''
+    ret_var is a list
+    make sure return value is safe
+    '''
+    NVALS_SAFE = 10
+
+    nvals = len(ret_var)
+    if nvals > NVALS_SAFE:
+        ret_var = ret_var[:NVALS_SAFE]
+    elif nvals < NVALS_SAFE:
+        nvals_add = NVALS_SAFE - nvals
+        ret_var += 2*[None]
+
+    return ret_var
+
 def read_farm_wthr_xls_file(run_xls_fn):
     '''
     check required sheets are present
@@ -799,6 +815,7 @@ def read_farm_wthr_xls_file(run_xls_fn):
         farm_sht = wb_obj[rqrd_sheet]
         df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
         ret_var += list(df['Values'][1:])
+        ret_var = _make_retvar_safe(ret_var)
     else:
         print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
         ret_var = None
@@ -834,7 +851,7 @@ class ReadStudy(object, ):
         if ret_var is None:
             return None
         
-        subareas, sub_distr, farm_name, latitude, longitude, area, prnct, dum = ret_var
+        subareas, sub_distr, farm_name, latitude, longitude, area, prnct, dum, dum, dum = ret_var
 
         # check consistency
         # =================

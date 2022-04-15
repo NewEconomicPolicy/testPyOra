@@ -15,7 +15,7 @@ __author__ = 's03mm5'
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
-                                                                        QApplication, QComboBox, QPushButton, QCheckBox
+                                            QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, split
 
@@ -33,7 +33,7 @@ from livestock_output_data import calc_livestock_data, check_livestock_run_data
 from ora_cn_model import run_soil_cn_algorithms, recalc_fwd_soil_cn
 from ora_excel_read import check_xls_run_file, ReadStudy
 from ora_gui_misc_fns import disp_ow_parms, check_mngmnt_ow
-from ora_wthr_misc_fns import check_or_read_csv_wthr
+from ora_wthr_misc_fns import check_or_read_csv_wthr, prod_system_to_descr
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
 
@@ -97,24 +97,10 @@ class AllTabs(QTabWidget):
         '''
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
-        irow = 0
-
-        # ========
-        lbl00 = QLabel('Study area:')
-        lbl00.setAlignment(Qt.AlignRight)
-        grid.addWidget(lbl00, irow, 0)
-
-        w_combo00 = QComboBox()
-        for study in self.settings['studies']:
-            w_combo00.addItem(study)
-        w_combo00.setFixedWidth(STD_CMBO_SIZE)
-        grid.addWidget(w_combo00, irow, 1, 1, 2)
-        w_combo00.currentIndexChanged[str].connect(self.changeStudy)
-        self.w_combo00 = w_combo00
 
         # post farm detail
         # ================
-        irow += 1
+        irow = 1
         irow = farm_detail_gui(self, grid, irow)
 
         irow += 1
@@ -127,15 +113,15 @@ class AllTabs(QTabWidget):
         helpText = 'Location for the Excel run file consisting of farm details, weather, crop management and livestock'
         w_run_lbl0.setToolTip(helpText)
         w_run_lbl0.setAlignment(Qt.AlignRight)
-        # w_run_lbl0.setAlignment(Qt.AlignBottom)
         grid.addWidget(w_run_lbl0, irow, 0)
 
         w_run_dir = QLabel()
-        grid.addWidget(w_run_dir, irow, 1, 1, 5)
+        grid.addWidget(w_run_dir, irow, 1, 1, 4)
         self.w_run_dir0 = w_run_dir
 
         w_lbl_sbas = QLabel()
-        grid.addWidget(w_lbl_sbas, irow, 6)
+        w_lbl_sbas.setAlignment(Qt.AlignRight)
+        grid.addWidget(w_lbl_sbas, irow, 5, 1, 2)
         self.w_lbl_sbas = w_lbl_sbas
 
         w_view_run = QPushButton('View run file')
@@ -158,12 +144,29 @@ class AllTabs(QTabWidget):
         # line for soil
         # =============
         irow += 1
-        w_use_isda = QCheckBox('Use iSDAsoil')
+
+        w_lbl06b = QLabel('Soil resource:')
+        w_lbl06b.setAlignment(Qt.AlignRight)
+        grid.addWidget(w_lbl06b, irow, 0)
+
+        w_use_isda = QRadioButton('iSDAsoil')
         helpText = 'Use the 30 meter resolution iSDAsoil mapping system for Africa'
         helpText += ' - see: https://www.isda-africa.com/isdasoil/'
         w_use_isda.setToolTip(helpText)
-        grid.addWidget(w_use_isda, irow, 0)
+        grid.addWidget(w_use_isda, irow, 1)
         self.w_use_isda = w_use_isda
+
+        w_use_hwsd = QRadioButton("HWSD")
+        helpText = 'Harmonized World Soil Database has a 30 arc seconds resolution and is maintained by\n'
+        helpText += 'the Food and Agriculture Organization (FAO), a specialized agency of the United Nations'
+        w_use_hwsd.setToolTip(helpText)
+        grid.addWidget(w_use_hwsd, irow, 2)
+        self.w_use_hwsd = w_use_hwsd
+
+        w_soil_choice = QButtonGroup()
+        w_soil_choice.addButton(w_use_isda)
+        w_soil_choice.addButton(w_use_hwsd)
+        self.w_soil_choice = w_soil_choice
 
         irow += 1
         grid.addWidget(QLabel(), irow, 3)   # spacer
@@ -197,7 +200,7 @@ class AllTabs(QTabWidget):
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
         w_chk_lvstck.setToolTip(helpText)
         w_chk_lvstck.clicked.connect(self.checkLvstck)
-        grid.addWidget(w_chk_lvstck, irow, 3)
+        grid.addWidget(w_chk_lvstck, irow, 3, 1, 2)
         self.w_chk_lvstck = w_chk_lvstck
 
         ntab = 0
@@ -344,7 +347,7 @@ class AllTabs(QTabWidget):
         '''
 
         '''
-        if validate_farm_var_fields(self):
+        if validate_farm_var_fields(self):          # checks farm name and numeric fields
             print('Saving farm... ' + self.w_farm_name.text())
             QApplication.processEvents()
 
@@ -529,6 +532,7 @@ class AllTabs(QTabWidget):
 
         # headers
         # =======
+        irow += 1
         icol = 1
         for anml in anml_typs:
             hdr_lbl = QLabel(anml_typs[anml])
@@ -645,6 +649,15 @@ class AllTabs(QTabWidget):
         self.setTabText(ntab, 'Livestock')
         self.w_tab2.setLayout(grid)
 
+    def changeSystem(self):
+        '''
+        if system is changed then expand 3 letter code
+        '''
+        prod_system = self.w_systems.currentText()
+        self.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
+
+        return
+
     def evaluateBoughtIn(self):
         '''
 
@@ -702,11 +715,12 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_run_lbl3, irow, 0)
 
         w_run_dir = QLabel('')
-        grid.addWidget(w_run_dir, irow, 1, 1, 5)
+        grid.addWidget(w_run_dir, irow, 1, 1, 4)
         self.w_run_dir3 = w_run_dir
 
         w_run_dscr = QLabel('')     # for message describing run file
-        grid.addWidget(w_run_dscr, irow, 6)
+        grid.addWidget(w_run_dscr, irow, 5, 1, 2)
+        w_run_dscr.setAlignment(Qt.AlignRight)
         self.w_run_dscr = w_run_dscr
 
         w_view_run = QPushButton('View run file')

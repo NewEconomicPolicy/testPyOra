@@ -28,6 +28,7 @@ STD_FLD_SIZE_40 = 40
 STD_FLD_SIZE_60 = 60
 STD_FLD_SIZE_80 = 80
 STD_FLD_SIZE_100 = 100
+STD_CMBO_SIZE = 150
 
 RUN_MODE_HDRS = {'Steady state': '', 'Forward run': ''}
 FIELD_NAMES = {'Description': '',
@@ -63,9 +64,32 @@ def farm_detail_gui(form, grid, irow):
     '''
     construct that section of the GUI dedicated to farm detail
     '''
-    irow += 1
+
+    # ========
+    lbl00 = QLabel('Study area:')
+    lbl00.setAlignment(Qt.AlignRight)
+    grid.addWidget(lbl00, irow, 0)
+
+    w_combo00 = QComboBox()
+    for study in form.settings['studies']:
+        w_combo00.addItem(study)
+    w_combo00.setFixedWidth(STD_CMBO_SIZE)
+    grid.addWidget(w_combo00, irow, 1, 1, 3)
+    w_combo00.currentIndexChanged[str].connect(form.changeStudy)
+    form.w_combo00 = w_combo00
 
     # ===================
+    lbl00b = QLabel('Existing farms:')
+    lbl00b.setAlignment(Qt.AlignRight)
+    grid.addWidget(lbl00b, irow, 4)
+
+    w_combo02 = QComboBox()
+    grid.addWidget(w_combo02, irow, 5)
+    w_combo02.currentIndexChanged[str].connect(form.postFarmDetail)
+    form.w_combo02 = w_combo02
+
+    # ===================
+    irow += 1
     lbl00a = QLabel('Farm:')
     lbl00a.setAlignment(Qt.AlignRight)
     helpText = 'list of farms'
@@ -78,24 +102,24 @@ def farm_detail_gui(form, grid, irow):
     w_farm_name.textChanged[str].connect(form.changeFarmName)
     form.w_farm_name = w_farm_name
 
-    # ===================
-    lbl00b = QLabel('Existing farms:')
-    lbl00b.setAlignment(Qt.AlignRight)
-    grid.addWidget(lbl00b, irow, 2)
+    sys_lbl = QLabel('Farming system:')
+    sys_lbl.setAlignment(Qt.AlignRight)
+    grid.addWidget(sys_lbl, irow, 2)
 
-    w_combo02 = QComboBox()
-    grid.addWidget(w_combo02, irow, 3)
-    w_combo02.currentIndexChanged[str].connect(form.postFarmDetail)
-    form.w_combo02 = w_combo02
+    w_systems = QComboBox()
+    w_systems.setFixedWidth(STD_FLD_SIZE_60)
+    for prod_sys in form.anml_prodn.africa_systems:
+        w_systems.addItem(prod_sys)
+    helpText = 'farming systems'
+    w_systems.setToolTip(helpText)
+    grid.addWidget(w_systems, irow, 3)
+    w_systems.currentIndexChanged[str].connect(form.changeSystem)
 
-    # ===================
-    lbl02a = QLabel('Description:')
-    lbl02a.setAlignment(Qt.AlignRight)
-    grid.addWidget(lbl02a, irow, 4)
+    sys_descr_lbl = QLabel('')
+    grid.addWidget(sys_descr_lbl, irow, 4, 1, 3)
 
-    w_farm_desc = QLineEdit()
-    grid.addWidget(w_farm_desc, irow, 5, 1, 3)
-    form.w_farm_desc = w_farm_desc
+    form.w_systems = w_systems
+    form.sys_descr_lbl = sys_descr_lbl
 
     # lon/lat
     # =======
@@ -119,8 +143,30 @@ def farm_detail_gui(form, grid, irow):
     grid.addWidget(w_lon, irow, 3)
     form.w_lon = w_lon
 
+    region_lbl = QLabel('Region:')
+    region_lbl.setAlignment(Qt.AlignRight)
+    grid.addWidget(region_lbl, irow, 4)
+
+    w_regions = QComboBox()
+    for region in form.anml_prodn.africa_regions:
+        w_regions.addItem(region)
+    helpText = 'world region'
+    w_regions.setToolTip(helpText)
+    grid.addWidget(w_regions, irow, 5, alignment=Qt.AlignHCenter)
+    form.w_regions = w_regions
+
     # additional farm related
     # =======================
+    irow += 1
+
+    lbl02a = QLabel('Description:')
+    lbl02a.setAlignment(Qt.AlignRight)
+    grid.addWidget(lbl02a, irow, 0)
+
+    w_farm_desc = QLineEdit()
+    grid.addWidget(w_farm_desc, irow, 1, 1, 3)
+    form.w_farm_desc = w_farm_desc
+
     lbl02b = QLabel('Area (ha):')
     lbl02b.setAlignment(Qt.AlignRight)
     grid.addWidget(lbl02b, irow, 4)
@@ -202,7 +248,7 @@ def post_farm_detail(form):
         if farm_vars is None:
             print(ERROR_STR + ' check ' + farm_wthr_fname)
         else:
-            subareas, sub_distr, dum, lat, lon, area, prnct, farm_desc = farm_vars
+            subareas, sub_distr, dum, lat, lon, area, prnct, farm_desc, farm_system, region = farm_vars
             form.w_lbl_sbas.setText(format_sbas('Subareas: ', subareas))
             form.w_farm_desc.setText(farm_desc)
             form.w_prcnt.setText(str(prnct))
@@ -210,6 +256,12 @@ def post_farm_detail(form):
             form.w_area.setText(str(area))
             form.w_lat.setText(str(lat))
             form.w_lon.setText(str(lon))
+            systm_indx = form.w_systems.findText(farm_system)
+            if systm_indx >= 0:
+                form.w_systems.setCurrentIndex(systm_indx)
+            rgn_indx = form.w_regions.findText(region)
+            if rgn_indx >= 0:
+                form.w_regions.setCurrentIndex(rgn_indx)
             ret_code = farm_wthr_fname
     else:
         print('Could not locate ' + farm_wthr_fname)

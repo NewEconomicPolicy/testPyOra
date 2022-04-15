@@ -329,7 +329,7 @@ def read_config_file(form):
     # check runfile
     # =============
     mgmt_dir0 = _check_run_file(form.w_tab_wdgt.w_run_dir0, form.w_tab_wdgt.w_run_dir3,
-                                                                                    config['mgmt_dir0'], config_file)
+                                                                config['mgmt_dir0'], config_file)
     run_xls_fname = join(mgmt_dir0, FNAME_RUN)
     if isfile(run_xls_fname):
         form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_soil_cn, mgmt_dir0))
@@ -392,14 +392,14 @@ def read_config_file(form):
     # TODO: improve understanding of check boxes
     # ==========================================
     if config['use_isda']:
-        form.w_tab_wdgt.w_use_isda.setCheckState(2)
+        form.w_tab_wdgt.w_use_isda.setChecked(True)
     else:
-        form.w_tab_wdgt.w_use_isda.setCheckState(0)
+        form.w_tab_wdgt.w_use_hwsd.setChecked(True)
 
     if config['use_csv']:
-        form.w_tab_wdgt.w_use_csv.setCheckState(2)
+        form.w_tab_wdgt.w_use_csv.setChecked(True)
     else:
-        form.w_tab_wdgt.w_use_csv.setCheckState(0)
+        form.w_tab_wdgt.w_use_spatial.setChecked(True)
 
     # populate widgets relating to study and farms
     # ============================================

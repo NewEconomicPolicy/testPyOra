@@ -15,7 +15,7 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QComboBox, QLineEdit, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QLabel, QComboBox, QLineEdit, QPushButton, QButtonGroup, QRadioButton
 
 def climate_gui(form, grid, irow):
     '''
@@ -42,9 +42,35 @@ def climate_gui(form, grid, irow):
 
     scenarios = list(['A1B','A2','B1','B2'])  # these have been replaced by RCPs
 
+    # weather choice
+    # ==============
+    irow += 1
+    w_lbl06b = QLabel('Weather resource:')
+    w_lbl06b.setAlignment(Qt.AlignRight)
+    grid.addWidget(w_lbl06b, irow, 0)
+
+    w_use_spatial = QRadioButton('Spatial')
+    helpText = 'Use the 30 meter resolution iSDAsoil mapping system for Africa'
+    helpText += ' - see: https://www.isda-africa.com/isdasoil/'
+    w_use_spatial.setToolTip(helpText)
+    grid.addWidget(w_use_spatial, irow, 1)
+    form.w_use_spatial = w_use_spatial
+
+    w_use_csv = QRadioButton("CSV file")
+    helpText = 'Comma Separated Values (CSV) file comprising monthly weather - precipitation (mm) and air temperature at surface (deg C)'
+    w_use_csv.setToolTip(helpText)
+    grid.addWidget(w_use_csv, irow, 2)
+    form.w_use_csv = w_use_csv
+
+    w_wthr_choice = QButtonGroup()
+    w_wthr_choice.addButton(w_use_spatial)
+    w_wthr_choice.addButton(w_use_csv)
+    form.w_wthr_choice = w_wthr_choice
+
     # Climate dataset resources
     # =========================
-    w_lbl30w = QLabel('Weather resource:')
+    irow += 1
+    w_lbl30w = QLabel('Dataset:')
     w_lbl30w.setAlignment(Qt.AlignRight)
     helpText = 'permissable weather dataset resources are limited to CRU only'
     w_lbl30w.setToolTip(helpText)
@@ -104,7 +130,7 @@ def climate_gui(form, grid, irow):
 
     # second line - end year and number of years
     # ==========================================
-    w_lbl29e = QLabel('# years:')
+    w_lbl29e = QLabel('Number of years:')
     w_lbl29e.setAlignment(Qt.AlignRight)
     grid.addWidget(w_lbl29e, irow, 2)
     form.w_lbl29e = w_lbl29e
@@ -134,7 +160,7 @@ def climate_gui(form, grid, irow):
 
     # third line - end year and number of years
     # =========================================
-    w_lbl31e = QLabel('# years:')
+    w_lbl31e = QLabel('Number of years:')
     w_lbl31e.setAlignment(Qt.AlignRight)
     grid.addWidget(w_lbl31e, irow, 2)
     form.w_lbl31e = w_lbl31e
@@ -162,25 +188,17 @@ def climate_gui(form, grid, irow):
 
     # CSV description
     # ===============
-    irow += 1
     w_csv_dscr = QLabel('')
-    grid.addWidget(w_csv_dscr, irow, 0, 1, 5)
+    grid.addWidget(w_csv_dscr, irow, 6)
+    w_csv_dscr.setAlignment(Qt.AlignRight)
     form.w_csv_dscr = w_csv_dscr
 
     w_view_csv = QPushButton('View CSV file')
     helpText = 'View CSV file comprising monthly weather'
     w_view_csv.setToolTip(helpText)
-    grid.addWidget(w_view_csv, irow, 6)
+    grid.addWidget(w_view_csv, irow, 7)
     w_view_csv.clicked.connect(form.viewCsvFile)
     form.w_view_csv = w_view_csv
-
-    # =============
-    w_use_csv = QCheckBox('Use CSV')
-    helpText = 'Use CSV in preference to CRU data'
-    w_use_csv.setToolTip(helpText)
-    w_view_csv.clicked.connect(form.checkWthrSrces)
-    grid.addWidget(w_use_csv, irow, 7)
-    form.w_use_csv = w_use_csv
 
     return irow
 

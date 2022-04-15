@@ -18,6 +18,23 @@ from math import ceil
 ERROR_STR = '*** Error *** '
 WARNING_STR = '*** Warning *** '
 GRANULARITY = 120
+FARMING_TYPES = {'LG': 'Livestock grazing', 'MR': 'Mixed rotation'}
+CLIMATE_TYPES = {'A': 'Arid/semi-arid', 'H': 'humid/sub-humid', 'T': 'Tropical highlands or temperate'}
+
+def prod_system_to_descr(prod_system):
+    '''
+
+    '''
+    psys2 = prod_system[:2]
+    if psys2 in FARMING_TYPES:
+        sys_descr = FARMING_TYPES[psys2]
+        clim_type = prod_system[2]
+        if clim_type in CLIMATE_TYPES:
+            sys_descr += ' - ' + CLIMATE_TYPES[clim_type]
+    else:
+        sys_descr = prod_system.title()
+
+    return sys_descr
 
 def check_or_read_csv_wthr(csv_fn, check_only = True):
     '''
@@ -30,8 +47,6 @@ def check_or_read_csv_wthr(csv_fn, check_only = True):
     delim = dialect.delimiter       # "delimiter" is a 1-character string
 
     csv_valid_flag = False
-    csv_detail = ''
-
     pettmp = {'precip': [], 'tair': []}
     with open(csv_fn, 'r') as fobj:
         wthr_reader = reader(fobj, delimiter = delim)
@@ -45,7 +60,8 @@ def check_or_read_csv_wthr(csv_fn, check_only = True):
     # ===============
     print('Read ' + csv_fn)
     nmnths_read = len(pettmp['precip'])
-    csv_detail += 'Read {} years of data'.format(round(nmnths_read / 12))
+    nyears = round(nmnths_read / 12)
+    csv_detail = 'Read {} years of data'.format(nyears)
     if nmnths_read < 12:
         print(ERROR_STR + csv_detail + ' - should be at least 12')
     else:
@@ -58,7 +74,7 @@ def check_or_read_csv_wthr(csv_fn, check_only = True):
     if check_only:
         return csv_valid_flag
     else:
-        return csv_valid_flag, pettmp, csv_detail
+        return csv_valid_flag, pettmp, '{} years'.format(nyears)
 
 def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     """

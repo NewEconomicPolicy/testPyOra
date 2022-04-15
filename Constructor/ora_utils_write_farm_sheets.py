@@ -188,7 +188,6 @@ def make_or_update_farm(form):
     end_yr_ss = strt_yr_ss + nyrs_ss
     end_yr_fwd = strt_yr_fwd + nyrs_fwd
 
-
     if form.wthr_sets is None or form.w_use_csv.isChecked():
         wthr_src = 'CSV file'
         csv_fn = form.w_csv_fn.text()
@@ -395,11 +394,13 @@ def _write_excel_location(sheet_name, form, writer):
     farm_desc = form.w_farm_desc.text()
     farm_area = float(form.w_area.text())
     prcnt_subdist = float(form.w_prcnt.text())
+    farm_system = form.w_systems.currentText()
+    region = form.w_regions.currentText()
 
     farm_location = {'Attribute': ['Subdistrict name', 'Farm name', 'Latitude', 'Longitude',
-                                        'Area (ha)','% of subdistrict','Description'],
-                     'Value': [subdist, farm_name, latitude, longitude, farm_area, prcnt_subdist, farm_desc]}
-
+                                        'Area (ha)', '% of subdistrict', 'Description', 'System', 'Region'],
+                     'Value': [subdist, farm_name, latitude, longitude, farm_area, prcnt_subdist,
+                                                                                    farm_desc, farm_system, region]}
     # create data frame from dictionary
     # =================================
     data_frame = DataFrame(farm_location)
