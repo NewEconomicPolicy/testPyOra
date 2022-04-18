@@ -31,7 +31,7 @@ def _gran_coords_from_lat_lon(lat, lon):
 
 class HWSD_soil_defn(object,):
 
-    def __init__(self, lgr):
+    def __init__(self, lggr):
 
         '''
         Each meta-cell comprises one or more HWSD mu global keys with each key paired with the number
@@ -44,7 +44,7 @@ class HWSD_soil_defn(object,):
 
         # define current cell object
         # ==========================
-        self.lgr  = lgr
+        self.lggr  = lggr
         self.area = None
         self.lat  = None
         self.lon  = None
@@ -67,11 +67,11 @@ class HWSD_soil_defn(object,):
         mess = 'Cell with Lat: {}\tLon: {}'.format(lat, lon)
         mess += '\thas {} rows and {} columns of HWSD grid'.format(cell_hwsd_df.shape[0], cell_hwsd_df.shape[1])
         mess += '\tN soil recs: {}'.format(len(soil_recs))
-        self.lgr.info(mess)
+        self.lggr.info(mess)
 
     def simplify_soil_defn(self, use_dom_soil_flag, use_high_cover_flag, bad_muglobals):
 
-        self.soil_recs = _simplify_soil_recs(self.lgr, bad_muglobals, self.soil_recs, use_dom_soil_flag)
+        self.soil_recs = _simplify_soil_recs(self.lggr, bad_muglobals, self.soil_recs, use_dom_soil_flag)
 
         # collapse the cell mu_global dictionary into a single entry with the same total number of HWSD cells
         # ===================================================================================================
@@ -87,7 +87,7 @@ class HWSD_soil_defn(object,):
             self.mu_global_pairs = {mu_global: nsize}
             return 0
 
-def _simplify_soil_recs(lgr, bad_muglobals, soil_recs, use_dom_soil_flag):
+def _simplify_soil_recs(lggr, bad_muglobals, soil_recs, use_dom_soil_flag):
     """
     compress soil records if duplicates are present
     simplify soil records if requested
@@ -122,7 +122,7 @@ def _simplify_soil_recs(lgr, bad_muglobals, soil_recs, use_dom_soil_flag):
         new_soil_group = []
         soil_group = sorted(soil_recs[mu_global])
         if len(soil_group) == 0:
-            lgr.info('*** Error *** mu global: {} has empty soil group from in soil_recs: {}'.format(mu_global,
+            lggr.info('*** Error *** mu global: {} has empty soil group from in soil_recs: {}'.format(mu_global,
                                                                                          str(soil_recs[mu_global])))
             continue
 
@@ -154,7 +154,7 @@ def _simplify_soil_recs(lgr, bad_muglobals, soil_recs, use_dom_soil_flag):
             new_soil_recs[mu_global] = list([dom_soil])
 
     mess = 'Exiting {}\trecords in: {} out: {}'.format(func_name, len(soil_recs),len(new_soil_recs))
-    lgr.info(mess + '\tnum raw sub-soils: {}\tafter compression: {}'.format(num_raw, num_compress))
+    lggr.info(mess + '\tnum raw sub-soils: {}\tafter compression: {}'.format(num_raw, num_compress))
     return new_soil_recs
 
 def meta_cell_centroid(aggre_cell, irow, icol, num_non_zeros, resol_upscale, granularity):

@@ -63,7 +63,7 @@ def check_hwsd_integrity(hwsd_dir):
         sleep(sleepTime)
         exit(0)
 
-def validate_hwsd_rec (lgr, mu_global, data_rec):
+def validate_hwsd_rec (lggr, mu_global, data_rec):
     """
     function to make sure we are supplying a valid HWSD data record for a given mu_global
 
@@ -85,7 +85,7 @@ def validate_hwsd_rec (lgr, mu_global, data_rec):
     """
     if len(data_rec) != 13:
         mess = 'Incomplete topsoil data - mu_global: ' + str(mu_global) + '\trecord: ' + ', '.join(data_rec)
-        lgr.info(mess)
+        lggr.info(mess)
         return None
 
     share, t_sand, t_silt, t_clay, t_bulk_density, t_oc, t_ph_h2o, \
@@ -98,7 +98,7 @@ def validate_hwsd_rec (lgr, mu_global, data_rec):
         if isnan(val):
             # TODO: mess = 'Incomplete topsoil data - mu_global: ' + str(mu_global) + '\trecord: ' + ', '.join(data_rec)
             mess =  'Incomplete topsoil data - mu_global: ' + str(mu_global)
-            lgr.info(mess)
+            lggr.info(mess)
             return None
     '''
     MJM: borrowed from mksims.py:
@@ -108,7 +108,7 @@ def validate_hwsd_rec (lgr, mu_global, data_rec):
                       /1000: g to kg,
                      *30: cm to lyr depth
     '''
-    # lgr.info('Soil data check for mu_global {}\tshare: {}%'.format(mu_global,share))
+    # lggr.info('Soil data check for mu_global {}\tshare: {}%'.format(mu_global,share))
     t_bulk = float(t_bulk_density)  # T_BULK_DENSITY
     t_oc = float(t_oc)    # T_OC
     t_c = round(t_bulk * t_oc / 100.0 * 30 * 100000000 / 1000.0, 1)
@@ -119,7 +119,7 @@ def validate_hwsd_rec (lgr, mu_global, data_rec):
     for val in ss_rec:
         if isnan(val):
             # log a message
-            lgr.info('Incomplete subsoil data - mu_global: ' + str(mu_global))
+            lggr.info('Incomplete subsoil data - mu_global: ' + str(mu_global))
             # modified share to from int to float
             return list([t_c, t_bulk, float(t_ph_h2o), int(t_clay), int(t_silt), int(t_sand), float(share)])
 
@@ -135,17 +135,17 @@ def validate_hwsd_rec (lgr, mu_global, data_rec):
                  s_c, s_bulk, float(s_ph_h2o), int(s_clay), int(s_silt), int(s_sand), float(share)])
     except ValueError as e:
         mess = 'problem {} with mu_global {}\tdata_rec: {}'.format(e, mu_global, data_rec)
-        lgr.info(mess)
+        lggr.info(mess)
         return None
 
     return ret_list
 
 class HWSD_bil(object,):
 
-    def __init__(self, lgr, hwsd_dir):
+    def __init__(self, lggr, hwsd_dir):
 
         self.hwsd_dir = hwsd_dir
-        self.lgr = lgr
+        self.lggr = lggr
 
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
         # =====================================================================
@@ -237,7 +237,7 @@ class HWSD_bil(object,):
         # bounding box defined by two lat/lon pairs
 
         func_name =  __prog__ + '.read_bbox_hwsd_mu_globals'
-        self.lgr.info('Running programme ' + func_name)
+        self.lggr.info('Running programme ' + func_name)
         locale.setlocale(locale.LC_ALL, '')
 
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
@@ -296,7 +296,7 @@ class HWSD_bil(object,):
         self.nlons = nlons
 
         mess =  'Retrieved {} mu globals for AOI of {} lats and {} lons'.format(nvals_read, nlats, nlons)
-        self.lgr.info(mess)
+        self.lggr.info(mess)
         print('Found mu_globals for {} cells'.format(nvals_read) + ' in function ' + func_name)
 
         return nvals_read
@@ -327,7 +327,7 @@ class HWSD_bil(object,):
                 for field in self.field_list:
                     data_rec.append(sub_frame[field].values[irec])
 
-                adjusted_datarec = validate_hwsd_rec(self.lgr, mu_global, data_rec)
+                adjusted_datarec = validate_hwsd_rec(self.lggr, mu_global, data_rec)
                 if adjusted_datarec is not None:
                     soil_recs[mu_global].append(adjusted_datarec)
 
@@ -340,7 +340,7 @@ class HWSD_bil(object,):
                 # =============
                 pass
 
-        self.lgr.info('Created {} soil records from dataframe in function {}'.format(len(soil_recs), func_name))
+        self.lggr.info('Created {} soil records from dataframe in function {}'.format(len(soil_recs), func_name))
         if len(soil_recs) == 0:
             return None
         else:
@@ -357,7 +357,7 @@ class HWSD_bil(object,):
         create a grid of MU_GLOBAL values corresponding to given bounding box defined by two lat/lon pairs
         '''
         func_name =  __prog__ + ' read_bbox_mu_globals'
-        self.lgr.info('Running programme ' + func_name)
+        self.lggr.info('Running programme ' + func_name)
 
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
         # AOI is typically county sized e.g. Isle of Man
@@ -430,7 +430,7 @@ class HWSD_bil(object,):
         self.nlats = nlats
         self.nlons = nlons
 
-        self.lgr.info('Exiting function {0} after reading {1} records from .bil file\n'.format(func_name,nrows_read))
+        self.lggr.info('Exiting function {0} after reading {1} records from .bil file\n'.format(func_name,nrows_read))
         return nrows_read
 
     def mu_global_list(self):
@@ -478,9 +478,9 @@ class HWSD_bil(object,):
                 else:
                     mu_globals[mu_global] += 1
 
-        self.lgr.info('Func: {}\tUnique number of mu_globals: {}'.format(func_name, len(mu_globals)))
+        self.lggr.info('Func: {}\tUnique number of mu_globals: {}'.format(func_name, len(mu_globals)))
         for key in sorted(mu_globals.keys()):
-            self.lgr.info('\t' + str(key) + ' :\t' + str(mu_globals[key]))
+            self.lggr.info('\t' + str(key) + ' :\t' + str(mu_globals[key]))
 
         # filter sea, i.e. mu_global == 0
         # ===============================
@@ -488,7 +488,7 @@ class HWSD_bil(object,):
             nzeros = mu_globals.pop(0)
             if len(mu_globals) == 0:
                 mu_globals = None
-                self.lgr.info('Only one mu_global with value of zero - nothing to process')
+                self.lggr.info('Only one mu_global with value of zero - nothing to process')
 
         return mu_globals
 

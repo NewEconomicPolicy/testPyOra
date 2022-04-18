@@ -54,7 +54,7 @@ class HWSD_mu_globals_csv(object,):
         '''
         class_name =  'HWSD_aoi_mu_globals_csv'
         mess = 'Creating class ' + class_name + ' from CSV file ' + csv_fname
-        form.lgr.info(mess); print(mess + '\n\t- this may take some time...')
+        form.lggr.info(mess); print(mess + '\n\t- this may take some time...')
 
         # read the CSV file
         # =================
@@ -76,21 +76,21 @@ class HWSD_mu_globals_csv(object,):
         lat_ur_aoi = data_frame['latitude'].max()
 
         mess = 'read and sorted {} lines using pandas'.format(nlines_str)
-        form.lgr.info(mess); print(mess)
+        form.lggr.info(mess); print(mess)
 
         mu_global_dict = dict(data_frame['mu_global'].value_counts())
 
         aoi_label = 'LL: {:.2f} {:.2f}\tUR: {:.2f} {:.2f}\t# cells: {}' \
                                 .format(lon_ll_aoi, lat_ll_aoi, lon_ur_aoi, lat_ur_aoi, nlines_str)
         mess = 'Exiting function {} AOI: {}\tCSV file {}\n'.format(class_name, aoi_label, csv_fname)
-        form.lgr.info(mess)
+        form.lggr.info(mess)
 
         # list file contents
         # ==================
         mu_global_list = list(mu_global_dict.keys())
         dummy, fname_short = split(csv_fname)
         mess = 'HWSD csv file {} has {} unique mu globals'.format(fname_short, len(mu_global_list))
-        print(mess);         form.lgr.info(mess)
+        print(mess);         form.lggr.info(mess)
         # self.soil_recs = hwsd.get_soil_recs(sorted(mu_global_dict.keys())) # sorted key list (of mu_globals)
 
         # complete object

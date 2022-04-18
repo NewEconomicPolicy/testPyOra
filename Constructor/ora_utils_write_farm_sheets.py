@@ -142,6 +142,35 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
 
     return writer
 
+def _delete_lctn_wthr_sheets(fname_run, sheet_del = 'all'):
+    '''
+    sheets_del: sheets to delete, all or a key in  SHEET_NAMES
+    Signature sheet is not deleted
+    '''
+    func_name =  __prog__ + ' _remove_excel_sheets'
+
+    ret_code = False
+
+    wb_obj = load_workbook(fname_run, data_only=True)
+    for sheet_name in SHEET_NAMES.values():
+        if sheet_name == 'Signature':
+            continue
+        else:
+            if sheet_del == 'all' or sheet_name == sheet_del:
+                try:
+                    del wb_obj[sheet_name]
+                except KeyError as err:
+                    print('Could not delete sheet ' + sheet_name)
+    try:
+        wb_obj.save(fname_run)
+        ret_code = True
+    except PermissionError as err:
+        print(str(err))
+
+    wb_obj.close()
+
+    return ret_code
+
 def make_or_update_farm(form):
     '''
     use pandas to write to Excel
@@ -231,8 +260,13 @@ def make_or_update_farm(form):
     if isfile(fname_run):
         new_runfile_flag =  False
         exstng_sbas = _fetch_existing_subarea_sheets(fname_run)
-        _delete_lctn_wthr_sheets(fname_run)     # delete all sheets except Signature
-        writer = ExcelWriter(fname_run, mode='a', if_sheet_exists='replace')
+        if not _delete_lctn_wthr_sheets(fname_run):     # delete all sheets except Signature
+            return -1, None
+        try:
+            writer = ExcelWriter(fname_run, mode='a', if_sheet_exists='replace')
+        except PermissionError as err:
+            print(err)
+            return -1, None
     else:
         new_runfile_flag = True
         writer = ExcelWriter(fname_run)
@@ -326,7 +360,8 @@ def _adjust_excel_workbook(fname_run):
         print('\tadded sheets to: ' + fname_run)
 
     except PermissionError as err:
-        print(str(err) + ' - could not save: ' + fname_run)
+        mess = str(err) + ' - could not save: ' + fname_run
+        print(mess)
 
     return
 
@@ -451,32 +486,6 @@ def _write_excel_livestock(sheet_name, form, writer):
     data_frame.to_excel(writer, sheet_name, header=False, index=False, freeze_panes=(1, 1))
 
     return writer
-
-def _delete_lctn_wthr_sheets(fname_run, sheet_del = 'all'):
-    '''
-    sheets_del: sheets to delete, all or a key in  SHEET_NAMES
-    Signature sheet is not deleted
-    '''
-    func_name =  __prog__ + ' _remove_excel_sheets'
-
-    wb_obj = load_workbook(fname_run, data_only=True)
-    for sheet_name in SHEET_NAMES.values():
-        if sheet_name == 'Signature':
-            continue
-        else:
-            if sheet_del == 'all' or sheet_name == sheet_del:
-                try:
-                    del wb_obj[sheet_name]
-                except KeyError as err:
-                    print('Could not delete sheet ' + sheet_name)
-    try:
-        wb_obj.save(fname_run)
-    except PermissionError as err:
-        print(str(err) + ' - could not save: ' + fname_run)
-
-    wb_obj.close()
-
-    return
 
 class WeatherSheet(object, ):
 

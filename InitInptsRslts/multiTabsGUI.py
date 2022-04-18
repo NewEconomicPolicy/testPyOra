@@ -33,7 +33,7 @@ from livestock_output_data import calc_livestock_data, check_livestock_run_data
 from ora_cn_model import run_soil_cn_algorithms, recalc_fwd_soil_cn
 from ora_excel_read import check_xls_run_file, ReadStudy
 from ora_gui_misc_fns import disp_ow_parms, check_mngmnt_ow
-from ora_wthr_misc_fns import check_or_read_csv_wthr, prod_system_to_descr
+from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
 
@@ -248,10 +248,9 @@ class AllTabs(QTabWidget):
         csv_fn_cur = self.w_csv_fn.text()
         csv_fn, dummy = QFileDialog.getOpenFileName(self, 'Open file', csv_fn_cur, 'CSV files (*.csv)')
         if csv_fn != '' and csv_fn != csv_fn_cur:
-            if check_or_read_csv_wthr(csv_fn):
+            csv_valid_flag, dum = read_csv_wthr_file(csv_fn, self.w_view_csv, self.w_csv_dscr)
+            if csv_valid_flag:
                 self.w_csv_fn.setText(csv_fn)
-                dum, dum, csv_detail = check_or_read_csv_wthr(csv_fn_cur, check_only=False)
-                self.w_csv_dscr.setText(csv_detail)
 
     def viewCsvFile(self):
         '''
@@ -273,14 +272,16 @@ class AllTabs(QTabWidget):
 
         if w_close == QMessageBox.Yes:
             study_dir = join(self.settings['study_area_dir'], self.w_combo00.currentText())
-            farm_dir = join(study_dir, self.w_farm_name.text())
-            if not isdir(farm_dir):
-                return
-
-            rmtree(farm_dir)
-
-        repopulate_farms_dropdown(self)
-
+            farm_name = self.w_farm_name.text()
+            farm_dir = join(study_dir, farm_name)
+            if isdir(farm_dir):
+                try:
+                    rmtree(farm_dir)
+                except PermissionError as err:
+                    print(err)
+                else:
+                    print('Removed farm: ' + farm_name)
+                    repopulate_farms_dropdown(self)
         return
 
     def checkFarms(self):

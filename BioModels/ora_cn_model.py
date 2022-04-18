@@ -137,6 +137,7 @@ def run_soil_cn_algorithms(form):
     func_name = __prog__ + '\trun_soil_cn_algorithms'
 
     excel_out_flag = form.w_make_xls.isChecked()
+    out_dir = form.settings['out_dir']
 
     parms_xls_fname = form.settings['params_xls']
     print('Reading: ' + parms_xls_fname)
@@ -155,7 +156,7 @@ def run_soil_cn_algorithms(form):
     # read input Excel workbook
     # =========================
     print('Reading: Run file: ' + run_xls_fname)
-    study = ReadStudy(form, mgmt_dir, run_xls_fname, form.settings['out_dir'])
+    study = ReadStudy(form, mgmt_dir, run_xls_fname, out_dir)
     retcode = read_run_xls_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
     if retcode is None:
         return
@@ -193,14 +194,14 @@ def run_soil_cn_algorithms(form):
         # ============
         form.all_runs_output[sba] = complete_run
         if excel_out_flag:
-            generate_excel_outfiles(study, sba, lookup_df, form.settings['out_dir'], ora_weather, complete_run,
+            generate_excel_outfiles(form.lggr, study, sba, lookup_df, out_dir, ora_weather, complete_run,
                                                                                                 mngmnt_ss, mngmnt_fwd)
         print()
         all_runs[sba] = complete_run
 
     if len(all_runs) > 0:
         if excel_out_flag:
-            write_excel_all_subareas(study, form.settings['out_dir'], lookup_df, all_runs)
+            write_excel_all_subareas(study, out_dir, lookup_df, all_runs)
 
         # update GUI by activating the livestock and new Excel output files push buttons
         # ==============================================================================

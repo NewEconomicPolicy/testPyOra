@@ -12,6 +12,7 @@
 __prog__ = 'ora_wthr_misc_fns.py'
 __author__ = 's03mm5'
 
+from os.path import isfile
 from csv import reader, Sniffer
 from math import ceil
 
@@ -36,45 +37,55 @@ def prod_system_to_descr(prod_system):
 
     return sys_descr
 
-def check_or_read_csv_wthr(csv_fn, check_only = True):
+def read_csv_wthr_file(csv_fn, w_view_csv = None, w_csv_dscr = None):
     '''
     read and validate CSV file of weather
     could use Multiple Char Separator in read_csv in Pandas
         see: https://datascientyst.com/use-multiple-char-separator-read_csv-pandas/
     '''
-    with open(csv_fn, 'r') as fobj:
-        dialect = Sniffer().sniff(fobj.read(1024))
-    delim = dialect.delimiter       # "delimiter" is a 1-character string
-
     csv_valid_flag = False
     pettmp = {'precip': [], 'tair': []}
-    with open(csv_fn, 'r') as fobj:
-        wthr_reader = reader(fobj, delimiter = delim)
-        hdr = next(wthr_reader)   # skip header
-        for row in wthr_reader:
-            year = int(row[2])
-            pettmp['precip'].append(float(row[0]))
-            pettmp['tair'].append(float(row[1]))
 
-    # validate inputs
-    # ===============
-    print('Read ' + csv_fn)
-    nmnths_read = len(pettmp['precip'])
-    nyears = round(nmnths_read / 12)
-    csv_detail = 'Read {} years of data'.format(nyears)
-    if nmnths_read < 12:
-        print(ERROR_STR + csv_detail + ' - should be at least 12')
+    if not isfile(csv_fn):
+        mess = 'does not exist'
+        if w_view_csv is not None:
+            w_view_csv.setEnabled(False)
     else:
-        nmnths_srpls = nmnths_read % 12
-        if nmnths_srpls > 0:
-            print(ERROR_STR + '12 should be a factor of number of months - read {} surplus months'.format(nmnths_srpls))
+        if w_view_csv is not None:
+            w_view_csv.setEnabled(True)
+
+        with open(csv_fn, 'r') as fobj:
+            dialect = Sniffer().sniff(fobj.read(1024))
+        delim = dialect.delimiter       # "delimiter" is a 1-character string
+
+        with open(csv_fn, 'r') as fobj:
+            wthr_reader = reader(fobj, delimiter = delim)
+            hdr = next(wthr_reader)   # skip header
+            for row in wthr_reader:
+                year = int(row[2])
+                pettmp['precip'].append(float(row[0]))
+                pettmp['tair'].append(float(row[1]))
+
+        # validate inputs
+        # ===============
+        print('Read ' + csv_fn)
+        nmnths_read = len(pettmp['precip'])
+        nyears = round(nmnths_read / 12)
+        mess = '{} years'.format(nyears)
+        csv_detail = 'Read {} years of data'.format(nyears)
+        if nmnths_read < 12:
+            print(ERROR_STR + csv_detail + ' - should be at least 12')
         else:
-            csv_valid_flag = True
+            nmnths_srpls = nmnths_read % 12
+            if nmnths_srpls > 0:
+                print(ERROR_STR + '12 should be a factor of number of months - read {} surplus months'.format(nmnths_srpls))
+            else:
+                csv_valid_flag = True
 
-    if check_only:
-        return csv_valid_flag
-    else:
-        return csv_valid_flag, pettmp, '{} years'.format(nyears)
+    if w_csv_dscr is not None:
+        w_csv_dscr.setText(mess)    # post detail
+
+    return csv_valid_flag, pettmp
 
 def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     """
@@ -83,7 +94,7 @@ def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     """
     func_name =  __prog__ + ' read_csv_wthr'
 
-    csv_valid_flag, pettmp, dum = check_or_read_csv_wthr(csv_fn, check_only=False)
+    csv_valid_flag, pettmp = read_csv_wthr_file(csv_fn)
     if not csv_valid_flag:
         return None
 
