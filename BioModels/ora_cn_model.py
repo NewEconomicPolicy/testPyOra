@@ -36,7 +36,7 @@ from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
 from ora_excel_write_cn_water import write_excel_all_subareas
-from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_run_xls_file
+from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_xls_run_file
 from ora_rothc_fns import run_rothc
 
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
@@ -133,6 +133,7 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 def run_soil_cn_algorithms(form):
     '''
     retrieve weather and soil
+    NB return code convention is 0 for success, -1 for failure
     '''
     func_name = __prog__ + '\trun_soil_cn_algorithms'
 
@@ -143,13 +144,13 @@ def run_soil_cn_algorithms(form):
     print('Reading: ' + parms_xls_fname)
     ora_parms = ReadCropOwNitrogenParms(parms_xls_fname)
     if ora_parms.ow_parms is None:
-        return
+        return -1
 
     mgmt_dir = form.w_run_dir3.text()
     run_xls_fname = join(mgmt_dir, FNAME_RUN)
     if not isfile(run_xls_fname):
         print(ERROR_STR + 'Excel run file ' + run_xls_fname + 'must exist')
-        return
+        return -1
 
     lookup_df = form.settings['lookup_df']
 
@@ -157,9 +158,9 @@ def run_soil_cn_algorithms(form):
     # =========================
     print('Reading: Run file: ' + run_xls_fname)
     study = ReadStudy(form, mgmt_dir, run_xls_fname, out_dir)
-    retcode = read_run_xls_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
+    retcode = read_xls_run_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
     if retcode is None:
-        return
+        return -1
     else:
         ora_weather, ora_subareas = retcode
 
@@ -207,7 +208,7 @@ def run_soil_cn_algorithms(form):
         # ==============================================================================
         ngrps = check_livestock_run_data(form)
         if ngrps > 0:
-            form.w_livestock.setEnabled(True)
+            form.w_livestock.setEnabled(False)
         else:
             print('\nNo livestock to process')
             form.w_livestock.setEnabled(False)
@@ -236,7 +237,7 @@ def run_soil_cn_algorithms(form):
     form.ora_subareas = ora_subareas
 
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
-    return
+    return 0
 
 def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     '''

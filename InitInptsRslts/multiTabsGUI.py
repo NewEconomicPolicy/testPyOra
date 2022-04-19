@@ -327,7 +327,7 @@ class AllTabs(QTabWidget):
             post_sbas_detail(self, run_xls_fn)
 
             mgmt_dir, dum = split(run_xls_fn)
-            self.w_run_dscr.setText(check_xls_run_file(self.w_soil_cn, mgmt_dir))
+            self.w_run_dscr.setText(check_xls_run_file(self.w_run_model, mgmt_dir))
             self.w_disp1_c.setEnabled(False)
             self.w_disp1_n.setEnabled(False)
             self.w_disp1_w.setEnabled(False)
@@ -850,13 +850,22 @@ class AllTabs(QTabWidget):
         # line 19
         # =======
         irow += 1
+        w_run_model = QPushButton('Run model')
+        helpText = 'Runs ORATOR soil carbon and nitrogen, livestock and economics models'
+        w_run_model.setToolTip(helpText)
+        w_run_model.setEnabled(False)
+        w_run_model.setFixedWidth(STD_BTN_SIZE)
+        w_run_model.clicked.connect(self.runModelClicked)
+        grid.addWidget(w_run_model, irow, 0)
+        self.w_run_model = w_run_model
+
         w_economics = QPushButton('Economics')
         helpText = 'Runs ORATOR economics model'
         w_economics.setToolTip(helpText)
-        # w_economics.setEnabled(False)
+        w_economics.setEnabled(False)
         w_economics.setFixedWidth(STD_BTN_SIZE)
         w_economics.clicked.connect(self.runEconomicsClicked)
-        grid.addWidget(w_economics, irow, 0)
+        grid.addWidget(w_economics, irow, 4)
         self.w_economics = w_economics
 
         w_livestock = QPushButton('Livestock')
@@ -865,7 +874,7 @@ class AllTabs(QTabWidget):
         w_livestock.setEnabled(False)
         w_livestock.setFixedWidth(STD_BTN_SIZE)
         w_livestock.clicked.connect(self.runLivestockClicked)
-        grid.addWidget(w_livestock, irow, 1)
+        grid.addWidget(w_livestock, irow, 5)
         self.w_livestock = w_livestock
 
         w_soil_cn = QPushButton('Soil C and N')
@@ -874,7 +883,7 @@ class AllTabs(QTabWidget):
         w_soil_cn.setEnabled(False)
         w_soil_cn.setFixedWidth(STD_BTN_SIZE)
         w_soil_cn.clicked.connect(self.runSoilCnClicked)
-        grid.addWidget(w_soil_cn, irow, 2)
+        grid.addWidget(w_soil_cn, irow, 6)
         self.w_soil_cn = w_soil_cn
 
         w_optimise = QPushButton('Optimise')
@@ -883,7 +892,7 @@ class AllTabs(QTabWidget):
         w_optimise.setEnabled(False)
         w_optimise.setFixedWidth(STD_BTN_SIZE)
         w_optimise.clicked.connect(self.runOptimiseClicked)
-        grid.addWidget(w_optimise, irow, 3)
+        grid.addWidget(w_optimise, irow, 7)
         self.w_optimise = w_optimise
 
         ntab = 3
@@ -947,6 +956,15 @@ class AllTabs(QTabWidget):
         from os import kill as kill_prcs
         os.kill(junk.pid, signal.SIGTERM)
         '''
+
+    def runModelClicked(self):
+        '''
+
+        '''
+        ret_code = run_soil_cn_algorithms(self)
+        if ret_code == 0:
+            calc_livestock_data(self)
+            test_economics_algorithms(self)
 
     def runEconomicsClicked(self):
 

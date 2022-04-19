@@ -245,36 +245,65 @@ def _validate_timesteps(run_xls_fn, subareas):
     for each subarea, check number of months against weather
     '''
     ret_code = True
-    wb_obj = load_workbook(run_xls_fn, data_only=True)
-    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
-    nmths_wthr = wthr_sht.max_row - 1
+    dum, farm_name = split(split(run_xls_fn)[0])
+    mess = 'Farm: ' + farm_name + '\t'
 
-    nmnths_subsareas = {}
-    for sba in subareas:
-        sba_sht = wb_obj[sba]
-        nmnths_sba = sba_sht.max_row - 1
-        if nmnths_sba > nmths_wthr:
-            nmnths_subsareas[sba] = nmnths_sba
-            ret_code = False
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+    # check for Nones in weather
+    # ==========================
+    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
+    wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
+    if wthr_sht.max_column == 6:
+        wthr_cols += ['actl_yr']
+    try:
+        df = DataFrame(wthr_sht.values, columns=wthr_cols)
+    except ValueError as err:
+        print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
+    else:
+        nmths_wthr = wthr_sht.max_row - 1
+        mess += 'weather months {} '.format(nmths_wthr)
+
+        # check subareas
+        # ==============
+        nmnths_subareas = {}
+        for sba in subareas:
+            sba_sht = wb_obj[sba]
+            nmnths_sba = sba_sht.max_row - 1
+            if nmnths_sba > nmths_wthr:
+                nmnths_subareas[sba] = nmnths_sba
+                ret_code = False
 
     wb_obj.close
 
-    dum, farm_name = split(split(run_xls_fn)[0])
-    mess = 'Farm: {}\tweather and subareas months {} '.format(farm_name, nmths_wthr)
     if ret_code:
-        print(mess + 'match')
+        mess +=  'and subareas match'
     else:
-        mess = ERR_MESS + mess
-        print(mess +  ' are too few for subareas: ' + str(nmnths_subsareas))
+        mess += ERR_MESS + mess
+        print(mess +  ' are too few for subareas: ' + str(nmnths_subareas))
+
+    '''
+    # check for None - TODO: seems unreliable
+    # ==============
+    mess_null = ''
+    if not df.isnull().values.any():
+        mess += '\tNulls encountered in weather sheet'
+        ret_code = False
+    '''
+
+    if not ret_code:
+        mess += ' - please check'
+
+    print(mess)
 
     return ret_code
 
-def check_xls_run_file(w_soil_cn, mgmt_dir):
+def check_xls_run_file(w_run_model, mgmt_dir):
     '''
     =========== called during initialisation or from GUI when changing farm ==============
     validate xls run file
     '''
-    w_soil_cn.setEnabled(False)
+    w_run_model.setEnabled(False)
     farm_wthr_fname = FNAME_RUN
     mess = 'Run file, ' + farm_wthr_fname + ', is '
 
@@ -307,11 +336,11 @@ def check_xls_run_file(w_soil_cn, mgmt_dir):
         else:
             if (_validate_timesteps(run_xls_fn, subareas)):
                 mess = format_sbas('Subareas: ', subareas)
-                w_soil_cn.setEnabled(True)      # activate carbon nitrogen model push button
+                w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
 
     return mess
 
-def read_run_xls_file(run_xls_fn, crop_vars, latitude):
+def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     '''
     check required sheets are present and read data from these
      '''
@@ -337,7 +366,7 @@ def read_run_xls_file(run_xls_fn, crop_vars, latitude):
     pettmp_fwd = {'precip': [], 'tair': []}
 
     wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
-    wthr_cols=['period', 'year', 'month', 'precip', 'tair']
+    wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
     if wthr_sht.max_column == 6:
         wthr_cols += ['actl_yr']
     try:
@@ -346,7 +375,13 @@ def read_run_xls_file(run_xls_fn, crop_vars, latitude):
         print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
         return ret_var
 
+    iline = 1
     for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
+        iline += 1
+        if mode is None or precip is None or tair is None:
+            print(ERR_MESS + 'null values encountered on line {} when reading run file weather sheet'.format(iline))
+            return ret_var
+
         if mode == 'steady state':
             pettmp_ss['precip'].append(precip)
             pettmp_ss['tair'].append(tair)

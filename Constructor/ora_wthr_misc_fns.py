@@ -138,7 +138,7 @@ def fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd):
     nmnths_fwd = 12 * nyrs_fwd
     for metric in pettmp:
         pettmp_ss[metric] = pettmp[metric][:nmnths_ss]
-        pettmp_fwd[metric] = pettmp[metric][nmnths_ss:nmnths_fwd]
+        pettmp_fwd[metric] = pettmp[metric][nmnths_ss:nmnths_ss + nmnths_fwd]
 
     return len(pettmp_ss[metric]), pettmp_ss, len(pettmp_fwd[metric]), pettmp_fwd
 
