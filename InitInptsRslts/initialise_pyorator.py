@@ -427,18 +427,11 @@ def read_config_file(form):
     form.w_tab_wdgt.w_nyrs_ss.setText(str(config['nyrs_ss']))
     form.w_tab_wdgt.w_nyrs_fwd.setText(str(config['nyrs_fwd']))
 
-    # view weather button
-    # ===================
-    if form.settings['notepad_path'] is None:
-        form.w_tab_wdgt.w_view_csv.setEnabled(False)
-    else:
-        form.w_tab_wdgt.w_view_csv.setEnabled(True)
-
     # post path to CSV weather file
     # =============================
     if 'csv_wthr_fn' in config:
         form.w_tab_wdgt.w_csv_fn.setText(config['csv_wthr_fn'])
-        dum, dum = read_csv_wthr_file(config['csv_wthr_fn'], form.w_tab_wdgt.w_view_csv, form.w_tab_wdgt.w_csv_dscr)
+        dum, dum = read_csv_wthr_file(config['csv_wthr_fn'], form.w_tab_wdgt.w_csv_dscr)
 
     return True
 

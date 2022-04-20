@@ -182,23 +182,14 @@ def climate_gui(form, grid, irow):
     grid.addWidget(w_csv_psh, irow, 0)
     w_csv_psh.clicked.connect(form.fetchCsvFile)
 
-    w_csv_fn = QLabel('')
-    grid.addWidget(w_csv_fn, irow, 1, 1, 5)
-    form.w_csv_fn = w_csv_fn
-
-    # CSV description
-    # ===============
-    w_csv_dscr = QLabel('')
-    grid.addWidget(w_csv_dscr, irow, 6)
-    w_csv_dscr.setAlignment(Qt.AlignRight)
+    w_csv_dscr = QLabel('')     # CSV description
+    grid.addWidget(w_csv_dscr, irow, 1)
+    w_csv_dscr.setAlignment(Qt.AlignCenter)
     form.w_csv_dscr = w_csv_dscr
 
-    w_view_csv = QPushButton('View CSV file')
-    helpText = 'View CSV file comprising monthly weather'
-    w_view_csv.setToolTip(helpText)
-    grid.addWidget(w_view_csv, irow, 7)
-    w_view_csv.clicked.connect(form.viewCsvFile)
-    form.w_view_csv = w_view_csv
+    w_csv_fn = QLabel('')
+    grid.addWidget(w_csv_fn, irow, 2, 1, 5)
+    form.w_csv_fn = w_csv_fn
 
     return irow
 

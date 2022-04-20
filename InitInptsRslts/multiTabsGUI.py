@@ -248,7 +248,7 @@ class AllTabs(QTabWidget):
         csv_fn_cur = self.w_csv_fn.text()
         csv_fn, dummy = QFileDialog.getOpenFileName(self, 'Open file', csv_fn_cur, 'CSV files (*.csv)')
         if csv_fn != '' and csv_fn != csv_fn_cur:
-            csv_valid_flag, dum = read_csv_wthr_file(csv_fn, self.w_view_csv, self.w_csv_dscr)
+            csv_valid_flag, dum = read_csv_wthr_file(csv_fn, self.w_csv_dscr)
             if csv_valid_flag:
                 self.w_csv_fn.setText(csv_fn)
 
@@ -259,6 +259,10 @@ class AllTabs(QTabWidget):
         csv_fn_cur = self.w_csv_fn.text()
         notepad_path = self.settings['notepad_path']
         Popen(list([notepad_path, csv_fn_cur]), stdout=DEVNULL)
+        '''
+        excel_path = self.settings['excel_path']
+        Popen(list([excel_path, csv_fn_cur]), stdout=DEVNULL)
+        '''
 
     def removeFarmClicked(self):
         '''

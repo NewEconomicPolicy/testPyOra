@@ -37,7 +37,7 @@ def prod_system_to_descr(prod_system):
 
     return sys_descr
 
-def read_csv_wthr_file(csv_fn, w_view_csv = None, w_csv_dscr = None):
+def read_csv_wthr_file(csv_fn, w_csv_dscr = None):
     '''
     read and validate CSV file of weather
     could use Multiple Char Separator in read_csv in Pandas
@@ -48,12 +48,7 @@ def read_csv_wthr_file(csv_fn, w_view_csv = None, w_csv_dscr = None):
 
     if not isfile(csv_fn):
         mess = 'does not exist'
-        if w_view_csv is not None:
-            w_view_csv.setEnabled(False)
     else:
-        if w_view_csv is not None:
-            w_view_csv.setEnabled(True)
-
         with open(csv_fn, 'r') as fobj:
             dialect = Sniffer().sniff(fobj.read(1024))
         delim = dialect.delimiter       # "delimiter" is a 1-character string
@@ -68,7 +63,6 @@ def read_csv_wthr_file(csv_fn, w_view_csv = None, w_csv_dscr = None):
 
         # validate inputs
         # ===============
-        print('Read ' + csv_fn)
         nmnths_read = len(pettmp['precip'])
         nyears = round(nmnths_read / 12)
         mess = '{} years'.format(nyears)
