@@ -18,11 +18,15 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import os, numpy
+from os.path import isfile, isdir, split, normpath, join
+import numpy
 from scipy.stats import norm
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
 from ora_cn_classes import EconoLvstckModel
+
+FNAME_ECONOMICS = 'PurchasesSalesLabour.xlsx'
+WARN_STR = '*** Warning *** '
 
 #----------------------------------------------------------
 # Create class to store instances of family members, in order to work out labour
@@ -170,9 +174,13 @@ def test_economics_algorithms(form):
     #----------------------------------------------------------
     # Import data on purchases and sales, and labour, from excel spreadsheet
     # Save as a DataFrame
+    mgmt_dir = form.w_run_dir3.text()
+    econ_xls_fname = normpath(join(mgmt_dir, FNAME_ECONOMICS))
+    if not isfile(econ_xls_fname):
+        print(WARN_STR + 'Excel economics file ' + econ_xls_fname + ' does not exist')
+        return -1
 
-    xls_inp_fname = os.path.normpath(form.settings['params_xls'])
-    purch_sales_df = read_econ_purch_sales_sheet(xls_inp_fname, 'Purchases & Sales', 3)
+    purch_sales_df = read_econ_purch_sales_sheet(econ_xls_fname, 'Purchases & Sales', 3)
     purch_sales_df = purch_sales_df.drop(columns=['Units.2','Units.3', 'Units.4', 'Units.5', 'Units.6', 'Units.7',
                                                   'Unnamed: 18'])
     purch_sales_df.columns= ['category', 'name', 'dryseas_pur_pr', 'units', 'dryseas_pur_quant', 'measure',
@@ -182,7 +190,7 @@ def test_economics_algorithms(form):
     purch_sales_df['dryseas_sales_value'] = purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']
     purch_sales_df['wetseas_sales_value'] = purch_sales_df['wetseas_sale_pr'] * purch_sales_df['wetseas_sale_quant']
 
-    labour_df = read_econ_labour_sheet(xls_inp_fname, 'Labour', 0)
+    labour_df = read_econ_labour_sheet(econ_xls_fname, 'Labour', 0)
 
     # ----------------------------------------
     # Create instances of HouseholdPurchasesSales Class using Dataframe created from excel sheet. Store in list.

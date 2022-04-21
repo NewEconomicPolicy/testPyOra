@@ -16,7 +16,7 @@ from os.path import isfile, isdir, normpath, join, exists, lexists
 import numpy as np
 from pathlib import Path
 from ora_excel_read import ReadLivestockSheet
-from ora_excel_read import ReadAfricaAnmlProdn
+from ora_excel_read import ReadAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
 from livestock_class import Livestock
@@ -43,7 +43,7 @@ def check_livestock_run_data(form, ntab = 3):
 
     # create animal production object which includes crop names for validation purposes
     # =================================================================================
-    anml_prodn_obj = ReadAfricaAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
+    anml_prodn_obj = ReadAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
     if anml_prodn_obj.retcode is None:
         return
 
@@ -82,7 +82,7 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
     '''
 
     '''
-    anml_prodn_df = anml_prodn_obj.africa_anml_prodn
+    anml_prodn_df = anml_prodn_obj.anml_prodn
 
     for subarea in all_lvstck.subareas:
         lvstck_defn = all_lvstck.subareas[subarea]
@@ -154,7 +154,7 @@ def calc_livestock_data(form):
 
     # create animal production object which includes crop names for validation purposes
     # =================================================================================
-    anml_prodn_obj = ReadAfricaAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
+    anml_prodn_obj = ReadAnmlProdn(xls_inp_fname, ora_parms.crop_vars)
     if anml_prodn_obj.retcode is None:
         return
 

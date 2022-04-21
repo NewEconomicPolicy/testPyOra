@@ -34,7 +34,7 @@ from weather_datasets import read_weather_dsets_detail
 
 from set_up_logging import set_up_logging
 from ora_excel_read import check_params_excel_file, check_xls_run_file, \
-                                                                ReadStudy, ReadCropOwNitrogenParms, ReadAfricaAnmlProdn
+                                                                ReadStudy, ReadCropOwNitrogenParms, ReadAnmlProdn
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
@@ -46,7 +46,7 @@ EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
 NOTEPAD_EXE_PATH = 'C:\\Windows\\System32\\notepad.exe'
 
 ERROR_STR = '*** Error *** '
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 sleepTime = 5
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
@@ -65,7 +65,7 @@ def initiation(form):
 
     # create animal production object which includes crop names for validation purposes
     # =================================================================================
-    form.anml_prodn = ReadAfricaAnmlProdn(parms_xls_fn, form.ora_parms.crop_vars)
+    form.anml_prodn = ReadAnmlProdn(parms_xls_fn, form.ora_parms.crop_vars)
 
     # check weather data
     # ==================
@@ -166,7 +166,7 @@ def _read_setup_file(program_id):
     if isfile(notepad_path):
         settings['notepad_path'] = notepad_path
     else:
-        print(WARNING_STR + 'Could not find notepad exe file - usually here: ' + NOTEPAD_EXE_PATH)
+        print(WARN_STR + 'Could not find notepad exe file - usually here: ' + NOTEPAD_EXE_PATH)
         settings['notepad_path'] = None
 
     # make sure directories exist for weather, configuration and log files paths
@@ -182,7 +182,7 @@ def _read_setup_file(program_id):
     wthr_dir = settings['wthr_dir']
     if wthr_dir is not None:
         if not lexists(wthr_dir):
-            print(WARNING_STR + ' weather datasets path ' + wthr_dir + ' does not exist')
+            print(WARN_STR + ' weather datasets path ' + wthr_dir + ' does not exist')
             wthr_dir = None
 
     settings['wthr_dir'] = wthr_dir
@@ -334,7 +334,7 @@ def read_config_file(form):
     if isfile(run_xls_fname):
         form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_run_model, mgmt_dir0))
     else:
-        print(WARNING_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
+        print(WARN_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
 
     if config['write_excel']:
         form.w_tab_wdgt.w_make_xls.setCheckState(2)

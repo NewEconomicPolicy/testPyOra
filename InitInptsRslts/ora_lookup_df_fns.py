@@ -24,7 +24,7 @@ from zipfile import BadZipFile
 from thornthwaite import thornthwaite
 
 ERROR_STR = '*** Error *** '
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 
 PY_VAR = 'PyOrator variable'
 PY_DISP = 'PyOrator display'
@@ -49,7 +49,7 @@ def fetch_display_names_from_metrics(lookup_df, category_change):
             key = result.index[0]
             pyora_display = str(lookup_df[PY_DISP][key])
             if pyora_display == 'nan' or pyora_display is None:
-                print(WARNING_STR + ' skipping metric ' + metric +
+                print(WARN_STR + ' skipping metric ' + metric +
                                                 ' - could not retrieve PyOrator display name from lookup data frame')
                 continue
 

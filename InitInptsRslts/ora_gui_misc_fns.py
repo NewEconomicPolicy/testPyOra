@@ -73,8 +73,8 @@ def region_validate(site_defn, anml_prodn_obj):
     TODO: improve - issue error
     '''
     region = site_defn['region']
-    if region not in anml_prodn_obj.africa_regions:
-        region = anml_prodn_obj.africa_regions[-1]
+    if region not in anml_prodn_obj.world_regions:
+        region = anml_prodn_obj.world_regions[-1]
 
     return region
 
@@ -106,8 +106,8 @@ class LivestockEntity:
         TODO: improve
         '''
         type = lvstck_content['type']
-        if type not in anml_prodn_obj.africa_anml_types:
-            type = anml_prodn_obj.africa_anml_types[-1]
+        if type not in anml_prodn_obj.anml_types:
+            type = anml_prodn_obj.anml_types[-1]
 
         number = float(lvstck_content['number'])    # TODO: trap error
         strategy = lvstck_content['strategy']

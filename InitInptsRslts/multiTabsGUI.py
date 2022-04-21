@@ -17,7 +17,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
                                             QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
 from subprocess import Popen, DEVNULL
-from os.path import normpath, join, isdir, split
+from os.path import normpath, join, isdir, isfile, split
 
 from shutil import rmtree
 # from ora_classes_excel_write import pyoraId as oraId
@@ -48,6 +48,7 @@ STRATEGIES = ['On farm production', 'Buy/sell']
 NFEED_TYPES = 5         # typically 5 feed types
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
+FNAME_ECON = 'PurchasesSalesLabour.xlsx'
 
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
@@ -130,8 +131,14 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_view_run, irow, 7)
         w_view_run.clicked.connect(self.viewRunFile0)
 
+        # =================================
         irow += 1
-        grid.addWidget(QLabel(), irow, 3)   # spacer
+        w_view_econ = QPushButton('View economics')
+        helpText = 'View and edit economics Excel file with Purchases & Sales and Labour sheets'
+        w_view_econ.setToolTip(helpText)
+        w_view_econ.setFixedWidth(STD_BTN_SIZE + 10)
+        grid.addWidget(w_view_econ, irow, 7)
+        w_view_econ.clicked.connect(self.viewEconFile)
 
         # create 3 lines relating to climate
         # ==================================
@@ -217,9 +224,22 @@ class AllTabs(QTabWidget):
         ngroups = check_livestock_run_data(self, ntab = 0)
         print('Livestock animal types to process: {}'.format(ngroups))
 
+
+    def viewEconFile(self):
+        '''
+        view Excel economics file
+        '''
+        mgmt_dir = self.w_run_dir0.text()
+        econ_xls_fn = normpath(join(mgmt_dir, FNAME_ECON))
+        if isfile(econ_xls_fn):
+            excel_path = self.settings['excel_path']
+            Popen(list([excel_path, econ_xls_fn]), stdout = DEVNULL)
+        else:
+            print('Economics file ' +  econ_xls_fn + ' does not exist')
+
     def viewRunFile0(self):
         '''
-        view Excel run file - also def viewRunFile
+        view Excel run file
         '''
         mgmt_dir = self.w_run_dir0.text()
         run_xls_fname = normpath(join(mgmt_dir, FNAME_RUN))
@@ -413,7 +433,7 @@ class AllTabs(QTabWidget):
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
         # =======================
-        self.setTabText(ntab,'Crop managment')
+        self.setTabText(ntab,'Crop Managment')
         self.w_tab1.setLayout(grid)
 
     def makeMngmntWidgets(self, sba_indx, grid, w_sba_descrs,  w_areas, w_nrota_ss, w_ss_mgmt, w_cpy_mgmt,
@@ -902,7 +922,7 @@ class AllTabs(QTabWidget):
         ntab = 3
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
-        self.setTabText(ntab,'Run')
+        self.setTabText(ntab,'Run Model')
         self.w_tab3.setLayout(grid)
 
     def viewRunFile(self):

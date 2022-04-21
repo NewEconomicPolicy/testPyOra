@@ -29,7 +29,7 @@ __version__ = '0.0.0'
 from math import exp
 from calendar import monthrange
 
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
 def _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, c_n_rat_dpm_prev):
@@ -139,7 +139,7 @@ def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt)
     '''
     denom = nut_n_opt - nut_n_min
     if denom == 0.0:
-        mess = WARNING_STR + 'potential division by zero in eq.3.3.1 - '
+        mess = WARN_STR + 'potential division by zero in eq.3.3.1 - '
         '''
         print(mess + 'check value of the optimum amount of nutrient for the crop which results in crop yield: '
                                                                                             + str(nut_n_opt))

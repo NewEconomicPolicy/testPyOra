@@ -29,7 +29,7 @@ from pandas import DataFrame, ExcelWriter
 
 from ora_lookup_df_fns import fetch_detail_from_varname
 
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 '''
 26 colors for the 2010 Colour Alphabet Project which proposed 26 "letters" coded by colors 
 stated to be near the maximum number reliably distinguishable. 
@@ -273,7 +273,7 @@ def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
             try:
                 data_frame = DataFrame.from_dict(plot_dict)
             except ValueError as err:
-                print(WARNING_STR + str(err) + ' for variable ' + var_name)
+                print(WARN_STR + str(err) + ' for variable ' + var_name)
                 data_frame = DataFrame()
 
             data_frame.to_excel(writer, var_name, index = False)
