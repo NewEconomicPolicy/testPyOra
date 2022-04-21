@@ -56,7 +56,7 @@ FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
 ERR_MESS = '*** Error *** '
 ERR_MESS_SHEET = ERR_MESS + 'reading sheet\t'
-WARNING_STR = '*** Warning ***\t'
+WARN_STR = '*** Warning ***\t'
 
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
@@ -407,7 +407,7 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
         if descr is not None:
             sba = rec[0]
             if sba not in wb_obj:
-                print(WARNING_STR + 'Management sheet ' + sba + ' not in run file')
+                print(WARN_STR + 'Management sheet ' + sba + ' not in run file')
                 continue
 
             area_ha = rec[4]
@@ -920,7 +920,7 @@ class ReadStudy(object, ):
         form.settings['out_dir'] = out_dir
         _repopulate_excel_dropdown(form, farm_name)
 
-class ReadAfricaAnmlProdn(object, ):
+class ReadAnmlProdn(object, ):
 
     def __init__(self, xls_fname, crop_vars):
         '''
@@ -941,15 +941,15 @@ class ReadAfricaAnmlProdn(object, ):
         column_names = 	list(self.header_mappings.keys())
         data = read_excel(xls_fname, header=None, names= column_names, sheet_name=ANML_PRODN_SHEET,
                                                                         usecols=range(1,13), skiprows=range(0,13))
-        africa_anml_prodn = data.dropna(how='all')
-        self.africa_anml_prodn = africa_anml_prodn
+        anml_prodn = data.dropna(how='all')
+        self.anml_prodn = anml_prodn
 
         # allowable values required for validation
         # ========================================
-        self.africa_anml_types = list(africa_anml_prodn['Type'].unique())   # + list(['Pigs','Poultry'])
-        self.africa_prodn_systms = list(africa_anml_prodn['ProdSystem'].unique())
-        self.africa_regions = list(africa_anml_prodn['Region'].unique())
-        self.africa_systems = list(africa_anml_prodn['System'].unique())
+        self.anml_types = list(anml_prodn['Type'].unique())   # + list(['Pigs','Poultry'])
+        self.prodn_systms = list(anml_prodn['ProdSystem'].unique())
+        self.world_regions = list(anml_prodn['Region'].unique())
+        self.farm_systems = list(anml_prodn['System'].unique())
         self.crop_names = ['None'] + list(crop_vars.keys())
 
         # TODO: a patch to get through transition
@@ -957,7 +957,7 @@ class ReadAfricaAnmlProdn(object, ):
         # =======================================
         anml_abbrevs = ['catdry','catmt','rumdry','rummt','pigs','pltry']
         gnrc_anml_types = {}
-        for abbrev, anml_typ in zip(anml_abbrevs, self.africa_anml_types):
+        for abbrev, anml_typ in zip(anml_abbrevs, self.anml_types):
             gnrc_anml_types[abbrev] = anml_typ
         self.gnrc_anml_types = gnrc_anml_types
 

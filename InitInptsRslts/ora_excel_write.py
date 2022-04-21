@@ -43,7 +43,7 @@ from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase) + ['AA','AB','AC','AD']        # TODO: may need to extend
 MAX_WDTH = 15                                   # width of column for table sheets
 FIXED_WDTHS = {'A':13, 'B':6, 'C':7, 'D':11}    # period eg "steady state", year, month and crop name
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 
 def generate_excel_outfiles(lggr, study, subarea, lookup_df, out_dir,  weather, complete_run, mngmnt_ss, mngmnt_fwd):
     '''
@@ -144,7 +144,7 @@ def _write_excel_out(lggr, sheet_name, out_obj, writer, wb_map):
 
         tmp_list = out_obj.sheet_data[var_name]
         if len(tmp_list) == 0:
-            lggr.info(WARNING_STR + 'no data for variable ' + var_name + ' in function ' + func_name)
+            lggr.info(WARN_STR + 'no data for variable ' + var_name + ' in function ' + func_name)
             continue
 
         var_fmt = out_obj.var_formats[var_name]
@@ -194,7 +194,7 @@ def _generate_metric_charts(lggr, fname, lookup_df, wb_map):
             metric = sheet[cell_ref].value
             if metric is None:
                 mess = 'column: ' + ch + '\tsheet: ' + sheet_name + '\t' + 'has no metric at: ' + cell_ref
-                lggr.info(WARNING_STR + mess)
+                lggr.info(WARN_STR + mess)
                 continue
 
             metric_dict[cell_ref] = metric
@@ -202,7 +202,7 @@ def _generate_metric_charts(lggr, fname, lookup_df, wb_map):
             defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
             if pyora_disp == metric:
                 mess = 'column: ' + ch + '\tsheet: ' + sheet_name + '\t' + 'no lookup for metric: ' + metric
-                lggr.info(WARNING_STR + mess)
+                lggr.info(WARN_STR + mess)
 
             sheet[cell_ref].value = pyora_disp
             sheet[cell_ref].alignment = Alignment(wrap_text = True, horizontal = 'center', vertical = 'center')

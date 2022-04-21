@@ -47,7 +47,7 @@ SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
 
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
@@ -256,7 +256,7 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
                 new_amt = ow_apl['amount'] + owex_amnt
                 if ow_type != ow_apl['ow_type']:
                     if warn_flag:
-                        print(WARNING_STR + 'changing organic waste from ' +  ow_apl['ow_type'] + ' to ' + ow_type)
+                        print(WARN_STR + 'changing organic waste from ' +  ow_apl['ow_type'] + ' to ' + ow_type)
                         warn_flag = False
 
             ow_apl_new = {'ow_type': ow_type, 'amount': new_amt}

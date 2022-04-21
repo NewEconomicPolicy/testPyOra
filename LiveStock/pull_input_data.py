@@ -91,6 +91,6 @@ class ReadInputExcel(object, ):
             sheet = REQD_SHEETS['C1a']
             print('Reading Africa animal production data from sheet: ' + sheet)
             data = read_excel(xls_fname, header=0, sheet_name=sheet, usecols=range(1,15), skiprows=range(0,12))
-            self.africa_animal_prod = data.dropna(how='all')
+            self.animal_prod = data.dropna(how='all')
 
             self.retcode = len(REQD_SHEETS)

@@ -17,7 +17,7 @@ from csv import reader, Sniffer
 from math import ceil
 
 ERROR_STR = '*** Error *** '
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 GRANULARITY = 120
 FARMING_TYPES = {'LG': 'Livestock grazing', 'MR': 'Mixed rotation'}
 CLIMATE_TYPES = {'A': 'Arid/semi-arid', 'H': 'humid/sub-humid', 'T': 'Tropical highlands or temperate'}

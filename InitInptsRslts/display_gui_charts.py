@@ -29,7 +29,7 @@ SUBAREAS = list(['Blackburn', 'Todmorden', 'Bury', 'Oldham', 'Rochdale'])   # fo
 NTSTEPS = 240
 
 SET_INDICES = {'carbon':0, 'nitrogen':1, 'soil_water':2, 'crop_model':None, 'livestock':None, 'economics' :None}    # lookup table for data object
-WARNING_STR = '*** Warning *** '
+WARN_STR = '*** Warning *** '
 LRGE_NUM = 99999999
 THRESHOLD = 1e-10
 
@@ -333,7 +333,7 @@ def _select_data_for_display(form, category, metric, sba, recalc_flag):
                 this_data = all_runs_output[subarea][group_indx].data[metric]
 
             if len(this_data) == 0:
-                mess = WARNING_STR + 'could not display metric: ' + metric
+                mess = WARN_STR + 'could not display metric: ' + metric
                 if hasattr(form, 'w_report'):
                     form.w_report.append(mess)
                 else:

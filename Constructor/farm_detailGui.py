@@ -108,7 +108,7 @@ def farm_detail_gui(form, grid, irow):
 
     w_systems = QComboBox()
     w_systems.setFixedWidth(STD_FLD_SIZE_60)
-    for prod_sys in form.anml_prodn.africa_systems:
+    for prod_sys in form.anml_prodn.farm_systems:
         w_systems.addItem(prod_sys)
     helpText = 'farming systems'
     w_systems.setToolTip(helpText)
@@ -148,7 +148,7 @@ def farm_detail_gui(form, grid, irow):
     grid.addWidget(region_lbl, irow, 4)
 
     w_regions = QComboBox()
-    for region in form.anml_prodn.africa_regions:
+    for region in form.anml_prodn.world_regions:
         w_regions.addItem(region)
     helpText = 'world region'
     w_regions.setToolTip(helpText)
