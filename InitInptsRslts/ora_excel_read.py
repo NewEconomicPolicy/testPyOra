@@ -63,35 +63,12 @@ ALPHABET = list(ascii_uppercase)
 MAX_SUB_AREAS = 8
 NFEED_TYPES = 5
 
-def rommel_jotter():
-    '''
-    not called - for Jupyter QtConsole 4.3.1
-    '''
-    RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas',
-                     'lvstck': 'Livestock'}
-    from openpyxl import load_workbook
-    from pandas import Series, read_excel, DataFrame
-
-    run_xls_fn = 'E:\\ORATOR_INTGR\\study areas\\North Gondar (ETH)\\Robe_nocnvrg\\FarmWthrMgmt.xlsx'
-    anml_abbrevs = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
-
-    wb_obj = load_workbook(run_xls_fn, data_only=True)
-
-    lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
-    df = DataFrame(lvstck_sht.values, columns=['descr'] + anml_abbrevs)
-
-    wb_obj.close()
-
-    for row in df.values:
-        break
-
 class ReadLivestockSheet(object, ):
 
     def __init__(self, w_run_dir3, anml_prodn_obj):
         '''
 
         '''
-
         mgmt_dir = w_run_dir3.text()
         run_xls_fn = join(mgmt_dir, FNAME_RUN)
 
@@ -280,7 +257,7 @@ def _validate_timesteps(run_xls_fn, subareas):
         mess +=  'and subareas match'
     else:
         mess += ERR_MESS + mess
-        print(mess +  ' are too few for subareas: ' + str(nmnths_subareas))
+        mess += ' are too few for subareas: ' + str(nmnths_subareas)
 
     '''
     # check for None - TODO: seems unreliable
@@ -937,7 +914,7 @@ class ReadAnmlProdn(object, ):
              'FSgrain': 'Feedstock dry matter from grain',
              'Manure': 'Manure dry matter', 'ExcreteN': 'Excreted N'}
 
-        print('Reading Africa animal production data from sheet: ' + ANML_PRODN_SHEET)
+        print('Reading animal production data from sheet: ' + ANML_PRODN_SHEET)
         column_names = 	list(self.header_mappings.keys())
         data = read_excel(xls_fname, header=None, names= column_names, sheet_name=ANML_PRODN_SHEET,
                                                                         usecols=range(1,13), skiprows=range(0,13))

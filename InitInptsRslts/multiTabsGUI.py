@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayou
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, isfile, split
 
-from shutil import rmtree
+from shutil import rmtree, copyfile
 # from ora_classes_excel_write import pyoraId as oraId
 
 from climateGui import climate_gui
@@ -44,6 +44,7 @@ STD_FLD_SIZE_40 = 40
 STD_BTN_SIZE = 100
 STD_CMBO_SIZE = 150
 
+ANML_ABBREVS = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
 STRATEGIES = ['On farm production', 'Buy/sell']
 NFEED_TYPES = 5         # typically 5 feed types
 
@@ -224,18 +225,18 @@ class AllTabs(QTabWidget):
         ngroups = check_livestock_run_data(self, ntab = 0)
         print('Livestock animal types to process: {}'.format(ngroups))
 
-
     def viewEconFile(self):
         '''
         view Excel economics file
         '''
         mgmt_dir = self.w_run_dir0.text()
         econ_xls_fn = normpath(join(mgmt_dir, FNAME_ECON))
-        if isfile(econ_xls_fn):
-            excel_path = self.settings['excel_path']
-            Popen(list([excel_path, econ_xls_fn]), stdout = DEVNULL)
-        else:
-            print('Economics file ' +  econ_xls_fn + ' does not exist')
+        if not isfile(econ_xls_fn):
+            copyfile(self.settings['econ_xls_fn'], econ_xls_fn)
+            print('Copied economics Excel file ' + econ_xls_fn + ' from templates')
+
+        excel_path = self.settings['excel_path']
+        Popen(list([excel_path, econ_xls_fn]), stdout = DEVNULL)
 
     def viewRunFile0(self):
         '''
@@ -663,16 +664,41 @@ class AllTabs(QTabWidget):
         w_save_farm2 = QPushButton('Save farm')
         helpText = 'Create a new or update an existing Excel file for a PyOrator run consisting of farm details, management and weather data'
         w_save_farm2.setToolTip(helpText)
+        w_save_farm2.setFixedWidth(STD_BTN_SIZE)
         w_save_farm2.clicked.connect(self.saveFarmClicked)
         grid.addWidget(w_save_farm2, irow, 0)
         self.w_save_farm2 = w_save_farm2
 
+        w_clear_data = QPushButton('Clear data')
+        helpText = 'set livestock data to zeros'
+        w_clear_data.setToolTip(helpText)
+        w_clear_data.setFixedWidth(STD_BTN_SIZE)
+        w_clear_data.clicked.connect(self.clearDataClicked)
+        grid.addWidget(w_clear_data, irow, 1)
+        self.w_clear_data = w_clear_data
+
+        # =======================
         ntab = 2
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
         # =======================
         self.setTabText(ntab, 'Livestock')
         self.w_tab2.setLayout(grid)
+
+    def clearDataClicked(self):
+        '''
+        resets livestock widgets
+        '''
+        for anml in ANML_ABBREVS:
+            for findx in range(NFEED_TYPES):
+                fd_typ = str(findx + 1)
+                self.w_feed_qties[anml][fd_typ].setText('0')
+                self.w_feed_types[anml][fd_typ].setCurrentIndex(0)
+
+                self.w_numbers[anml].setText('0')
+                self.w_strtgs[anml].setCurrentIndex(0)
+
+        return
 
     def changeSystem(self):
         '''

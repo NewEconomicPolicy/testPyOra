@@ -14,13 +14,11 @@ __prog__ = 'ora_excel_read_misc.py'
 __version__ = '0.0.1'
 __author__ = 's03mm5'
 
-from os.path import isfile, join, split, dirname
-from os import remove
-
+from os.path import join, split, dirname
 from glob import glob
 from openpyxl import load_workbook
-from pandas import DataFrame, read_excel
-import requests, json
+from pandas import DataFrame
+import requests
 
 import hwsd_bil
 
@@ -32,22 +30,6 @@ MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 
 ISDA_URL = 'https://api.isda-africa.com/v1/soilproperty'
 SOIL_DATA_API_KEY = 'AIzaSyDdmmXVqnAVXRE28meqX2XMQxzRox_25RM'
-
-def read_hwsd_xlsx():
-
-    REQD_COLS = ['MU_GLOBAL','SHARE','T_SAND','T_SILT','T_CLAY', 'T_BULK_DENSITY','T_OC','T_PH_H2O',
-                                                    'S_SAND','S_SILT','S_CLAY','S_BULK_DENSITY','S_OC','S_PH_H2O']
-    fn = 'E:\\temp\\hwsd\\HWSD_DATA.xlsx'
-    sheet_name = 'HWSD_DATA'
-
-    print('Reading HWSD muglobal defns from ' + fn + ' - please be patient...')
-    data = read_excel(fn, sheet_name, usecols = REQD_COLS)
-    data = data.dropna(how='all')
-    print('Have read {} records'.format(data.shape[0]))
-
-    results = {}
-    for mu in [17691, 17688]:
-        results[mu] = data[data['MU_GLOBAL'] == mu]
 
 def fetch_isda_soil_data(lggr, lat, lon):
     '''
@@ -153,6 +135,16 @@ def read_farm_wthr_sbsa_xls_file(form, run_xls_fn):
         # ======================================================
         for row in df.values[1:]:
             sba, descr, irrig, nrota_yrs, area = row[:5]
+
+            # trap for missing description
+            # ============================
+            if sba in wb_obj.sheetnames and descr is None:
+                descr = sba + 'dummy'
+                WARN_STR = '*** Warning *** '
+                mess = WARN_STR + 'management sheet for subarea ' + sba + ' is present'
+                mess += ' but description is missing from ' + rqrd_sheet + ' sheet - will use ' + descr
+                print(mess)
+
             if descr is not None:
                 if sba in wb_obj.sheetnames:
                     form.w_sba_descrs[sba].setText(descr)
@@ -161,7 +153,7 @@ def read_farm_wthr_sbsa_xls_file(form, run_xls_fn):
                     form.w_areas[sba].setText(str(area))
                     form.w_ss_mgmt[sba].setEnabled(True)
                 else:
-                    mess = ERROR_STR
+                    mess = WARN_STR
                     mess += 'discarded description ' + descr + ' for subarea ' + sba + ' - no associated sheet present'
                     print(mess)
     else:
