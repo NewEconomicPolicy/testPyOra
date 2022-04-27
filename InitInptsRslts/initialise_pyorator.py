@@ -242,15 +242,17 @@ def _read_setup_file(program_id):
 
     return settings
 
-def _write_default_config_file(config_file):
+def _write_default_config_file(config_file, study_area_dir):
     '''
 
     '''
+    farm_name = 'Grassland'
+    study = 'Dummy (IND)'
     _default_config = {
         'clim_scnr_indx': 0,
         'csv_wthr_fn': '',
-        'farm_name': 'Robe_nocnvrg',
-        'mgmt_dir0': 'C:\\ORATOR\\study areas\\North Gondar (ETH)\\Robe_nocnvrg',
+        'farm_name': farm_name,
+        'mgmt_dir0': join(study_area_dir, study, farm_name),
         'mnth_appl_indx': 4,
         'nyrs_fwd': 10,
         'nyrs_ss': 10,
@@ -259,7 +261,7 @@ def _write_default_config_file(config_file):
         'owex_min': '0.1',
         'strt_yr_fwd_indx': 0,
         'strt_yr_ss_indx': 0,
-        'study': 'North Gondar (ETH)',
+        'study': study,
         'use_csv': False,
         'use_isda': False,
         'write_excel': False
@@ -300,7 +302,7 @@ def read_config_file(form):
             print(ERROR_STR + err)
             return False
     else:
-        config = _write_default_config_file(config_file)
+        config = _write_default_config_file(config_file, form.settings['study_area_dir'])
 
     for attrib in list(['mgmt_dir0', 'write_excel']):
         if attrib not in config:
