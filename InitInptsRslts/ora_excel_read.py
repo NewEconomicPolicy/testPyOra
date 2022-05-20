@@ -29,7 +29,7 @@ from zipfile import BadZipFile
 from glob import glob
 from calendar import monthrange
 from pandas import DataFrame
-from numpy import nan, isnan
+from numpy import nan, isnan, array
 
 from ora_water_model import add_pet_to_weather
 from ora_cn_fns import plant_inputs_crops_distribution
@@ -54,9 +54,9 @@ T_DEPTH = 30
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
-ERR_MESS = '*** Error *** '
-ERR_MESS_SHEET = ERR_MESS + 'reading sheet\t'
-WARN_STR = '*** Warning ***\t'
+ERR_STR = '*** Error *** '
+ERR_STR_SHEET = ERR_STR + 'reading sheet\t'
+WARN_STR = '*** Warning *** '
 
 from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
@@ -221,7 +221,7 @@ def _validate_timesteps(run_xls_fn, subareas):
     '''
     for each subarea, check number of months against weather
     '''
-    ret_code = True
+    ret_code = False
     dum, farm_name = split(split(run_xls_fn)[0])
     mess = 'Farm: ' + farm_name + '\t'
 
@@ -235,41 +235,49 @@ def _validate_timesteps(run_xls_fn, subareas):
         wthr_cols += ['actl_yr']
     try:
         df = DataFrame(wthr_sht.values, columns=wthr_cols)
-    except ValueError as err:
-        print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
-    else:
-        nmths_wthr = wthr_sht.max_row - 1
-        mess += 'weather months {} '.format(nmths_wthr)
 
-        # check subareas
+        '''
+        # check for None - TODO: seems unreliable
         # ==============
-        nmnths_subareas = {}
-        for sba in subareas:
-            sba_sht = wb_obj[sba]
-            nmnths_sba = sba_sht.max_row - 1
-            if nmnths_sba > nmths_wthr:
-                nmnths_subareas[sba] = nmnths_sba
-                ret_code = False
+        mess_null = ''
+        if not df.isnull().values.any():
+            mess += '\tNulls encountered in weather sheet'
+            ret_code = False
+        '''
+
+    except ValueError as err:
+        print(ERR_STR + 'reading run file weather sheet: ' + str(err))
+        return ret_code
+
+    # identify issues to warn user
+    # ============================
+    ret_code = True
+    warn_mess = ''
+    nmnths_wthr = wthr_sht.max_row - 1
+    mess += 'weather months {} '.format(nmnths_wthr)
+
+    # check subareas
+    # ==============
+    nmnths_subareas = {}
+    for sba in subareas:
+        sba_sht = wb_obj[sba]
+        nmnths_sba = sba_sht.max_row - 1
+        nmnths_subareas[sba] = nmnths_sba
+
+    sba_mnths = array(list(nmnths_subareas.values()))
+    if all(sba_mnths == sba_mnths[0]):
+        mess += '\tsubarea months: {}'.format(sba_mnths[0])
+        if sba_mnths[0] != nmnths_wthr:
+            warn_mess += 'different subarea and weather months'
+    else:
+        warn_mess += 'subarea sheets have inconsistent number of months: ' + str(nmnths_subareas)
 
     wb_obj.close
 
-    if ret_code:
-        mess +=  'and subareas match'
-    else:
-        mess += ERR_MESS + mess
-        mess += ' are too few for subareas: ' + str(nmnths_subareas)
-
-    '''
-    # check for None - TODO: seems unreliable
-    # ==============
-    mess_null = ''
-    if not df.isnull().values.any():
-        mess += '\tNulls encountered in weather sheet'
-        ret_code = False
-    '''
-
-    if not ret_code:
-        mess += ' - please check'
+    # add warnings
+    # ============
+    if len(warn_mess) > 0:
+        mess += ' ' + WARN_STR + warn_mess
 
     print(mess)
 
@@ -308,12 +316,9 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess += 'uncompliant'
     else:
         subareas = ret_var[0]
-        if len(subareas) == 0:
-            mess += 'present but with no subareas'
-        else:
-            if (_validate_timesteps(run_xls_fn, subareas)):
-                mess = format_sbas('Subareas: ', subareas)
-                w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
+        mess = format_sbas(subareas)
+        if (_validate_timesteps(run_xls_fn, subareas)):
+            w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
 
     return mess
 
@@ -336,37 +341,6 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     lctn_sht = wb_obj[RUN_SHT_NAMES['lctn']]
     df = DataFrame(lctn_sht.values, columns=['Attribute', 'Values'])
     lctn_var = list(df['Values'][:])
-
-    # Weather sheet can have 5 or 6 columns
-    # =====================================
-    pettmp_ss = {'precip': [], 'tair': []}
-    pettmp_fwd = {'precip': [], 'tair': []}
-
-    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
-    wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
-    if wthr_sht.max_column == 6:
-        wthr_cols += ['actl_yr']
-    try:
-        df = DataFrame(wthr_sht.values, columns = wthr_cols)
-    except ValueError as err:
-        print(ERR_MESS + 'reading run file weather sheet: ' + str(err))
-        return ret_var
-
-    iline = 1
-    for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
-        iline += 1
-        if mode is None or precip is None or tair is None:
-            print(ERR_MESS + 'null values encountered on line {} when reading run file weather sheet'.format(iline))
-            return ret_var
-
-        if mode == 'steady state':
-            pettmp_ss['precip'].append(precip)
-            pettmp_ss['tair'].append(tair)
-        else:
-            pettmp_fwd['precip'].append(precip)
-            pettmp_fwd['tair'].append(tair)
-
-    ora_weather = WeatherRelated(pettmp_ss, pettmp_fwd, latitude)  # construct weather object including degree days etc
 
     # Subareas - read subareas lookup sheet which includes soil definition
     # ====================================================================
@@ -394,7 +368,7 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
             soil_defn = {}
             for val, metric in zip([T_DEPTH] + rec[5:], SOIL_METRICS):
                 if val is None:
-                    print(ERR_MESS + 'Soil for subarea ' + sba + ' not defined in run file')
+                    print(ERR_STR + 'Soil for subarea ' + sba + ' not defined in run file')
                     return ret_var
                 else:
                     soil_defn[metric] = val
@@ -404,16 +378,79 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
             soil_for_area = Soil(soil_defn)
             ora_subareas[sba] = ReadMngmntSubareas(wb_obj, sba, soil_for_area, crop_vars, area_ha)
 
+    # Weather sheet can have 5 or 6 columns
+    # =====================================
+    pettmp_ss = {'precip': [], 'tair': []}
+    pettmp_fwd = {'precip': [], 'tair': []}
+
+    wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
+    wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
+    if wthr_sht.max_column == 6:
+        wthr_cols += ['actl_yr']
+    try:
+        df = DataFrame(wthr_sht.values, columns = wthr_cols)
+    except ValueError as err:
+        print(ERR_STR + 'reading run file weather sheet: ' + str(err))
+        return ret_var
+
+    iline = 1
+    for mode, precip, tair in zip(df['period'].values[1:], df['precip'].values[1:], df['tair'].values[1:]):
+        iline += 1
+        if mode is None or precip is None or tair is None:
+            print(ERR_STR + 'null values encountered on line {} when reading run file weather sheet'.format(iline))
+            return ret_var
+
+        if mode == 'steady state':
+            pettmp_ss['precip'].append(precip)
+            pettmp_ss['tair'].append(tair)
+        else:
+            pettmp_fwd['precip'].append(precip)
+            pettmp_fwd['tair'].append(tair)
+
+    # correct any temporal misalignment between weather and management
+    # ================================================================
+    ntsteps_fwd = ora_subareas[sba].ntsteps_fwd
+    ntsteps_wthr = len(pettmp_fwd['precip'])
+    if ntsteps_wthr != ntsteps_fwd:
+        pettmp_fwd = _sync_wthr_to_mgmt(pettmp_fwd, ntsteps_wthr, ntsteps_fwd)
+
+    ora_weather = WeatherRelated(pettmp_ss, pettmp_fwd, latitude)  # construct weather object including degree days etc
+
     wb_obj.close()
 
     # wrap up
     # =======
     if len(ora_subareas) == 0:
-        print(ERR_MESS + 'the Subareas sheet must have at least one subarea with a description - check run file')
+        print(ERR_STR + 'the Subareas sheet must have at least one subarea with a description - check run file')
     else:
         ret_var = (ora_weather, ora_subareas)
 
     return ret_var
+
+def _sync_wthr_to_mgmt(pettmp, ntsteps_wthr, ntsteps_sim):
+    '''
+    Truncate or stretch supplied weather to match length for simulation period
+    '''
+    if ntsteps_sim > ntsteps_wthr:
+        mess = 'Stretched'
+    else:
+        mess = 'Truncated'
+
+    nsim_yrs = int(ntsteps_sim / 12)
+    nwthr_yrs = int(ntsteps_wthr / 12)
+    print(mess + ' weather from {} years to match simulation period of {} years'.format(nwthr_yrs, nsim_yrs))
+
+    NPERIODS = 10
+    pettmp_sim = {}
+    for metric in pettmp:
+        pettmp_lst = []
+        for iyr in range(NPERIODS):
+            pettmp_lst += pettmp[metric]
+            if len(pettmp_lst) > ntsteps_sim:
+                pettmp_sim[metric] = pettmp_lst[:ntsteps_sim]
+                break
+
+    return pettmp_sim
 
 def _make_current_crop_list(crop_names):
     '''
@@ -545,7 +582,7 @@ class ReadMngmntSubareas(object, ):
         try:
             indx_mode = period_list.index('forward run')
         except ValueError as err:
-            print(ERR_MESS + 'bad subarea sheet ' + sba)
+            print(ERR_STR + 'bad subarea sheet ' + sba)
             return
 
         crop_names = list(df['crop_name'].values)
@@ -582,6 +619,8 @@ class ReadMngmntSubareas(object, ):
 
         self.crop_mngmnt_fwd = crop_mngmnt_fwd
         self.area_ha = area_ha
+        self.ntsteps_ss = len(crop_mngmnt_ss['crop_name'])
+        self.ntsteps_fwd = len(crop_mngmnt_fwd['crop_name'])
 
 class WeatherRelated(object, ):
 
@@ -649,7 +688,7 @@ def check_params_excel_file(params_xls_fn):
     retcode = None
 
     if not isfile(params_xls_fn):
-        print(ERR_MESS + 'Excel parameters file ' + params_xls_fn + ' must exist - check setup file')
+        print(ERR_STR + 'Excel parameters file ' + params_xls_fn + ' must exist - check setup file')
         return None
 
     print('ORATOR parameters file: ' + params_xls_fn)
@@ -657,7 +696,7 @@ def check_params_excel_file(params_xls_fn):
         wb_obj = load_workbook(params_xls_fn, data_only = True)
         sheet_names = wb_obj.sheetnames
     except (PermissionError, BadZipFile) as err:
-        print(ERR_MESS + str(err))
+        print(ERR_STR + str(err))
         return retcode
 
     wb_obj.close()
@@ -666,7 +705,7 @@ def check_params_excel_file(params_xls_fn):
     # ===================================
     for sheet in REQUIRED_SHEET_NAMES:
         if sheet not in sheet_names:
-            print(ERR_MESS + 'Required sheet ' + sheet + ' is not present - please check file')
+            print(ERR_STR + 'Required sheet ' + sheet + ' is not present - please check file')
             return retcode
 
     return 0
@@ -704,7 +743,7 @@ def _read_crop_vars(xls_fname, sheet_name):
         crop_vars = crop_dframe.to_dict()
     except ValueError as err:
 
-        print(ERR_MESS_SHEET + sheet_name + ' ' + str(err))
+        print(ERR_STR_SHEET + sheet_name + ' ' + str(err))
         return None
 
     # discard unwanted entries
@@ -746,7 +785,7 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
         ow_dframe = data.set_index(ow_parms_names)
         all_ow_parms = ow_dframe.to_dict()
     except ValueError as err:
-        print(ERR_MESS_SHEET + sheet_name + ' ' + str(err))
+        print(ERR_STR_SHEET + sheet_name + ' ' + str(err))
         all_ow_parms = None
 
     return all_ow_parms
@@ -868,7 +907,7 @@ class ReadStudy(object, ):
         # check consistency
         # =================
         if farm_name != farm:
-            print('Inconsistent farm names: ' + farm + '\tname in run file: ' + farm_name)
+            print(WARN_STR + 'Inconsistent farm names: ' + farm + '\tname in run file: ' + farm_name)
 
         study_desc = 'Study area: ' + study_area + '\t\tFarm: ' + farm_name
         study_desc += '\t\tLatitude: {}'.format(latitude)
@@ -963,7 +1002,7 @@ def read_subarea_sheet(wthr_xls, sba_indx, nyrs_rota, mngmnt_hdrs):
         return data_rows
 
     if len(data_rows[0]) < 9:
-        print(ERR_MESS_SHEET + sba_indx + ' must have at least 9 values per line')
+        print(ERR_STR_SHEET + sba_indx + ' must have at least 9 values per line')
         return None
 
     # condition data so yield, Fert N amount, OW amount and	irrigation are mapped from None to zero

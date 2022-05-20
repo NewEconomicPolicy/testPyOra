@@ -271,20 +271,6 @@ def _write_default_config_file(config_file, study_area_dir):
         dump_json(_default_config, fconfig, indent=2, sort_keys=True)
         return _default_config
 
-def _check_run_file(w_run_dir0, w_run_dir3, mgmt_dir, config_file):
-    '''
-
-    '''
-    mgmt_dir = normpath(mgmt_dir)
-    if isdir(mgmt_dir):
-        w_run_dir0.setText(mgmt_dir)
-        w_run_dir3.setText(mgmt_dir)
-    else:
-        mess = '\nManagement path: ' + mgmt_dir + ' does not exist\n\t- check configuration file ' + config_file
-        print(mess)
-
-    return mgmt_dir
-
 def read_config_file(form):
     '''
     read widget settings used in the previous programme session from the config file, if it exists,
@@ -309,6 +295,29 @@ def read_config_file(form):
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
             sys,exit(0)
+
+    mgmt_dir0 = normpath(config['mgmt_dir0'])
+    if isdir(mgmt_dir0):
+        form.w_tab_wdgt.w_run_dir0.setText(mgmt_dir0)
+        form.w_tab_wdgt.w_run_dir3.setText(mgmt_dir0)
+    else:
+        mess = '\nManagement path: ' + mgmt_dir0 + ' does not exist\n\t- check configuration file ' + config_file
+        print(ERROR_STR + mess)
+        return False
+
+    # check runfile
+    # =============
+    run_xls_fname = join(mgmt_dir0, FNAME_RUN)
+    if isfile(run_xls_fname):
+        run_fn_dscr = check_xls_run_file(form.w_tab_wdgt.w_run_model, mgmt_dir0)
+        form.w_tab_wdgt.w_run_dscr.setText(run_fn_dscr)
+    else:
+        print(WARN_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
+
+    if config['write_excel']:
+        form.w_tab_wdgt.w_make_xls.setCheckState(2)
+    else:
+        form.w_tab_wdgt.w_make_xls.setCheckState(0)
 
     # required for extra organic waste
     # ================================
@@ -338,21 +347,6 @@ def read_config_file(form):
     form.w_tab_wdgt.w_owex_max.setText(str(owex_max))
     form.w_tab_wdgt.w_combo13.setCurrentIndex(ow_type_indx)
     form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
-
-    # check runfile
-    # =============
-    mgmt_dir0 = _check_run_file(form.w_tab_wdgt.w_run_dir0, form.w_tab_wdgt.w_run_dir3,
-                                                                config['mgmt_dir0'], config_file)
-    run_xls_fname = join(mgmt_dir0, FNAME_RUN)
-    if isfile(run_xls_fname):
-        form.w_tab_wdgt.w_run_dscr.setText(check_xls_run_file(form.w_tab_wdgt.w_run_model, mgmt_dir0))
-    else:
-        print(WARN_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
-
-    if config['write_excel']:
-        form.w_tab_wdgt.w_make_xls.setCheckState(2)
-    else:
-        form.w_tab_wdgt.w_make_xls.setCheckState(0)
 
     # populate popup lists
     # ====================

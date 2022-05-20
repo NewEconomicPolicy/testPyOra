@@ -218,13 +218,16 @@ def check_mngmnt_ow(form):
 
     return mess
 
-def format_sbas(prefix, subareas, mess = ''):
+def format_sbas(subareas):
     '''
      add list of subareas to message
      '''
-    mess += prefix
-    for sba in subareas:
-        mess += sba + ', '
-    mess = mess.rstrip(', ')
+    mess = 'Subareas: '
+    if len(subareas) == 0:
+        mess += 'none'      # no subareas
+    else:
+        for sba in subareas:
+            mess += sba + ', '
+        mess = mess.rstrip(', ')
 
     return mess

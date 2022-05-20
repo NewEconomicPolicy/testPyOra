@@ -230,13 +230,18 @@ class AllTabs(QTabWidget):
         view Excel economics file
         '''
         mgmt_dir = self.w_run_dir0.text()
-        econ_xls_fn = normpath(join(mgmt_dir, FNAME_ECON))
-        if not isfile(econ_xls_fn):
-            copyfile(self.settings['econ_xls_fn'], econ_xls_fn)
-            print('Copied economics Excel file ' + econ_xls_fn + ' from templates')
+        econ_xls_fname = normpath(join(mgmt_dir, FNAME_ECON))
+        if not isfile(econ_xls_fname):
+            try:
+                copyfile(self.settings['econ_xls_fn'], econ_xls_fname)
+            except FileNotFoundError as err:
+                print(err)
+                return -1
+            else:
+                print('Copied economics Excel file ' + FNAME_ECON + ' from templates directory ')
 
         excel_path = self.settings['excel_path']
-        Popen(list([excel_path, econ_xls_fn]), stdout = DEVNULL)
+        Popen(list([excel_path, econ_xls_fname]), stdout = DEVNULL)
 
     def viewRunFile0(self):
         '''
@@ -352,7 +357,8 @@ class AllTabs(QTabWidget):
             post_sbas_detail(self, run_xls_fn)
 
             mgmt_dir, dum = split(run_xls_fn)
-            self.w_run_dscr.setText(check_xls_run_file(self.w_run_model, mgmt_dir))
+            run_fn_dscr = check_xls_run_file(self.w_run_model, mgmt_dir)
+            self.w_run_dscr.setText(run_fn_dscr)
             self.w_disp1_c.setEnabled(False)
             self.w_disp1_n.setEnabled(False)
             self.w_disp1_w.setEnabled(False)

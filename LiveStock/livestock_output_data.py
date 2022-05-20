@@ -147,7 +147,6 @@ def calc_livestock_data(form):
     # read sheets from input Excel workbook
     # =====================================
     print('Loading: ' + xls_inp_fname)
-    study = ReadStudy(form.w_run_dir3.text(), xls_inp_fname, form.settings['out_dir'])
     ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     out_dir = form.settings['out_dir']
     Path(out_dir + "/Livestock/Graphs").mkdir(parents = True, exist_ok = True)
@@ -228,7 +227,7 @@ def calc_livestock_data(form):
             calc_method_dic.update(calc_dic)
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
-    print('livestock calcs completed')
+    print('Livestock calcs completed')
 
     form.total_an_prod_all_subareas = total_an_prod_all_subareas
 

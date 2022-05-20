@@ -249,7 +249,7 @@ def post_farm_detail(form):
             print(ERROR_STR + ' check ' + farm_wthr_fname)
         else:
             subareas, sub_distr, dum, lat, lon, area, prnct, farm_desc, farm_system, region = farm_vars
-            form.w_lbl_sbas.setText(format_sbas('Subareas: ', subareas))
+            form.w_lbl_sbas.setText(format_sbas(subareas))
             form.w_farm_desc.setText(farm_desc)
             form.w_prcnt.setText(str(prnct))
             form.w_subdist.setText(sub_distr)

@@ -18,12 +18,12 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from os.path import isfile, isdir, split, normpath, join
+from os.path import isfile, normpath, join
+from shutil import copyfile
 import numpy
 from scipy.stats import norm
 
 from ora_excel_read import read_econ_purch_sales_sheet, read_econ_labour_sheet
-from ora_cn_classes import EconoLvstckModel
 
 FNAME_ECONOMICS = 'PurchasesSalesLabour.xlsx'
 WARN_STR = '*** Warning *** '
@@ -177,8 +177,13 @@ def test_economics_algorithms(form):
     mgmt_dir = form.w_run_dir3.text()
     econ_xls_fname = normpath(join(mgmt_dir, FNAME_ECONOMICS))
     if not isfile(econ_xls_fname):
-        print(WARN_STR + 'Excel economics file ' + econ_xls_fname + ' does not exist')
-        return -1
+        try:
+            copyfile(form.settings['econ_xls_fn'], econ_xls_fname)
+        except FileNotFoundError as err:
+            print(err)
+            return -1
+        else:
+            print('Copied economics Excel file ' + FNAME_ECONOMICS + ' from templates')
 
     purch_sales_df = read_econ_purch_sales_sheet(econ_xls_fname, 'Purchases & Sales', 3)
     purch_sales_df = purch_sales_df.drop(columns=['Units.2','Units.3', 'Units.4', 'Units.5', 'Units.6', 'Units.7',
@@ -542,5 +547,5 @@ def test_economics_algorithms(form):
 
     form.all_farm_livestock_production = economics_GUI_class
 
-    print('Economics Calcs completed')
+    print('Economics calcs completed')
     return
