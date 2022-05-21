@@ -62,7 +62,7 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     indx += 1
     return indx, 0, 0, yld_ann_typ, yld_ann_n_lim       # resets cummulated nitrogen uptakes to zero
 
-class EconoLvstckModel(object, ):
+class LivestockModel(object, ):
     '''
     dummy object
     '''
@@ -70,16 +70,36 @@ class EconoLvstckModel(object, ):
         '''
         construct a crop model object suitable for livestock model
         '''
-        self.title = 'EconoLvstckModel'
+        self.title = 'LivestockModel'
         self.data = {}
 
-        var_name_list = list(['full_hh_income_n_lim',
-                              'dairy_cat_n_excrete_nlim','dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
+        var_name_list = list(['dairy_cat_n_excrete_nlim','dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
                               'dairy_cat_manure_prod_nlim', 'beef_cat_n_excrete_nlim', 'beef_cat_meat_prod_nlim',
                               'beef_cat_manure_prod_nlim', 'goats_sheep_n_excrete_nlim', 'goats_sheep_milk_prod_nlim',
                               'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim', 'poultry_n_excrete_nlim',
                               'poultry_eggs_prod_nlim', 'poultry_meat_prod_nlim', 'poultry_manure_prod_nlim',
-                              'pigs_n_excrete_nlim', 'pigs_meat_prod_nlim', 'pigs_manure_prod_nlim',
+                              'pigs_n_excrete_nlim', 'pigs_meat_prod_nlim', 'pigs_manure_prod_nlim'])
+
+        for var_name in var_name_list:
+            self.data[var_name] = []
+
+        self.var_name_list = var_name_list
+
+        if complete_run is not None:
+            self.area_ha = area_ha
+
+class EconomicsModel(object, ):
+    '''
+    dummy object
+    '''
+    def __init__(self, complete_run = None, area_ha = None):
+        '''
+        construct a crop model object suitable for livestock model
+        '''
+        self.title = 'LivestockModel'
+        self.data = {}
+
+        var_name_list = list(['full_hh_income_n_lim',
                               'per_capita_consumption_n_lim', 'relative_food_insecurity_n_lim',
                               'dietary_diversity_n_lim'])
 

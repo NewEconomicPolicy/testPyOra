@@ -20,7 +20,7 @@ from ora_excel_read import ReadAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
 from merge_data import merge_harvest_land_use
 from livestock_class import Livestock
-from ora_cn_classes import EconoLvstckModel
+from ora_cn_classes import LivestockModel
 from ora_gui_misc_fns import simulation_yrs_validate
 
 
@@ -257,7 +257,7 @@ def calc_livestock_data(form):
                 full_farm_livestock_production.update({man_type:temp_dic})
 
     # Format data to class object so it can be used in GUI charts. Only do for N Lim, although output data for all
-    livestock_GUI_class = EconoLvstckModel()
+    livestock_GUI_class = LivestockModel()
     form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
 
     for calc_method, livestock in full_farm_livestock_production.items():
@@ -327,6 +327,7 @@ def calc_livestock_data(form):
     form.all_farm_livestock_production = {'full_farm' : livestock_GUI_class}
 
     form.w_disp_econ.setEnabled(True)
+    form.w_disp_lvstck.setEnabled(True)
 
     return
 

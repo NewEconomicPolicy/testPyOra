@@ -35,7 +35,7 @@ from weather_datasets import read_weather_dsets_detail
 from set_up_logging import set_up_logging
 from ora_excel_read import check_params_excel_file, check_xls_run_file, \
                                                                 ReadStudy, ReadCropOwNitrogenParms, ReadAnmlProdn
-from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, EconoLvstckModel
+from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, LivestockModel, EconomicsModel
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 from ora_gui_misc_fns import simulation_yrs_validate
@@ -374,10 +374,15 @@ def read_config_file(form):
     for display_name in display_names:
         form.w_tab_wdgt.w_combo10.addItem(display_name)
 
-    econ_model = EconoLvstckModel()
-    display_names = fetch_display_names_from_metrics(lookup_df, econ_model)
+    lvstck_model = LivestockModel()
+    display_names = fetch_display_names_from_metrics(lookup_df, lvstck_model)
     for display_name in display_names:
         form.w_tab_wdgt.w_combo11.addItem(display_name)
+
+    econ_model = EconomicsModel()
+    display_names = fetch_display_names_from_metrics(lookup_df, econ_model)
+    for display_name in display_names:
+        form.w_tab_wdgt.w_combo12.addItem(display_name)
 
     # enable users to view outputs from previous run
     # ==============================================

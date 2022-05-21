@@ -311,7 +311,7 @@ def _select_data_for_display(form, category, metric, sba, recalc_flag):
             elif category == 'crop_model':
                 all_runs_output = form.all_runs_crop_model
             elif category == 'economics':
-                all_runs_output = form.economics_calcs
+                all_runs_output = form.all_farm_livestock_production
         else:
             if recalc_flag:
                 # instead of subareas use increments

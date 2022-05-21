@@ -76,18 +76,21 @@ class AllTabs(QTabWidget):
         self.w_tab2 = QWidget()
         self.w_tab3 = QWidget()
         self.w_tab4 = QWidget()
+        self.w_tab5 = QWidget()
 
         self.addTab(self.w_tab0, "Tab 0")
         self.addTab(self.w_tab1, "Tab 1")
         self.addTab(self.w_tab2, "Tab 2")
         self.addTab(self.w_tab3, "Tab 3")
         self.addTab(self.w_tab4, "Tab 4")
+        self.addTab(self.w_tab5, "Tab 5")
 
         self.tab0UI()
         self.tab1UI()
         self.tab2UI()
         self.tab3UI()
         self.tab4UI()
+        self.tab5UI()
 
     # ================================ end of AllTabs =========================
 
@@ -363,6 +366,7 @@ class AllTabs(QTabWidget):
             self.w_disp1_n.setEnabled(False)
             self.w_disp1_w.setEnabled(False)
             self.w_disp_cm.setEnabled(False)
+            self.w_disp_lvstck.setEnabled(False)
             self.w_disp_econ.setEnabled(False)
             self.w_recalc.setEnabled(False)
             self.w_disp_out.setEnabled(False)
@@ -856,18 +860,34 @@ class AllTabs(QTabWidget):
         # Livestock
         # ==========
         irow += 1
-        w_disp_econ = QPushButton('Livestock, Economics')
-        helpText = 'Display Livestock and Economics related charts'
-        w_disp_econ.setToolTip(helpText)
-        w_disp_econ.clicked.connect(lambda: self.displayMetric(self.w_combo11, 'livestock'))
-        w_disp_econ.setEnabled(False)
-        self.w_disp_econ = w_disp_econ
-        grid.addWidget(w_disp_econ, irow, 0)
+        w_disp_lvstck = QPushButton('Livestock')
+        helpText = 'Display Livestock related charts'
+        w_disp_lvstck.setToolTip(helpText)
+        w_disp_lvstck.clicked.connect(lambda: self.displayMetric(self.w_combo11, 'livestock'))
+        w_disp_lvstck.setEnabled(False)
+        self.w_disp_lvstck = w_disp_lvstck
+        grid.addWidget(w_disp_lvstck, irow, 0)
 
         w_combo11 = QComboBox()
         w_combo11.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo11))
         self.w_combo11 = w_combo11
         grid.addWidget(w_combo11, irow, 1, 1, 2)
+
+        # Livestock
+        # ==========
+        irow += 1
+        w_disp_econ = QPushButton('Economics')
+        helpText = 'Display Economics related charts'
+        w_disp_econ.setToolTip(helpText)
+        w_disp_econ.clicked.connect(lambda: self.displayMetric(self.w_combo12, 'economics'))
+        w_disp_econ.setEnabled(False)
+        self.w_disp_econ = w_disp_econ
+        grid.addWidget(w_disp_econ, irow, 0)
+
+        w_combo12 = QComboBox()
+        w_combo12.currentIndexChanged[str].connect(lambda: self.changeHelpText(self.w_combo12))
+        self.w_combo12 = w_combo12
+        grid.addWidget(w_combo12, irow, 1, 1, 2)
 
         irow += 1
         grid.addWidget(QLabel(), irow, 0)  # spacer
@@ -1223,3 +1243,53 @@ class AllTabs(QTabWidget):
         pass
 
     # ================================ end of tab4UI =========================
+
+    def tab5UI(self):
+        '''
+        tab for catchment
+        creates these QComboBox names:
+
+        '''
+        grid = QGridLayout()    # define layout
+        grid.setSpacing(10)
+
+        # extra organic waste
+        # ===================
+        irow = 0
+        irow += 1
+        grid.addWidget(QLabel(), irow, 0)  # spacer
+
+        irow += 1
+        grid.addWidget(QLabel(), irow, 0)  # spacer
+
+        ntab = 5
+        self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
+
+        self.setTabText(ntab,'Catchment')
+        self.w_tab5.setLayout(grid)
+
+    def recalcClicked(self):
+        '''
+
+        '''
+        recalc_runs_fwd = recalc_fwd_soil_cn(self)
+        if recalc_runs_fwd is None:
+            self.w_disp2_c.setEnabled(False)
+            self.w_disp2_n.setEnabled(False)
+            self.w_disp2_w.setEnabled(False)
+        else:
+            self.w_disp2_c.setEnabled(True)
+            self.w_disp2_n.setEnabled(True)
+            self.w_disp2_w.setEnabled(True)
+
+        self.recalc_runs_fwd = recalc_runs_fwd
+
+        return
+
+    def displayFwdRunsClicked(self):
+
+        func_name =  __prog__ + ' createFileClicked'
+
+        pass
+
+    # ================================ end of tab5UI =========================
