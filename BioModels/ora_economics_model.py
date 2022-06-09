@@ -385,21 +385,21 @@ def test_economics_algorithms(form):
 
     # Alpha values for PCC
     # Intercept
-    alpha_0 = 9.194
+    pcc_alpha_0 = 9.194
     # Full Household income
-    alpha_1 = 0.0154
+    pcc_alpha_1 = 0.0154
     # Land
-    alpha_2 = 0.0351
+    pcc_alpha_2 = 0.0351
     # Land squared
-    alpha_3 = -0.0000816
+    pcc_alpha_3 = -0.0000816
     # Total land utilised
-    alpha_4 = 0.0211
+    pcc_alpha_4 = 0.0211
     # Total land utilised squared
-    alpha_5 = -0.000396
+    pcc_alpha_5 = -0.000396
     # Log - Household size adult equivalents
-    alpha_6 = -0.399
+    pcc_alpha_6 = -0.399
     # Regional price index
-    alpha_7 = 1
+    pcc_alpha_7 = 1
 
     # Use Full Household income for each year for each calc method to calculate yearly PCC
     farm_pcc = {}
@@ -407,8 +407,9 @@ def test_economics_algorithms(form):
         fr_pcc = []
         for year in calcs:
                 # year is FHI for each year
-            year_pcc = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
-                        (alpha_4 * tlu) + (alpha_5 * tlu_squared) + (alpha_6 * household_size_log) + alpha_7
+            year_pcc = pcc_alpha_0 + (pcc_alpha_1 * year) + (pcc_alpha_2 * land) + (pcc_alpha_3 * land_squared) + \
+                        (pcc_alpha_4 * tlu) + (pcc_alpha_5 * tlu_squared) + (pcc_alpha_6 * household_size_log) +\
+                       pcc_alpha_7
             fr_pcc.append(year_pcc)
         farm_pcc.update({calc_method : fr_pcc})
 #    farm_pcc = farm_pcc
@@ -419,23 +420,23 @@ def test_economics_algorithms(form):
 
     # Alpha values for RFI
     # Intercept
-    alpha_0 = -1.782
+    rfi_alpha_0 = -1.782
     # Full Household income
-    alpha_1 = -0.0333
+    rfi_alpha_1 = -0.0333
     # Land
-    alpha_2 = -0.102
+    rfi_alpha_2 = -0.102
     # Land squared
-    alpha_3 = 0.000222
+    rfi_alpha_3 = 0.000222
     # Total land utilised
-    alpha_4 = -0.008400
+    rfi_alpha_4 = -0.008400
     # Total land utilised squared
     # NO DATA SO REMOVED FROM EQUATION
-    # alpha_5 = 000000000000000000000000
+    rfi_alpha_5 = 0
     # Log - Household size adult equivalents
-    alpha_6 = 0.802
+    rfi_alpha_6 = 0.802
     # Regional price index
     # CHECK!!!!
-    alpha_7 = 1
+    rfi_alpha_7 = 1
 
     # Use Full Household income for each year for each calc method to calculate yearly relative food insecurity
     farm_rfi = {}
@@ -443,8 +444,8 @@ def test_economics_algorithms(form):
         fr_rfi = []
         for year in calcs:
                 # year is FHI for each year
-            year_rfi = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
-                        (alpha_4 * tlu) + (alpha_6 * household_size_log) + alpha_7
+            year_rfi = rfi_alpha_0 + (rfi_alpha_1 * year) + (rfi_alpha_2 * land) + (rfi_alpha_3 * land_squared) + \
+                        (rfi_alpha_4 * tlu) + (rfi_alpha_6 * household_size_log) + rfi_alpha_7
             # Calculate probit to return value between 0 and 1
             year_rfi = norm.cdf(year_rfi)
             fr_rfi.append(year_rfi)
@@ -458,22 +459,22 @@ def test_economics_algorithms(form):
 
     # Alpha values for Dietary Diversity
     # Intercept
-    alpha_0 = 1.782
+    dd_alpha_0 = 1.782
     # Full Household income
-    alpha_1 = 0.000182
+    dd_alpha_1 = 0.000182
     # Land
-    alpha_2 = 0.00718
+    dd_alpha_2 = 0.00718
     # Land squared
-    alpha_3 = -0.0000185
+    dd_alpha_3 = -0.0000185
     # Total land utilised
-    alpha_4 = 0.00544
+    dd_alpha_4 = 0.00544
     # Agriculutrual Diversity (Number of crops)
-    alpha_5 = 0.0269
+    dd_alpha_5 = 0.0269
     # Log - Household size adult equivalents
-    alpha_6 = 0.0784
+    dd_alpha_6 = 0.0784
     # Regional price index
     # CHECK!!!!
-    alpha_7 = 1
+    dd_alpha_7 = 1
 
     # Number of crops grown by household in year
     # Bug in crop model so this is hard coded for now
@@ -490,8 +491,9 @@ def test_economics_algorithms(form):
         diet_div = []
         for year in calcs:
             # year is FHI for each year
-            year_dd = alpha_0 + (alpha_1 * year) + (alpha_2 * land) + (alpha_3 * land_squared) + \
-                        (alpha_4 * tlu) + (alpha_5 * number_of_crops) + (alpha_6 * household_size_log) + alpha_7
+            year_dd = dd_alpha_0 + (dd_alpha_1 * year) + (dd_alpha_2 * land) + (dd_alpha_3 * land_squared) + \
+                        (dd_alpha_4 * tlu) + (dd_alpha_5 * number_of_crops) + (dd_alpha_6 * household_size_log) + \
+                      dd_alpha_7
             diet_div.append(year_dd)
         farm_diet_div.update({calc_method: diet_div})
 
