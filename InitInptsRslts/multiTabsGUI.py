@@ -16,6 +16,7 @@ __author__ = 's03mm5'
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
                                             QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
+from PyQt5.QtGui import QPixmap, QFont
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, isfile, split
 
@@ -1253,6 +1254,11 @@ class AllTabs(QTabWidget):
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
 
+        font = QFont(self.font())
+
+        font.setPointSize(font.pointSize() + 2)
+        self.setFont(font)
+
         # extra organic waste
         # ===================
         irow = 0
@@ -1260,6 +1266,15 @@ class AllTabs(QTabWidget):
         grid.addWidget(QLabel(), irow, 0)  # spacer
 
         irow += 1
+        functional_spec = 'This would take in the type of intervention (eg exclosure, ditches etc (other soil water\n'\
+                ' conservation measures). We would need a sub-model to simulate deposition or runoff\n'\
+                'of soils / water and how those are reduced by the presence of the intervention and the distance\n'\
+                          'and slope between the farm area and the intervention.'
+        w_func_spec = QLabel(functional_spec)
+        w_func_spec.setStyleSheet('font: bold 10.5pt Courier')  # big jump to 11pt
+        grid.addWidget(w_func_spec, irow, 0, 2, 2)
+
+        irow += 2
         grid.addWidget(QLabel(), irow, 0)  # spacer
 
         ntab = 5
@@ -1267,29 +1282,5 @@ class AllTabs(QTabWidget):
 
         self.setTabText(ntab,'Catchment')
         self.w_tab5.setLayout(grid)
-
-    def recalcClicked(self):
-        '''
-
-        '''
-        recalc_runs_fwd = recalc_fwd_soil_cn(self)
-        if recalc_runs_fwd is None:
-            self.w_disp2_c.setEnabled(False)
-            self.w_disp2_n.setEnabled(False)
-            self.w_disp2_w.setEnabled(False)
-        else:
-            self.w_disp2_c.setEnabled(True)
-            self.w_disp2_n.setEnabled(True)
-            self.w_disp2_w.setEnabled(True)
-
-        self.recalc_runs_fwd = recalc_runs_fwd
-
-        return
-
-    def displayFwdRunsClicked(self):
-
-        func_name =  __prog__ + ' createFileClicked'
-
-        pass
 
     # ================================ end of tab5UI =========================

@@ -171,7 +171,21 @@ class Form(QWidget):
 def main():
     '''
     program entry point
+    The splash screen is controlled from within Python by the pyi_splash module, which can be imported at runtime.
+    This module cannot be installed by a package manager because it is part of PyInstaller and is included as needed.
     '''
+    try:
+        import pyi_splash
+
+        # Update the text on the splash screen
+        # ====================================
+        pyi_splash.update_text("Loading PyOratorGUI exe file - this may take some seconds...")
+
+        # the splash screen remains open until this function is called or the Python program is terminated.
+        pyi_splash.close()
+    except:
+        pass
+
     app = QApplication(sys.argv)  # create QApplication object
     form = Form() # instantiate form
     # display the GUI and start the event loop if we're not running batch mode

@@ -858,18 +858,22 @@ def read_farm_wthr_xls_file(run_xls_fn):
         if sht in oraId().SUBAREAS:
             subareas.append(sht)
 
-    subareas.sort()     # returns null value
-    ret_var = list([subareas])
-
-    rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
-    if rqrd_sheet in wb_obj.sheetnames:
-        farm_sht = wb_obj[rqrd_sheet]
-        df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
-        ret_var += list(df['Values'][1:])
-        ret_var = _make_retvar_safe(ret_var)
-    else:
-        print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
+    if len(subareas) == 0:
+        print(ERR_STR + 'Uncompliant run file ' + run_xls_fn + ' - must have at least one subarea sheet e.g. B')
         ret_var = None
+    else:
+        subareas.sort()     # returns null value
+        ret_var = list([subareas])
+
+        rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
+        if rqrd_sheet in wb_obj.sheetnames:
+            farm_sht = wb_obj[rqrd_sheet]
+            df = DataFrame(farm_sht.values, columns=['Attribute', 'Values'])
+            ret_var += list(df['Values'][1:])
+            ret_var = _make_retvar_safe(ret_var)
+        else:
+            print('Sheet ' + rqrd_sheet + ' not present in ' + run_xls_fn)
+            ret_var = None
 
     wb_obj.close()
 

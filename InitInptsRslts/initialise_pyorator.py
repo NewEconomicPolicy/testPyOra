@@ -39,7 +39,7 @@ from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, LivestockMod
 from ora_water_model import  SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 from ora_gui_misc_fns import simulation_yrs_validate
-from ora_wthr_misc_fns import read_csv_wthr_file
+from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 
 PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
@@ -448,6 +448,9 @@ def read_config_file(form):
     if 'csv_wthr_fn' in config:
         form.w_tab_wdgt.w_csv_fn.setText(config['csv_wthr_fn'])
         dum, dum = read_csv_wthr_file(config['csv_wthr_fn'], form.w_tab_wdgt.w_csv_dscr)
+
+    prod_system = form.w_tab_wdgt.w_systems.currentText()
+    form.w_tab_wdgt.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
 
     return True
 
