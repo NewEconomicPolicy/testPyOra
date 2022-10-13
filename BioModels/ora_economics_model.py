@@ -179,7 +179,7 @@ def test_economics_algorithms(form):
     if not isfile(econ_xls_fname):
         try:
             copyfile(form.settings['econ_xls_fn'], econ_xls_fname)
-        except FileNotFoundError as err:
+        except (FileNotFoundError, KeyError) as err:
             print(err)
             return -1
         else:
