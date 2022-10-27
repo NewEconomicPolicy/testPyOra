@@ -1,0 +1,7 @@
+{
+  "inp_xls": "E:\\ORATOR\\inputs\\ORATOR_inputs.xlsx",
+  "mgmt_dir": "E:\\ORATOR\\management\\Gondar",
+  "out_dir": "F:\\Orator",
+  "use_json": true,
+  "write_excel": true
+}
