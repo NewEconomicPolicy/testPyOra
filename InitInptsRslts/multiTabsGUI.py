@@ -14,7 +14,7 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
+from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QStyle, QGridLayout, QLineEdit, QMessageBox, \
                                             QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
 from PyQt5.QtGui import QPixmap, QFont
 from subprocess import Popen, DEVNULL
@@ -208,11 +208,20 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_chk_farm, irow, 2)
         self.w_chk_farm = w_chk_farm
 
+        # Arkan: will try to make check button to show if columns have equal numbers
+        chk_farm_icon = QPushButton()
+        helpText = 'Not yet completed'
+        chk_farm_icon.setToolTip(helpText)
+        logo = getattr(QStyle, 'SP_DialogApplyButton')
+        chk_farm_icon.setIcon(self.style().standardIcon(logo))
+        grid.addWidget(chk_farm_icon, irow, 3)
+        self.chk_farm_icon = chk_farm_icon
+
         w_chk_lvstck = QPushButton('Check livestock sheet')
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
         w_chk_lvstck.setToolTip(helpText)
         w_chk_lvstck.clicked.connect(self.checkLvstck)
-        grid.addWidget(w_chk_lvstck, irow, 3, 1, 2)
+        grid.addWidget(w_chk_lvstck, irow, 5, 1, 2)
         self.w_chk_lvstck = w_chk_lvstck
 
         ntab = 0

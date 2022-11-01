@@ -1,8 +1,18 @@
 {
   "setup": {
-    "config_dir": "E:\\ORATOR\\config",
-    "fname_png": "G:\\PyOraDev\\testPyOra\\OratorRun\\Images\\orator_logo.png",
-	"fname_lookup": "G:\\PyOraDev\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx",
-    "log_dir": "E:\\ORATOR\\logs"
+	"areas_dflt": 1,
+    "config_dir": "D:\\PyOrator\\config",
+    "fname_png": "D:\\Pyorator\\Images\\Tree_of_life.PNG",
+    "log_dir": "D:\\Pyorator\\logs",
+    "wthr_dir": "D:\\Pyorator\\GlobalEcosseData\\",
+    "fname_lookup": "D:\\Pyorator\\lookup\\Orator variables lookup table.xlsx",
+    "excel_dir": "C:\\Program Files\\Microsoft Office\\root\\Office16",
+    "params_xls": "D:\\Pyorator\\params\\ORATOR_parameters.xlsx",
+	"hwsd_dir": "D:\\Pyorator\\GlobalEcosseData\\HWSD_NEW",
+	"irrig_dflt": 0,
+	"nrota_yrs_dflt": 1,
+	"nsubareas": 8,
+	"study_area_dir": "D:\\Pyorator\\study_areas"
+
   }
 }
