@@ -14,8 +14,5 @@
   "study": "Dummy (IND)",
   "use_csv": false,
   "use_isda": false,
-  "write_excel": false,
-
-  "key": "value",
-  "comments": "For some reason, when running testpyorator, HWSD is not detected"
+  "write_excel": false
 }

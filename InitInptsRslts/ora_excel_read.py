@@ -231,7 +231,7 @@ def _validate_timesteps(run_xls_fn, subareas):
     # ==========================
     wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
     wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
-    if wthr_sht.max_column == 6:
+    if wthr_sht.max_column == 6:                                      # Arkan: where does .max_column property come from? (which library, cannot find online)
         wthr_cols += ['actl_yr']
     try:
         df = DataFrame(wthr_sht.values, columns=wthr_cols)
@@ -258,6 +258,7 @@ def _validate_timesteps(run_xls_fn, subareas):
 
     # check subareas
     # ==============
+    check0 = True
     nmnths_subareas = {}
     for sba in subareas:
         sba_sht = wb_obj[sba]
@@ -269,6 +270,7 @@ def _validate_timesteps(run_xls_fn, subareas):
         mess += '\tsubarea months: {}'.format(sba_mnths[0])
         if sba_mnths[0] != nmnths_wthr:
             warn_mess += 'different subarea and weather months'
+            check0 = False
     else:
         warn_mess += 'subarea sheets have inconsistent number of months: ' + str(nmnths_subareas)
 
@@ -281,7 +283,7 @@ def _validate_timesteps(run_xls_fn, subareas):
 
     print(mess)
 
-    return ret_code
+    return (ret_code, check0)
 
 def check_xls_run_file(w_run_model, mgmt_dir):
     '''
@@ -311,16 +313,19 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess += 'uncompliant'
         return mess
 
+    check1 = False
     ret_var = read_farm_wthr_xls_file(run_xls_fn)
     if ret_var is None:
         mess += 'uncompliant'
     else:
         subareas = ret_var[0]
         mess = format_sbas(subareas)
-        if (_validate_timesteps(run_xls_fn, subareas)):
+        if (_validate_timesteps(run_xls_fn, subareas)[0]):
             w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
+        if (_validate_timesteps(run_xls_fn, subareas)[1]):
+            check1 = True
 
-    return mess
+    return (mess, check1)
 
 def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     '''

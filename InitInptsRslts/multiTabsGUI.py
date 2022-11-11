@@ -19,12 +19,14 @@ from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QStyle, QG
 from PyQt5.QtGui import QPixmap, QFont
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, isfile, split
+from openpyxl import load_workbook
+from numpy import array
 
 from shutil import rmtree, copyfile
 # from ora_classes_excel_write import pyoraId as oraId
 
 from climateGui import climate_gui
-from farm_detailGui import farm_detail_gui, repopulate_farms_dropdown, post_farm_detail, post_sbas_detail, post_sbas_hdrs
+from farm_detailGui import farm_detail_gui, repopulate_farms_dropdown, post_farm_detail, post_sbas_detail, post_sbas_hdrs 
 from ora_excel_read_misc import identify_farms_for_study, clear_farm_fields, check_sheets_for_farms, validate_farm_var_fields
 from ora_utils_write_farm_sheets import make_or_update_farm
 
@@ -32,7 +34,7 @@ from ora_low_level_fns import gui_optimisation_cycle
 from ora_economics_model import test_economics_algorithms
 from livestock_output_data import calc_livestock_data, check_livestock_run_data
 from ora_cn_model import run_soil_cn_algorithms, recalc_fwd_soil_cn
-from ora_excel_read import check_xls_run_file, ReadStudy
+from ora_excel_read import check_xls_run_file, ReadStudy, _validate_timesteps
 from ora_gui_misc_fns import disp_ow_parms, check_mngmnt_ow
 from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 from display_gui_charts import display_metric
@@ -209,13 +211,23 @@ class AllTabs(QTabWidget):
         self.w_chk_farm = w_chk_farm
 
         # Arkan: will try to make check button to show if columns have equal numbers
+        
         chk_farm_icon = QPushButton()
-        helpText = 'Not yet completed'
+        run_xls_fn = post_farm_detail(self)
+        mgmt_dir, dum = split(run_xls_fn)
+        
+        if (check_xls_run_file(self.w_run_model, mgmt_dir)[1]):
+            helpText = 'Weather and subarea months are equal'
+            logo = getattr(QStyle, 'SP_DialogApplyButton')
+        else:
+            helpText = 'Weather and subarea months are NOT equal'
+            logo = getattr(QStyle, 'SP_DialogCancelButton')
+
         chk_farm_icon.setToolTip(helpText)
-        logo = getattr(QStyle, 'SP_DialogApplyButton')
         chk_farm_icon.setIcon(self.style().standardIcon(logo))
         grid.addWidget(chk_farm_icon, irow, 3)
         self.chk_farm_icon = chk_farm_icon
+
 
         w_chk_lvstck = QPushButton('Check livestock sheet')
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
@@ -370,7 +382,7 @@ class AllTabs(QTabWidget):
             post_sbas_detail(self, run_xls_fn)
 
             mgmt_dir, dum = split(run_xls_fn)
-            run_fn_dscr = check_xls_run_file(self.w_run_model, mgmt_dir)
+            run_fn_dscr = check_xls_run_file(self.w_run_model, mgmt_dir)[0]
             self.w_run_dscr.setText(run_fn_dscr)
             self.w_disp1_c.setEnabled(False)
             self.w_disp1_n.setEnabled(False)
