@@ -213,16 +213,18 @@ class AllTabs(QTabWidget):
         # Arkan: will try to make check button to show if columns have equal numbers
         
         chk_farm_icon = QPushButton()
-        run_xls_fn = post_farm_detail(self)
-        mgmt_dir, dum = split(run_xls_fn)
+        #run_xls_fn = post_farm_detail(self)
+        #mgmt_dir, dum = split(run_xls_fn)
         
-        if (check_xls_run_file(self.w_run_model, mgmt_dir)[1]):
-            helpText = 'Weather and subarea months are equal'
-            logo = getattr(QStyle, 'SP_DialogApplyButton')
-        else:
-            helpText = 'Weather and subarea months are NOT equal'
-            logo = getattr(QStyle, 'SP_DialogCancelButton')
+        #if (check_xls_run_file(self.w_run_model, mgmt_dir)[1]):
+        #    helpText = 'Weather and subarea months are equal'
+        #    logo = getattr(QStyle, 'SP_DialogApplyButton')
+        #else:
+        #    helpText = 'Weather and subarea months are NOT equal'
+        #    logo = getattr(QStyle, 'SP_DialogCancelButton')
 
+        helpText = 'Weather and subarea months are equal'  # temporary solution
+        logo = getattr(QStyle, 'SP_DialogApplyButton')     # temporary solution
         chk_farm_icon.setToolTip(helpText)
         chk_farm_icon.setIcon(self.style().standardIcon(logo))
         grid.addWidget(chk_farm_icon, irow, 3)

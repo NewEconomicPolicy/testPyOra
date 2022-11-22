@@ -309,7 +309,7 @@ def read_config_file(form):
     # =============
     run_xls_fname = join(mgmt_dir0, FNAME_RUN)
     if isfile(run_xls_fname):
-        run_fn_dscr = check_xls_run_file(form.w_tab_wdgt.w_run_model, mgmt_dir0)[0]
+        run_fn_dscr = check_xls_run_file(form.w_tab_wdgt.w_run_model, mgmt_dir0)
         form.w_tab_wdgt.w_run_dscr.setText(run_fn_dscr)
     else:
         print(WARN_STR + '\nRun file ' + run_xls_fname + ' does not exist\n\t- select another management path')
