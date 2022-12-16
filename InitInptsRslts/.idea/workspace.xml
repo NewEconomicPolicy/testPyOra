@@ -19,13 +19,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="corrected bug whereby program falls over if run file has no subarea sheets">
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyOratorGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyOratorGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../OratorRun/Images/man_on_unicycle.PNG" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,7 +169,14 @@
       <option name="project" value="LOCAL" />
       <updated>1653117893811</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="corrected bug whereby program falls over if run file has no subarea sheets">
+      <created>1655454898475</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1655454898475</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -200,86 +204,50 @@
     <MESSAGE value="1) modified function linked to the ‘View Economics’ push button so that default PurchasesSalesLabour Excel file is copied to farm run directory&#10;2) Clear data push button added to Livestock tab.&#10;3) Addressed condition where a subarea is present in the farm run file  but has no description in the Subareas sheet." />
     <MESSAGE value="Addressed situation where a subarea management has a diffrent temporal length compared with weather." />
     <MESSAGE value="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab" />
-    <option name="LAST_COMMIT_MESSAGE" value="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab" />
+    <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected bug whereby program falls over if run file has no subarea sheets" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2356" y="290" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1648968584861">
+    <state x="2319" y="163" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1669648461342">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2356" y="290" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1648968584861" />
-    <state x="2602" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1649052500046">
+    <state x="2319" y="163" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1669648461342" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.bottom" timestamp="1671173059806">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2602" y="269" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1649052500046" />
-    <state x="2654" y="258" key="FileChooserDialogImpl" timestamp="1646824276856">
+    <state width="1046" height="1808" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173059806" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.center" timestamp="1671173059805">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2654" y="258" key="FileChooserDialogImpl/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1646824276856" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.bottom" timestamp="1655452980879">
+    <state width="1046" height="1808" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173059805" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.left" timestamp="1671173059804">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961040911" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452980879" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.center" timestamp="1655452980879">
+    <state width="1046" height="1808" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173059804" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.right" timestamp="1671173059805">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961040911" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452980879" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.left" timestamp="1655452980879">
+    <state width="1046" height="1808" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173059805" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.bottom" timestamp="1671173089956">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961040910" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452980879" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.right" timestamp="1655452980879">
+    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173089956" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.center" timestamp="1671173089955">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961040911" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452980879" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom" timestamp="1655452998062">
+    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173089955" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.left" timestamp="1671173089955">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961114742" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452998062" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.center" timestamp="1655452998062">
+    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173089955" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.right" timestamp="1671173089956">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961114742" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452998062" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.left" timestamp="1655452998062">
+    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173089956" />
+    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1671172056966">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961114741" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452998062" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.right" timestamp="1655452998062">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1650961114742" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452998062" />
-    <state x="2375" y="162" key="SettingsEditor" timestamp="1649830238649">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="455" y="162" key="SettingsEditor/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1648139570319" />
-    <state x="2375" y="162" key="SettingsEditor/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1649830238649" />
-    <state x="2464" y="242" key="Vcs.Push.Dialog.v2" timestamp="1653117897710">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2464" y="242" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1653117897710" />
-    <state x="2672" y="185" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1647067941704">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2672" y="185" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1647067941704" />
-    <state x="2681" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1655452468273">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2681" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1655452468273" />
-    <state x="2577" y="311" key="git4idea.merge.GitPullDialog" timestamp="1648970683593">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2577" y="311" key="git4idea.merge.GitPullDialog/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1648970683593" />
-    <state x="2544" y="236" width="672" height="678" key="search.everywhere.popup" timestamp="1647498222713">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2544" y="236" width="672" height="678" key="search.everywhere.popup/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1647498222713" />
+    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671172056966" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -296,12 +264,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>363</line>
+          <line>377</line>
           <option name="timeStamp" value="112" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>268</line>
+          <line>282</line>
           <option name="timeStamp" value="113" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -326,13 +294,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ora_excel_read.py</url>
-          <line>267</line>
-          <option name="timeStamp" value="163" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ora_excel_read.py</url>
           <line>313</line>
-          <option name="timeStamp" value="164" />
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ora_excel_read.py</url>
+          <line>267</line>
+          <option name="timeStamp" value="166" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
