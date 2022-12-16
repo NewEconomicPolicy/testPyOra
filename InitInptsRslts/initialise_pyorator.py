@@ -45,6 +45,8 @@ PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
 NOTEPAD_EXE_PATH = 'C:\\Windows\\System32\\notepad.exe'
 
+FNAME_ECON = 'PurchasesSalesLabour.xlsx'
+
 ERROR_STR = '*** Error *** '
 WARN_STR = '*** Warning *** '
 sleepTime = 5
@@ -109,11 +111,11 @@ def _read_setup_file(program_id):
 
         except (JSONDecodeError, OSError, IOError) as err:
             sleep(sleepTime)
-            exit(0)
+            sys.exit(0)
     else:
         print(ERROR_STR + 'setup file ' + setup_file + ' must exist')
         sleep(sleepTime)
-        exit(0)
+        sys.exit(0)
 
     # initialise vars
     # ===============
@@ -124,7 +126,7 @@ def _read_setup_file(program_id):
         if key not in settings:
             print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
             sleep(sleepTime)
-            exit(0)
+            sys.exit(0)
 
     print('Read setup file: {}\nLogs will be written to: {}'.format(setup_file, settings['log_dir']))
 
@@ -144,21 +146,30 @@ def _read_setup_file(program_id):
 
     if not excel_flag:
         sleep(sleepTime)
-        exit(0)
+        sys.exit(0)
 
     settings['excel_path'] = excel_path
 
-    # lookup Excel and parameters files are required
-    # ==============================================
+    # validate mandatory lookup, parameters and economics Excel files
+    # ===============================================================
     if read_lookup_excel_file(settings) is None:
         sleep(sleepTime)
-        exit(0)
+        sys.exit(0)
 
     params_xls = normpath(settings['params_xls'])
     if check_params_excel_file(params_xls) is None:
         print('Excel input file ' + params_xls + ' must exist')
         sleep(sleepTime)
-        exit(0)
+        sys.exit(0)
+
+    tmplt_dir = join(split(settings['log_dir'])[0], 'run', 'templates')
+    econ_xls_fn = normpath(join(tmplt_dir, FNAME_ECON))
+    if not isfile(econ_xls_fn):
+        print('Excel economics file ' + econ_xls_fn + ' must exist')
+        sleep(sleepTime)
+        sys. exit(0)
+
+    settings['econ_xls_fn'] = econ_xls_fn
 
     # used to display weather data
     # ============================
@@ -195,7 +206,7 @@ def _read_setup_file(program_id):
     if len(study_areas) == 0:
         print(ERROR_STR + 'No valid study areas in: ' + settings['study_area_dir'])
         sleep(sleepTime)
-        exit(0)
+        sys.exit(0)
 
     studies = []
     for dirname in study_areas:
@@ -231,15 +242,17 @@ def _read_setup_file(program_id):
 
     return settings
 
-def _write_default_config_file(config_file):
+def _write_default_config_file(config_file, study_area_dir):
     '''
 
     '''
+    farm_name = 'Grassland'
+    study = 'Dummy (IND)'
     _default_config = {
         'clim_scnr_indx': 0,
         'csv_wthr_fn': '',
-        'farm_name': 'Robe_nocnvrg',
-        'mgmt_dir0': 'E:\\ORATOR\\study areas\\North Gondar (ETH)\\Robe_nocnvrg',
+        'farm_name': farm_name,
+        'mgmt_dir0': join(study_area_dir, study, farm_name),
         'mnth_appl_indx': 4,
         'nyrs_fwd': 10,
         'nyrs_ss': 10,
@@ -248,7 +261,7 @@ def _write_default_config_file(config_file):
         'owex_min': '0.1',
         'strt_yr_fwd_indx': 0,
         'strt_yr_ss_indx': 0,
-        'study': 'North Gondar (ETH)',
+        'study': study,
         'use_csv': False,
         'use_isda': False,
         'write_excel': False
@@ -275,7 +288,7 @@ def read_config_file(form):
             print(ERROR_STR + err)
             return False
     else:
-        config = _write_default_config_file(config_file)
+        config = _write_default_config_file(config_file, form.settings['study_area_dir'])
 
     for attrib in list(['mgmt_dir0', 'write_excel']):
         if attrib not in config:
@@ -374,6 +387,10 @@ def read_config_file(form):
     # enable users to view outputs from previous run
     # ==============================================
     study = ReadStudy(form, mgmt_dir0, run_xls_fname)
+    if study is None:
+        sleep(sleepTime)
+        sys.exit(0)
+
     for sba in study.subareas:
         form.w_tab_wdgt.w_combo36.addItem(sba)      # Sensitivity Analysis tab
 
