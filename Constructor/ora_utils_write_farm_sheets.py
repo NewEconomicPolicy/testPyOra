@@ -248,7 +248,7 @@ def make_or_update_farm(form):
         
         mnths_sum = nmnths_ss + nmnths_fwd
 
-    print('Retrieved {} months of weather data for simulation run from {}'.format(nmnths_ss + nmnths_fwd, wthr_src))
+    print('Retrieved {} months of weather data for simulation run from {}'.format(mnths_sum, wthr_src))
     '''
     this section is taken from PyOrator ..\InitInptsRslts\ora_excel_write.py
     '''

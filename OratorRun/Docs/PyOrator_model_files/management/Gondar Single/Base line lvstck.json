@@ -1,0 +1,50 @@
+{
+    "site definition": {
+        "area name": "Base Line",
+        "area (ha)": 3.5,
+		"region": "Eastern Africa",
+		"system": "MRA",
+        "livestock1": {
+			"type": "Dairy cattle",
+			"number": 1.5,
+			"strategy": "On farm production",
+			"feed1": {
+				"type": "Maize",
+				"value": 50
+			},
+			"feed2": {
+				"type": "Grassland",
+				"value": 25
+			},
+			"feed3": {
+				"type": "bought in"
+			}
+        },
+        "livestock2": {
+            "type": "Beef cattle",
+			"number": 2,
+			"strategy": "On farm production",
+			"feed1": {
+				"type": "Maize",
+				"value": 50
+			},
+			"feed2": {
+				"type": "Grassland",
+				"value": 25
+			},
+			"feed3": {
+				"type": "bought in",
+				"value": 25
+			}
+        },
+        "livestock3": {
+			"type": "Goats/sheep for milk",
+			"number": 1.3,
+			"strategy": "On farm production",
+			"feed1": {
+				"type": "Grassland",
+				"value": 100
+			}
+		}
+    }
+}

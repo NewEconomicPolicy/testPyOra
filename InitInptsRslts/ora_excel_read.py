@@ -231,7 +231,7 @@ def _validate_timesteps(run_xls_fn, subareas):
     # ==========================
     wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
     wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
-    if wthr_sht.max_column == 6:
+    if wthr_sht.max_column == 6:                                      # Arkan: where does .max_column property come from? (which library, cannot find online)
         wthr_cols += ['actl_yr']
     try:
         df = DataFrame(wthr_sht.values, columns=wthr_cols)
@@ -311,6 +311,7 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess += 'uncompliant'
         return mess
 
+    
     ret_var = read_farm_wthr_xls_file(run_xls_fn)
     if ret_var is None:
         mess += 'uncompliant'
@@ -319,6 +320,7 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess = format_sbas(subareas)
         if (_validate_timesteps(run_xls_fn, subareas)):
             w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
+        
 
     return mess
 
