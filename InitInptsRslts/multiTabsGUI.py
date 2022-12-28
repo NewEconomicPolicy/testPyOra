@@ -15,7 +15,7 @@ __author__ = 's03mm5'
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
-                                            QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
+                                   QStyle, QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
 from PyQt5.QtGui import QPixmap, QFont
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, isfile, split
@@ -208,11 +208,23 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_chk_farm, irow, 2)
         self.w_chk_farm = w_chk_farm
 
+        # Arkan: check timespan consistency for weather and subareas
+        # ==========================================================
+        w_chk_farm_icon = QPushButton()
+        helpText = 'Check that weather and management subarea months are equal'  # temporary solution
+        logo = getattr(QStyle, 'SP_DialogApplyButton')  # temporary solution
+        w_chk_farm_icon.setToolTip(helpText)
+        w_chk_farm_icon.setIcon(self.style().standardIcon(logo))
+        w_chk_farm_icon.clicked.connect(self.checkFarm)
+        grid.addWidget(w_chk_farm_icon, irow, 3)
+        self.w_chk_farm_icon = w_chk_farm_icon
+
+        # =====================
         w_chk_lvstck = QPushButton('Check livestock sheet')
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
         w_chk_lvstck.setToolTip(helpText)
         w_chk_lvstck.clicked.connect(self.checkLvstck)
-        grid.addWidget(w_chk_lvstck, irow, 3, 1, 2)
+        grid.addWidget(w_chk_lvstck, irow, 5, 1, 2)
         self.w_chk_lvstck = w_chk_lvstck
 
         ntab = 0
@@ -316,6 +328,15 @@ class AllTabs(QTabWidget):
                 else:
                     print('Removed farm: ' + farm_name)
                     repopulate_farms_dropdown(self)
+        return
+
+    def checkFarm(self):
+        '''
+
+        '''
+        mgmt_dir = self.w_run_dir0.text()
+        run_fn_dscr = check_xls_run_file(self.w_run_model, mgmt_dir)
+
         return
 
     def checkFarms(self):
