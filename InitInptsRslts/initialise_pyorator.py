@@ -8,7 +8,7 @@
 # Description:#
 #   Notes:
 #       entries for drop-down menus are populated after GUI has been created and config file has been read
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------- (exit)
 '''
 
 __prog__ = 'initialise_pyorator.py'
@@ -54,7 +54,7 @@ sleepTime = 5
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-def initiation(form):
+def initiation(form): 
     '''
     this function is called to initiate the programme and process all settings
     '''
@@ -167,7 +167,8 @@ def _read_setup_file(program_id):
     if not isfile(econ_xls_fn):
         print('Excel economics file ' + econ_xls_fn + ' must exist')
         sleep(sleepTime)
-        sys. exit(0)
+        sys.exit(0)
+    
 
     settings['econ_xls_fn'] = econ_xls_fn
 

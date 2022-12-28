@@ -1,0 +1,18 @@
+{
+  "clim_scnr_indx": 0,
+  "csv_wthr_fn": "",
+  "farm_name": "Grassland",
+  "mgmt_dir0": "D:\\testPyOra\\OratorRun\\study_areas\\Dummy (IND)\\Grassland",
+  "mnth_appl_indx": 4,
+  "nyrs_fwd": 10,
+  "nyrs_ss": 10,
+  "ow_type_indx": 4,
+  "owex_max": "10.0",
+  "owex_min": "0.1",
+  "strt_yr_fwd_indx": 0,
+  "strt_yr_ss_indx": 0,
+  "study": "Dummy (IND)",
+  "use_csv": false,
+  "use_isda": false,
+  "write_excel": false
+}
