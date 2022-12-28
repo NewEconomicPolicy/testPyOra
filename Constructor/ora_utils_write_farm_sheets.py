@@ -283,7 +283,7 @@ def make_or_update_farm(form):
             return -1, None
     else:
         new_runfile_flag = True
-        writer = ExcelWriter(fname_run)
+        writer = ExcelWriter(fname_run, engine = 'openpyxl')
 
     wthr = WeatherSheet(pettmp)
     if new_runfile_flag:

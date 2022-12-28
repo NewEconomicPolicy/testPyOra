@@ -168,6 +168,7 @@ def _read_setup_file(program_id):
         print('Excel economics file ' + econ_xls_fn + ' must exist')
         sleep(sleepTime)
         sys.exit(0)
+    
 
     settings['econ_xls_fn'] = econ_xls_fn
 

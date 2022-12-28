@@ -14,7 +14,7 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 import sys
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtGui import QPixmap, QFont, QColor
 from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout,  \
                                                                                                 QPushButton, QTextEdit
 from multiTabsGUI import AllTabs
@@ -127,9 +127,9 @@ class Form(QWidget):
 
         # reads and set values from last run
         # ==================================
-        read_config_file(self)
         sys.stdout = OutLog(self.w_report, sys.stdout)
-        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))
+        sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))   # RGB
+        read_config_file(self)
 
     def clearReporting(self):
         #
