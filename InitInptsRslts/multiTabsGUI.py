@@ -212,7 +212,7 @@ class AllTabs(QTabWidget):
 
         # Arkan: will try to make check button to show if columns have equal numbers
         
-        chk_farm_icon = QPushButton()
+        w_chk_farm_icon = QPushButton()
         #run_xls_fn = post_farm_detail(self)
         #mgmt_dir, dum = split(run_xls_fn)
         
@@ -225,10 +225,11 @@ class AllTabs(QTabWidget):
 
         helpText = 'Weather and subarea months are equal'  # temporary solution
         logo = getattr(QStyle, 'SP_DialogApplyButton')     # temporary solution
-        chk_farm_icon.setToolTip(helpText)
-        chk_farm_icon.setIcon(self.style().standardIcon(logo))
-        grid.addWidget(chk_farm_icon, irow, 3)
-        self.chk_farm_icon = chk_farm_icon
+        w_chk_farm_icon.setToolTip(helpText)
+        w_chk_farm_icon.setIcon(self.style().standardIcon(logo))
+        w_chk_farm_icon.clicked.connect(self.checkFarms)
+        grid.addWidget(w_chk_farm_icon, irow, 3)
+        self.w_chk_farm_icon = w_chk_farm_icon
 
 
         w_chk_lvstck = QPushButton('Check livestock sheet')

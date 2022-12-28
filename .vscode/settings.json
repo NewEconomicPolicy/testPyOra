@@ -2,6 +2,9 @@
     "python.analysis.extraPaths": [
         "./Constructor",
         "./BioModels",
-        "./LiveStock"
+        "./LiveStock",
+        "./InitInptsRslts",
+        "./InitInptsRslts",
+        "./EnvModelModules"
     ]
 }

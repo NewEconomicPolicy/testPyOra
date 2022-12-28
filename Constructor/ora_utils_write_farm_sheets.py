@@ -174,7 +174,7 @@ def _delete_lctn_wthr_sheets(fname_run, sheet_del = 'all'):
 def make_or_update_farm(form):
     '''
     use pandas to write to Excel
-    if new_runfile_flag is set to True then the a new run file will be created or, if False, edited
+    if new_runfile_flag is set to True then a new run file will be created or, if False, edited
     return code is -1 for fail and 0 for success together with new_runfile_flag
     '''
 
@@ -217,10 +217,18 @@ def make_or_update_farm(form):
     end_yr_ss = strt_yr_ss + nyrs_ss
     end_yr_fwd = strt_yr_fwd + nyrs_fwd
 
+    # Arkan: attempts to solve Nonetype error:
+
     if form.wthr_sets is None or form.w_use_csv.isChecked():
         wthr_src = 'CSV file'
         csv_fn = form.w_csv_fn.text()
-        nmnths_ss, pettmp_ss, nmnths_fwd, pettmp_fwd = fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd)
+        retcode = fetch_csv_wthr(csv_fn, nyrs_ss, nyrs_fwd)
+        if retcode is None:
+            return -1, None 
+        else:
+            nmnths_ss, pettmp_ss, nmnths_fwd, pettmp_fwd = retcode
+
+        mnths_sum = nmnths_ss + nmnths_fwd   
     else:
         wthr_src = 'NC dataset'
         climgen = ClimGenNC(lggr, form.wthr_sets, wthr_rsrc, fut_clim_scen,
@@ -232,9 +240,15 @@ def make_or_update_farm(form):
         pettmp_fut = climgen.fetch_cru_future_NC_data(aoi_indices_fut, num_band)
         pettmp_hist = climgen.fetch_cru_historic_NC_data(aoi_indices_hist, num_band)
 
-        nmnths_ss, pettmp_ss, nmnths_fwd, pettmp_fwd = associate_climate(site_rec, climgen, pettmp_hist, pettmp_fut)
+        retcode = associate_climate(site_rec, climgen, pettmp_hist, pettmp_fut)
+        if retcode is None:
+            return -1, None
+        else:
+            nmnths_ss, pettmp_ss, nmnths_fwd, pettmp_fwd = retcode
+        
+        mnths_sum = nmnths_ss + nmnths_fwd
 
-    print('Retrieved {} months of weather data for simulation run from {}'.format(nmnths_ss + nmnths_fwd, wthr_src))
+    print('Retrieved {} months of weather data for simulation run from {}'.format(mnths_sum, wthr_src))
     '''
     this section is taken from PyOrator ..\InitInptsRslts\ora_excel_write.py
     '''
