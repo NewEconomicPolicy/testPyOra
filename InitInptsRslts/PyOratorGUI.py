@@ -127,9 +127,9 @@ class Form(QWidget):
 
         # reads and set values from last run
         # ==================================
+        read_config_file(self)
         sys.stdout = OutLog(self.w_report, sys.stdout)
         sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))   # RGB
-        read_config_file(self)
 
     def clearReporting(self):
         #

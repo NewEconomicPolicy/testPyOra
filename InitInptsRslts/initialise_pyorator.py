@@ -388,7 +388,7 @@ def read_config_file(form):
     # enable users to view outputs from previous run
     # ==============================================
     study = ReadStudy(form, mgmt_dir0, run_xls_fname)
-    if study is None:
+    if not study.study_ok_flag:
         sleep(sleepTime)
         sys.exit(0)
 

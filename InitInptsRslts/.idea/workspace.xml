@@ -19,9 +19,14 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="reordered reading of configuration file to come after invocation of OutLog class">
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PyOratorGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyOratorGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator program guidance.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator program guidance.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +46,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../ORATOR_INTGR/setup" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager">
     <configuration name="PyOraBeta" type="PythonConfigurationType" factoryName="Python">
@@ -182,7 +187,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671173351239</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="reordered reading of configuration file to come after invocation of OutLog class">
+      <created>1672126501565</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1672126501565</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -212,64 +224,61 @@
     <MESSAGE value="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab" />
     <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
     <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
+    <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
+    <option name="LAST_COMMIT_MESSAGE" value="reordered reading of configuration file to come after invocation of OutLog class" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2319" y="163" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1669648461342">
+    <state width="1046" height="1808" key="GridCell.Tab.0.bottom" timestamp="1680691251992">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2319" y="163" key="#com.intellij.execution.impl.EditConfigurationsDialog/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1669648461342" />
-    <state width="1848" height="262" key="GridCell.Tab.0.bottom" timestamp="1672125794180">
+    <state width="1046" height="1808" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.center" timestamp="1680691251991">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1848" height="262" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125794180" />
-    <state width="1848" height="262" key="GridCell.Tab.0.center" timestamp="1672125794180">
+    <state width="1046" height="1808" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.left" timestamp="1680691251991">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1848" height="262" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125794180" />
-    <state width="1848" height="262" key="GridCell.Tab.0.left" timestamp="1672125794180">
+    <state width="1046" height="1808" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
+    <state width="1046" height="1808" key="GridCell.Tab.0.right" timestamp="1680691251991">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1848" height="262" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125794180" />
-    <state width="1848" height="262" key="GridCell.Tab.0.right" timestamp="1672125794180">
+    <state width="1046" height="1808" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.bottom" timestamp="1680691251992">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1848" height="262" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125794180" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom" timestamp="1672125088953">
+    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.center" timestamp="1680691251992">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125088953" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.center" timestamp="1672125088947">
+    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.left" timestamp="1680691251992">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125088947" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.left" timestamp="1672125088947">
+    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
+    <state width="1046" height="1808" key="GridCell.Tab.1.right" timestamp="1680691251992">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125088947" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.right" timestamp="1672125088947">
+    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
+    <state x="2366" y="153" key="SettingsEditor" timestamp="1680692354697">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672125088947" />
-    <state x="2366" y="153" key="SettingsEditor" timestamp="1671779349100">
+    <state x="2366" y="153" key="SettingsEditor/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680692354697" />
+    <state x="2457" y="228" key="Vcs.Push.Dialog.v2" timestamp="1672126507310">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2366" y="153" key="SettingsEditor/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671779349100" />
-    <state x="2457" y="228" key="Vcs.Push.Dialog.v2" timestamp="1671173358859">
+    <state x="2457" y="228" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672126507310" />
+    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1680686799235">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2457" y="228" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1671173358859" />
-    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1672124583998">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672124583998" />
+    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680686799235" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>1002</line>
+          <line>1023</line>
           <option name="timeStamp" value="104" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -289,12 +298,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>237</line>
+          <line>249</line>
           <option name="timeStamp" value="127" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ora_excel_read.py</url>
-          <line>893</line>
+          <line>896</line>
           <option name="timeStamp" value="156" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -303,9 +312,24 @@
           <option name="timeStamp" value="158" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py</url>
+          <line>72</line>
+          <option name="timeStamp" value="176" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py</url>
+          <line>146</line>
+          <option name="timeStamp" value="177" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
+          <line>101</line>
+          <option name="timeStamp" value="178" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/initialise_pyorator.py</url>
-          <line>425</line>
-          <option name="timeStamp" value="173" />
+          <line>389</line>
+          <option name="timeStamp" value="180" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

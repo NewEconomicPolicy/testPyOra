@@ -887,60 +887,61 @@ class ReadStudy(object, ):
         '''
         read location sheet from ORATOR inputs Excel file
         '''
+        self.study_ok_flag = False
         self.output_excel = output_excel
 
         if run_xls_fname is None:
             run_xls_fname = normpath(join(mgmt_dir, FNAME_RUN))
 
         if not isfile(run_xls_fname):
-            print('No run file ' + FNAME_RUN + ' in directory ' + mgmt_dir)
-            return None
-
-        # split management directory
-        # ==========================
-        norm_path = normpath(mgmt_dir)
-        path_cmpnts = norm_path.split(os_sep)
-        study_area, farm = path_cmpnts[-2:]
-
-        # Farm location
-        # =============
-        ret_var = read_farm_wthr_xls_file(run_xls_fname)
-        if ret_var is None:
-            return None
-        
-        subareas, sub_distr, farm_name, latitude, longitude, area, prnct, dum, dum, dum = ret_var
-
-        # check consistency
-        # =================
-        if farm_name != farm:
-            print(WARN_STR + 'Inconsistent farm names: ' + farm + '\tname in run file: ' + farm_name)
-
-        study_desc = 'Study area: ' + study_area + '\t\tFarm: ' + farm_name
-        study_desc += '\t\tLatitude: {}'.format(latitude)
-        study_desc += '\tLongitude: {}'.format(longitude)
-        if hasattr(form, 'w_study'):
-            form.w_study.setText(study_desc)
+            print(WARN_STR + 'No run file ' + FNAME_RUN + ' in directory ' + mgmt_dir)
         else:
-            form.w_tab_wdgt.w_study.setText(study_desc)
+            # split management directory
+            # ==========================
+            norm_path = normpath(mgmt_dir)
+            path_cmpnts = norm_path.split(os_sep)
+            study_area, farm = path_cmpnts[-2:]
 
-        self.study_name = farm_name
-        self.latitude = latitude
-        self.longitude = longitude
-        self.subareas = subareas
+            # Farm location
+            # =============
+            ret_var = read_farm_wthr_xls_file(run_xls_fname)
+            if ret_var is None:
+                print(ERR_STR + 'Failed to read run file: ' + run_xls_fname)
+            else:
+                subareas, sub_distr, farm_name, latitude, longitude, area, prnct, dum, dum, dum = ret_var
 
-        '''
-         base outputs directory on inputs location, check and if necessary create
-        '''
-        out_dir = normpath(join(mgmt_dir, 'outputs'))
-        if not isdir(out_dir):
-            try:
-                mkdir(out_dir)
-                print('Created output directory: ' + out_dir)
-            except:
-                raise Exception('*** Error *** Could not create output directory: ' + out_dir)
+                # check consistency
+                # =================
+                if farm_name != farm:
+                    print(WARN_STR + 'Inconsistent farm names: ' + farm + '\tname in run file: ' + farm_name)
 
-        form.settings['out_dir'] = out_dir
-        _repopulate_excel_dropdown(form, farm_name)
+                study_desc = 'Study area: ' + study_area + '\t\tFarm: ' + farm_name
+                study_desc += '\t\tLatitude: {}'.format(latitude)
+                study_desc += '\tLongitude: {}'.format(longitude)
+                if hasattr(form, 'w_study'):
+                    form.w_study.setText(study_desc)
+                else:
+                    form.w_tab_wdgt.w_study.setText(study_desc)
+
+                self.study_name = farm_name
+                self.latitude = latitude
+                self.longitude = longitude
+                self.subareas = subareas
+
+                '''
+                 base outputs directory on inputs location, check and if necessary create
+                '''
+                out_dir = normpath(join(mgmt_dir, 'outputs'))
+                if not isdir(out_dir):
+                    try:
+                        mkdir(out_dir)
+                        print('Created output directory: ' + out_dir)
+                    except:
+                        raise Exception('*** Error *** Could not create output directory: ' + out_dir)
+
+                form.settings['out_dir'] = out_dir
+                _repopulate_excel_dropdown(form, farm_name)
+                self.study_ok_flag = True
 
 class ReadAnmlProdn(object, ):
 

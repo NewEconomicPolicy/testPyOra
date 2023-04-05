@@ -70,7 +70,11 @@ def retrieve_hwsd_soil_recs(lggr, hwsd_dir, lat, lon):
     '''
     extract required metrics from the HWSD database
     '''
-    hwsd = hwsd_bil.HWSD_bil(lggr, hwsd_dir)
+    try:
+        hwsd = hwsd_bil.HWSD_bil(lggr, hwsd_dir)
+    except:
+        return
+
     nvals_read = hwsd.read_bbox_mu_globals([lon, lat], snglPntFlag = True)
     lggr.info('Read {} value from HWSD'.format(nvals_read))
 
