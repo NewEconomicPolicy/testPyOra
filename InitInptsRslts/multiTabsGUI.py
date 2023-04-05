@@ -1062,7 +1062,7 @@ class AllTabs(QTabWidget):
         ret_code = run_soil_cn_algorithms(self)
         if ret_code == 0:
             calc_livestock_data(self)
-            test_economics_algorithms(self)
+            # test_economics_algorithms(self)
 
     def runEconomicsClicked(self):
 

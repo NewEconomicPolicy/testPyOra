@@ -20,7 +20,7 @@ from openpyxl import load_workbook
 from pandas import DataFrame
 import requests
 
-#import hwsd_bil
+import hwsd_bil
 
 ERROR_STR = '*** Error *** '
 SHEET_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr':'Weather', 'sbas':'Subareas',
