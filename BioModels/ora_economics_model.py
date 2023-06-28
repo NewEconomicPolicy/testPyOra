@@ -209,7 +209,7 @@ def test_economics_algorithms(form):
     hh_members = []
     labour_df = labour_df.iloc[: , 1:]
     for column_name, column_data in labour_df.iteritems():
-        hh_lab_instance =  HouseholdMembers(column_name, column_data)
+        hh_lab_instance = HouseholdMembers(column_name, column_data)
         if hh_lab_instance.number == 0:
             pass
         else:

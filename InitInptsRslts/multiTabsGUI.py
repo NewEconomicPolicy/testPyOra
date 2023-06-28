@@ -960,7 +960,7 @@ class AllTabs(QTabWidget):
         w_economics = QPushButton('Economics')
         helpText = 'Runs ORATOR economics model'
         w_economics.setToolTip(helpText)
-        w_economics.setEnabled(False)
+        w_economics.setEnabled(True)
         w_economics.setFixedWidth(STD_BTN_SIZE)
         w_economics.clicked.connect(self.runEconomicsClicked)
         grid.addWidget(w_economics, irow, 4)

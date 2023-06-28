@@ -28,7 +28,6 @@ from pandas import Series, read_excel, DataFrame
 from zipfile import BadZipFile
 from glob import glob
 from calendar import monthrange
-from pandas import DataFrame
 from numpy import nan, isnan, array
 
 from ora_water_model import add_pet_to_weather
