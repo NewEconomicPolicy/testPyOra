@@ -8,7 +8,7 @@
     "fname_lookup": "D:\\testPyOra\\OratorRun\\lookup\\Orator variables lookup table.xlsx", 
     "excel_dir": "C:\\Program Files\\Microsoft Office\\root\\Office16",
     "params_xls": "D:\\testPyOra\\OratorRun\\Docs\\PyOrator_model_files\\params\\ORATOR_parameters.xlsx",
-	"hwsd_dir": "D:\\testPyOra\\OratorRun\\Docs\\PyOrator_model_files\\GlobalEcosseData\\HSWD_NEW",
+	"hwsd_dir": "D:\\testPyOra\\OratorRun\\Docs\\PyOrator_model_files\\GlobalEcosseData\\HWSD_NEW",
 	"irrig_dflt": 0,
 	"nrota_yrs_dflt": 1,
 	"nsubareas": 8,
