@@ -226,11 +226,12 @@ def _read_setup_file(program_id):
     # verify HWSD
     # ===========
     hwsd_dir = settings['hwsd_dir']
-    if lexists(hwsd_dir):
+    if isdir(hwsd_dir):
         check_hwsd_integrity(hwsd_dir)
     else:
-        print('HWSD not detected')
-        settings['hwsd_dir'] = None
+        print(ERROR_STR + 'HWSD not detected in ' + hwsd_dir)
+        sleep(sleepTime)
+        sys.exit(0)
 
     settings['inp_dir'] = ''  # this will be reset after valid Excel inputs file has been identified
 

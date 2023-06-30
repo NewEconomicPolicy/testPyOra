@@ -162,7 +162,6 @@ class HWSD_bil(object,):
 
         # create data frame from main data set
         # ====================================
-        hwsd_dir = "D:/testPyOra/OratorRun/Docs/PyOrator_model_files/GlobalEcosseData/HWSD_NEW"
         inp_fname = 'HWSD_DATA.csv'
         csv_file = join(hwsd_dir, inp_fname)
         self.data_frame = read_csv(csv_file, sep=',', index_col=False, low_memory=False, dtype=dtypes)
