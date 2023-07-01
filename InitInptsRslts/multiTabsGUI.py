@@ -466,7 +466,7 @@ class AllTabs(QTabWidget):
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
         # =======================
-        self.setTabText(ntab,'Crop Managment')
+        self.setTabText(ntab,'Crop Management')
         self.w_tab1.setLayout(grid)
 
     def makeMngmntWidgets(self, sba_indx, grid, w_sba_descrs,  w_areas, w_nrota_ss, w_ss_mgmt, w_cpy_mgmt,

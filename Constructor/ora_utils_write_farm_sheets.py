@@ -15,8 +15,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from os.path import isfile, join, isdir
-from os import makedirs, name as name_os
+from os.path import isfile, join, isdir, getsize
+from os import remove, makedirs, name as name_os
 
 from pandas import DataFrame, ExcelWriter, Series
 from openpyxl import load_workbook
@@ -99,6 +99,9 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
     '''
     # condition data
     # ==============
+    if soil_recs is None:
+        return None
+
     t_depth, t_bulk, t_ph, t_clay, t_silt, t_sand, t_c_prcnt = soil_recs[0]
 
     subarea_dict = {'Subarea': [], 'Description': [], 'Irrig (mm)': [],  'Rota (yrs)': [], 'Area (ha)': [],
@@ -123,7 +126,12 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
         subarea_dict['Irrig (mm)'].append(50)
         nyrs_rota = rotation_yrs_validate(form.w_nrota_ss[sba_indx])
         subarea_dict['Rota (yrs)'].append(nyrs_rota)
-        subarea_dict['Area (ha)'].append(float(form.w_areas[sba_indx].text()))
+
+        area_ha = form.w_areas[sba_indx].text()
+        if area_ha == '':
+            area_ha = 0
+        subarea_dict['Area (ha)'].append(float(area_ha))
+
         subarea_dict['t_clay'].append(t_clay)
         subarea_dict['t_sand'].append(t_sand)
         subarea_dict['t_silt'].append(t_silt)
@@ -271,18 +279,23 @@ def make_or_update_farm(form):
     # ================
     exstng_sbas = []
     fname_run = join(farm_dir, form.settings['fname_run'])
+    new_runfile_flag = True
     if isfile(fname_run):
-        new_runfile_flag =  False
-        exstng_sbas = _fetch_existing_subarea_sheets(fname_run)
-        if not _delete_lctn_wthr_sheets(fname_run):     # delete all sheets except Signature
-            return -1, None
-        try:
-            writer = ExcelWriter(fname_run, mode='a', if_sheet_exists='replace')
-        except PermissionError as err:
-            print(err)
-            return -1, None
-    else:
-        new_runfile_flag = True
+        if getsize(fname_run) > 0:
+            new_runfile_flag =  False
+            exstng_sbas = _fetch_existing_subarea_sheets(fname_run)
+            if not _delete_lctn_wthr_sheets(fname_run):     # delete all sheets except Signature
+                return -1, None
+            try:
+                writer = ExcelWriter(fname_run, mode='a', if_sheet_exists='replace')
+            except PermissionError as err:
+                print(err)
+                return -1, None
+
+    if new_runfile_flag:
+        if isfile(fname_run):
+            remove(fname_run)
+
         writer = ExcelWriter(fname_run, engine = 'openpyxl')
 
     wthr = WeatherSheet(pettmp)
@@ -291,12 +304,10 @@ def make_or_update_farm(form):
     writer = _write_excel_location(SHEET_NAMES['lctn'], form, writer)
     writer = _write_excel_weather(SHEET_NAMES['wthr'], wthr, writer)
     writer = _write_excel_livestock(SHEET_NAMES['lvstck'], form, writer)
-    area_ha = None
 
     writer = _write_xls_subarea_summary_sheet(SHEET_NAMES['sbas'], exstng_sbas, form, soil_recs, writer)
     try:
-        writer.save()
-        writer.close()
+        writer.close()  #  synonym for save, to make it more file-like
     except PermissionError as err:
         print(err)
         return -1, None

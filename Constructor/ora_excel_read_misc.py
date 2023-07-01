@@ -23,6 +23,8 @@ import requests
 import hwsd_bil
 
 ERROR_STR = '*** Error *** '
+WARN_STR = '*** Warning *** '
+
 SHEET_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr':'Weather', 'sbas':'Subareas',
                                                                                                 'lvstck':'Livestock'}
 ANML_ABBREVS = ['catdry','catmt','rumdry','rummt','pigs','pltry']
@@ -42,16 +44,6 @@ def fetch_isda_soil_data(lggr, lat, lon):
     request_str = ISDA_URL + '?key=' + SOIL_DATA_API_KEY + '&lat={}&lon={}'.format(lat, lon)
     soil_data = requests.get(request_str)
     if soil_data.ok:
-
-        # create a soil file and a formatted string of the JSON object
-        # ============================================================
-        """soil_file = 'E:\\temp\\soil.json'
-        if isfile(soil_file):
-            remove(soil_file)
-
-        with open(soil_file, 'w') as fsetup:
-            json.dump(soil_data.json(), fsetup, indent=2, sort_keys=True)"""
-
         t_depth = 20
         isda_data = soil_data.json()
         isda = isda_data['property']
@@ -144,7 +136,6 @@ def read_farm_wthr_sbsa_xls_file(form, run_xls_fn):
             # ============================
             if sba in wb_obj.sheetnames and descr is None:
                 descr = sba + 'dummy'
-                WARN_STR = '*** Warning *** '
                 mess = WARN_STR + 'management sheet for subarea ' + sba + ' is present'
                 mess += ' but description is missing from ' + rqrd_sheet + ' sheet - will use ' + descr
                 print(mess)

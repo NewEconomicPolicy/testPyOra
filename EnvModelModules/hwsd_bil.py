@@ -32,6 +32,7 @@ from time import sleep
 import math
 
 sleepTime = 5
+GRANULARITY = 120
 
 def check_hwsd_integrity(hwsd_dir):
     '''
@@ -133,8 +134,8 @@ def validate_hwsd_rec (lggr, mu_global, data_rec):
         # modified share to from int to float
         ret_list = list([t_c, t_bulk, float(t_ph_h2o), int(t_clay), int(t_silt), int(t_sand),
                  s_c, s_bulk, float(s_ph_h2o), int(s_clay), int(s_silt), int(s_sand), float(share)])
-    except ValueError as e:
-        mess = 'problem {} with mu_global {}\tdata_rec: {}'.format(e, mu_global, data_rec)
+    except ValueError as err:
+        mess = 'problem {} with mu_global {}\tdata_rec: {}'.format(err, mu_global, data_rec)
         lggr.info(mess)
         return None
 
@@ -149,8 +150,7 @@ class HWSD_bil(object,):
 
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
         # =====================================================================
-        ngranularity = 120
-        self.granularity = float(ngranularity)
+        self.granularity = GRANULARITY
 
         # required HWSD metrics
         # =====================
@@ -162,15 +162,10 @@ class HWSD_bil(object,):
 
         # create data frame from main data set
         # ====================================
-        hwsd_dir = "D:/testPyOra/OratorRun/Docs/PyOrator_model_files/GlobalEcosseData/HWSD_NEW"
         inp_fname = 'HWSD_DATA.csv'
         csv_file = join(hwsd_dir, inp_fname)
         self.data_frame = read_csv(csv_file, sep=',', index_col=False, low_memory=False, dtype=dtypes)
-        '''
-        self.data_frame = read_csv(csv_file, sep = ',', error_bad_lines = False, index_col = False,
-                                                                                    low_memory = False, dtype = dtypes)
-        # self.data_frame = read_csv(csv_file, sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
-        '''
+
         # open header file and read first 9 lines
         # ========================
         inp_fname = 'hwsd.hdr'
@@ -243,7 +238,6 @@ class HWSD_bil(object,):
 
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
         # AOI is typically county sized e.g. Isle of Man
-        granularity = self.granularity
 
         # these are lat/lon
         coord_upper_left = [bbox[3],bbox[0]]
@@ -252,9 +246,9 @@ class HWSD_bil(object,):
         self.coord_lower_right = coord_lower_right
 
         # round these so that they are divisable by the requested resolution
-        nlats = round((coord_upper_left[0] - coord_lower_right[0])*granularity)
+        nlats = round((coord_upper_left[0] - coord_lower_right[0])*GRANULARITY)
         nlats = upscale_resol*math.ceil(nlats/upscale_resol)
-        nlons = round((coord_lower_right[1] - coord_upper_left[1])*granularity)
+        nlons = round((coord_lower_right[1] - coord_upper_left[1])*GRANULARITY)
         nlons = upscale_resol*math.ceil(nlons/upscale_resol)
 
         # construct 2D array
@@ -262,9 +256,9 @@ class HWSD_bil(object,):
         rows.shape = (nlats,nlons)
         #
         # work out first and last rows
-        nrow1 = round((90.0 - coord_upper_left[0])*granularity)
+        nrow1 = round((90.0 - coord_upper_left[0])*GRANULARITY)
         nrow2 = nrow1 + nlats
-        ncol1 = round((180.0 + coord_upper_left[1])*granularity)
+        ncol1 = round((180.0 + coord_upper_left[1])*GRANULARITY)
         ncol2 = ncol1 + nlons
 
         # read a chunk the CSV file
@@ -363,7 +357,6 @@ class HWSD_bil(object,):
         # the HWSD grid covers the globe's land area with 30 arc-sec grid-cells
         # AOI is typically county sized e.g. Isle of Man
 
-        granularity = self.granularity
         ncols = self.ncols
         wordsize = self.wordsize
 
@@ -371,9 +364,9 @@ class HWSD_bil(object,):
             nlats = 1
             nlons = 1
             lower_left_coord = [bbox[1],bbox[0]]
-            nrow1 = round((90.0 - lower_left_coord[0])*granularity)
+            nrow1 = round((90.0 - lower_left_coord[0])*GRANULARITY)
             nrow2 = nrow1
-            ncol1 = round((180.0 + lower_left_coord[1])*granularity)
+            ncol1 = round((180.0 + lower_left_coord[1])*GRANULARITY)
             ncol2 = ncol1
             nlats = 1
             nlons = 1
@@ -384,14 +377,14 @@ class HWSD_bil(object,):
             self.coord_upper_left = coord_upper_left
             self.coord_lower_right = coord_lower_right
 
-            nlats = int(round((coord_upper_left[0] - coord_lower_right[0])*granularity))
-            nlons = int(round((coord_lower_right[1] - coord_upper_left[1])*granularity))
+            nlats = int(round((coord_upper_left[0] - coord_lower_right[0])*GRANULARITY))
+            nlons = int(round((coord_lower_right[1] - coord_upper_left[1])*GRANULARITY))
             #
             # work out first and last rows
-            nrow1 = int(round((90.0 - coord_upper_left[0])*granularity) + 1)
-            nrow2 = int(round((90.0 - coord_lower_right[0])*granularity))
-            ncol1 = int(round((180.0 + coord_upper_left[1])*granularity) + 1)
-            ncol2 = int(round((180.0 + coord_lower_right[1])*granularity))
+            nrow1 = int(round((90.0 - coord_upper_left[0])*GRANULARITY) + 1)
+            nrow2 = int(round((90.0 - coord_lower_right[0])*GRANULARITY))
+            ncol1 = int(round((180.0 + coord_upper_left[1])*GRANULARITY) + 1)
+            ncol2 = int(round((180.0 + coord_lower_right[1])*GRANULARITY))
 
         chunksize = wordsize*nlons
         form = str(int(chunksize/2)) + 'H'  # format for unpack
