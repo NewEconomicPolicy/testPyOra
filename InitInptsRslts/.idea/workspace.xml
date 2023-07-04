@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="BranchesTreeState">
     <expand>
       <path>
@@ -19,13 +22,16 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="reordered reading of configuration file to come after invocation of OutLog class">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action.">
       <change beforePath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/weather_datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/weather_datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py" beforeDir="false" afterPath="$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyOratorGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyOratorGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator program guidance.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator program guidance.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_gui_misc_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_gui_misc_fns.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,6 +77,7 @@
       <method v="2" />
     </configuration>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -194,7 +201,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672126501565</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action.">
+      <created>1680693185816</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1680693185816</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -207,7 +221,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="insignificant changes for harmonisation purposes only" />
@@ -225,53 +238,8 @@
     <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
     <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
-    <option name="LAST_COMMIT_MESSAGE" value="reordered reading of configuration file to come after invocation of OutLog class" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state width="1046" height="1808" key="GridCell.Tab.0.bottom" timestamp="1680691251992">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.center" timestamp="1680691251991">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.left" timestamp="1680691251991">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
-    <state width="1046" height="1808" key="GridCell.Tab.0.right" timestamp="1680691251991">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.0.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251991" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom" timestamp="1680691251992">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.bottom/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.center" timestamp="1680691251992">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.center/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.left" timestamp="1680691251992">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.left/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
-    <state width="1046" height="1808" key="GridCell.Tab.1.right" timestamp="1680691251992">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1046" height="1808" key="GridCell.Tab.1.right/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680691251992" />
-    <state x="2366" y="153" key="SettingsEditor" timestamp="1680692354697">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2366" y="153" key="SettingsEditor/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680692354697" />
-    <state x="2457" y="228" key="Vcs.Push.Dialog.v2" timestamp="1672126507310">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2457" y="228" key="Vcs.Push.Dialog.v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1672126507310" />
-    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1680686799235">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state x="2674" y="422" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1040/3840.0.1080.1880/0.0.1920.1040/-1920.0.1920.1040@1920.0.1920.1040" timestamp="1680686799235" />
+    <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
+    <option name="LAST_COMMIT_MESSAGE" value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -288,23 +256,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>377</line>
+          <line>388</line>
           <option name="timeStamp" value="112" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>282</line>
-          <option name="timeStamp" value="113" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
           <line>249</line>
           <option name="timeStamp" value="127" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ora_excel_read.py</url>
-          <line>896</line>
-          <option name="timeStamp" value="156" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/display_gui_charts.py</url>
@@ -313,25 +271,37 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py</url>
-          <line>72</line>
-          <option name="timeStamp" value="176" />
+          <line>150</line>
+          <option name="timeStamp" value="190" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py</url>
-          <line>146</line>
-          <option name="timeStamp" value="177" />
+          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="192" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>101</line>
-          <option name="timeStamp" value="178" />
+          <line>308</line>
+          <option name="timeStamp" value="203" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/initialise_pyorator.py</url>
-          <line>389</line>
-          <option name="timeStamp" value="180" />
+          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
+          <line>289</line>
+          <option name="timeStamp" value="204" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
+          <line>298</line>
+          <option name="timeStamp" value="205" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

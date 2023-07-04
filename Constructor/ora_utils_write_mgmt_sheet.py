@@ -56,7 +56,7 @@ def write_mgmt_sht(fname, subarea, sba_descr, nmnths_ss, nmnths_fwd, rota_dict, 
     data_frame.to_excel(writer, subarea, index=False, freeze_panes=(1, 1))
 
     try:
-        writer.save()
+        writer.close()
     except PermissionError as err:
         print(err)
         return -1

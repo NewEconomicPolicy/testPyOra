@@ -81,10 +81,10 @@ def _fetch_weather_nc_parms(nc_fname, weather_resource, resol_time, scenario):
         end_year = start_year + int(len(time_var)/12) - 1
     else:
         time_var_units = time_var.units
-        start_day = time_var[0]
+        start_day = int(time_var[0])
         try:
             start_date = num2date(start_day, units = time_var_units, calendar = calendar_attr)
-        except (TypeError) as e:
+        except (TypeError) as err:
             print('Error deriving start and end year for dataset: ' + nc_fname)
             return None
 

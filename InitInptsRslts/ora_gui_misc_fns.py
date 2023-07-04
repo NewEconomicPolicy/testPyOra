@@ -19,9 +19,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-import json
-from csv import reader
-from os.path import isfile, join
+from json import load as json_load
+from os.path import isfile
 
 WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
@@ -158,7 +157,7 @@ class ReadLvstckJsonSubareas(object, ):
                 continue
 
             with open(lvstck_fname, 'r') as flvstck:
-                lvstck_content = json.load(flvstck)
+                lvstck_content = json_load(flvstck)
 
             site_defn = lvstck_content['site definition']
             area = site_defn['area name']

@@ -1,4 +1,4 @@
-'''
+"""
 #-------------------------------------------------------------------------------
 # Name:        initialise_funcs.py
 # Purpose:     script to read read and write the setup and configuration files
@@ -9,7 +9,7 @@
 #   Notes:
 #       entries for drop-down menus are populated after GUI has been created and config file has been read
 #------------------------------------------------------------------------------- (exit)
-'''
+"""
 
 __prog__ = 'initialise_pyorator.py'
 __version__ = '0.0.0'
@@ -18,7 +18,8 @@ __version__ = '0.0.0'
 # ---------------
 # 
 from os.path import isfile, isdir, normpath, join, exists, lexists, split
-from os import getcwd, makedirs, name as name_os
+from os import getcwd, makedirs
+from calendar import month_abbr
 
 from json import load as load_json, dump as dump_json
 from json.decoder import JSONDecodeError
@@ -51,13 +52,13 @@ ERROR_STR = '*** Error *** '
 WARN_STR = '*** Warning *** '
 sleepTime = 5
 
+MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
-MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 def initiation(form): 
-    '''
+    """
     this function is called to initiate the programme and process all settings
-    '''
+    """
     # retrieve settings
     # =================
     form.settings = _read_setup_file(PROGRAM_ID)
@@ -93,10 +94,10 @@ def initiation(form):
     return
 
 def _read_setup_file(program_id):
-    '''
+    """
     read settings used for programme from the setup file, if it exists,
     or create setup file using default values if file does not exist
-    '''
+    """
     func_name = __prog__ + ' _read_setup_file'
 
     # validate setup file
@@ -245,9 +246,9 @@ def _read_setup_file(program_id):
     return settings
 
 def _write_default_config_file(config_file, study_area_dir):
-    '''
+    """
 
-    '''
+    """
     farm_name = 'Grassland'
     study = 'Dummy (IND)'
     _default_config = {
@@ -274,10 +275,10 @@ def _write_default_config_file(config_file, study_area_dir):
         return _default_config
 
 def read_config_file(form):
-    '''
+    """
     read widget settings used in the previous programme session from the config file, if it exists,
     or create config file using default settings if config file does not exist
-    '''
+    """
     func_name = __prog__ + ' read_config_file'
 
     config_file = form.settings['config_file']
@@ -390,8 +391,9 @@ def read_config_file(form):
     # ==============================================
     study = ReadStudy(form, mgmt_dir0, run_xls_fname)
     if not study.study_ok_flag:
-        sleep(sleepTime)
-        sys.exit(0)
+        return False
+        # sleep(sleepTime)
+        # sys.exit(0)
 
     for sba in study.subareas:
         form.w_tab_wdgt.w_combo36.addItem(sba)      # Sensitivity Analysis tab
@@ -457,9 +459,9 @@ def read_config_file(form):
     return True
 
 def write_config_file(form, message_flag=True):
-    '''
+    """
     write current selections to config file
-    '''
+    """
     nyrs_ss, nyrs_fwd = simulation_yrs_validate(form.w_tab_wdgt.w_nyrs_ss, form.w_tab_wdgt.w_nyrs_fwd)
 
     # only one config file
@@ -503,11 +505,11 @@ def write_config_file(form, message_flag=True):
 class exchangeObj(object, ):
 
     def __init__(self, lvstck_files, anml_prodn_obj):
-        '''
+        """
         creates object which bridges the different functional areas of PyOrator:
             Economics - energy, labour, purchases and sales
             Biophysical model - crop production, soil, carbon, nitrogen and water
             Livestock - animal production
-        '''
+        """
         self.all_runs_output = {}
         self.all_runs_crop_model = {}
