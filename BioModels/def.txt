@@ -1,0 +1,81 @@
+ora_cn_classes.py:27:def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
+ora_cn_classes.py:42:def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
+ora_cn_classes.py:69:    def __init__(self, complete_run = None, area_ha = None):
+ora_cn_classes.py:95:    def __init__(self, complete_run = None, area_ha = None):
+ora_cn_classes.py:118:    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None, area_ha = None):
+ora_cn_classes.py:199:    def __init__(self, tot_soc_meas = None):
+ora_cn_classes.py:214:    def adjust_soil_water(self, soil_water):
+ora_cn_classes.py:221:    def adjust_soil_n_change(self, nitrogen_change):
+ora_cn_classes.py:229:    def sum_c_pools(self):
+ora_cn_classes.py:236:    def write_c_pools(self, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom):
+ora_cn_classes.py:246:    def get_rothc_vars(self):
+ora_cn_classes.py:254:    def get_n_change_vars(self):
+ora_cn_classes.py:265:    def __init__(self, mngmnt, ora_parms, pi_tonnes_ss = None):
+ora_cn_classes.py:298:    def __init__(self):
+ora_cn_classes.py:316:    def get_last_tstep_pools(self):
+ora_cn_classes.py:339:    def get_cvals_for_tstep(self, tstep):
+ora_cn_classes.py:368:    def append_vars(self, imnth, rate_mod, c_pi_mnth, cow,
+ora_cn_classes.py:414:    def __init__(self):
+ora_cn_classes.py:441:    def append_vars(self, imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
+ora_cn_classes.py:500:    def additional_n_variables(self):
+ora_cn_fns.py:27:def get_crop_vars(management, crop_vars, tstep):
+ora_cn_fns.py:43:def npp_zaks_grow_season(management):
+ora_cn_fns.py:68:def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
+ora_cn_fns.py:87:def _miami_dyce_growing_season(precip, tair, land_cover_type='ara'):
+ora_cn_fns.py:103:def generate_miami_dyce_npp(pettmp, management):
+ora_cn_fns.py:142:def get_soil_vars(soil_vars, subarea = None, write_flag = False):
+ora_cn_fns.py:166:def init_ss_carbon_pools(tot_soc_meas):
+ora_cn_fns.py:182:def get_fert_vals_for_tstep(management, parameters, tstep):
+ora_cn_fns.py:220:def get_values_for_tstep(pettmp, management, parameters, tstep):
+ora_cn_fns.py:266:def get_rate_temp(tair, pH, salinity, wc_fld_cap, wc_pwp, wc_tstep):
+ora_cn_fns.py:285:def carbon_lost_from_pool(c_in_pool, k_rate_constant, rate_mod):
+ora_cn_fns.py:291:def plant_inputs_crops_distribution(t_grow, c_pi_yr = None):
+ora_cn_fns.py:318:def inert_organic_carbon(prop_iom_ow, cow):
+ora_cn_model.py:54:def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
+ora_cn_model.py:106:def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):
+ora_cn_model.py:133:def run_soil_cn_algorithms(form):
+ora_cn_model.py:242:def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
+ora_cn_model.py:271:def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
+ora_cn_model.py:289:def recalc_fwd_soil_cn(form):
+ora_economics_model.py:40:    def __init__(self, name, labour_data):
+ora_economics_model.py:91:    def agricultural_labour_calc(self):
+ora_economics_model.py:115:    def domestic_labour_calc(self):
+ora_economics_model.py:150:    def __init__(self, purchase_sales_data):
+ora_economics_model.py:168:def test_economics_algorithms(form):
+ora_low_level_fns.py:31:def get_imnth(month_short_name, func_name = None):
+ora_low_level_fns.py:41:def _dump_summary(sum_tbl):
+ora_low_level_fns.py:56:def gui_summary_table_add(continuity, pi_tonnes, summary_table = None):
+ora_low_level_fns.py:80:def populate_org_fert(org_fert):
+ora_low_level_fns.py:106:def average_weather(latitude, precip, tair):
+ora_low_level_fns.py:140:def gui_optimisation_cycle(form, subarea = None, iteration = None):
+ora_low_level_fns.py:160:def extend_out_dir(form):
+ora_nitrogen_model.py:26:def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, soil_vars, nitrogen_change, continuity):
+ora_no3_nh4_fns.py:35:def _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, c_n_rat_dpm_prev):
+ora_no3_nh4_fns.py:53:def _get_c_n_rat_rpm(c_n_rat_pi, pool_c_rpm, pi_to_rpm, c_n_rat_rpm_prev):
+ora_no3_nh4_fns.py:65:def _get_c_n_rat_hum(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow, c_n_rat_soil):
+ora_no3_nh4_fns.py:84:def _get_n_release(prop_co2, c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, c_loss_bio, c_loss_hum,
+ora_no3_nh4_fns.py:98:def _get_n_adjust(c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, prop_bio,
+ora_no3_nh4_fns.py:112:def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c_n_rat_soil,
+ora_no3_nh4_fns.py:136:def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
+ora_no3_nh4_fns.py:153:def prop_n_optimal_from_yield(prop_yld_opt, crop_vars):
+ora_no3_nh4_fns.py:163:def get_n_parameters(n_parms):
+ora_no3_nh4_fns.py:182:def _fertiliser_inputs(fert_amount):
+ora_no3_nh4_fns.py:198:def loss_adjustment_ratio(n_start, n_sum_inputs, n_sum_losses):
+ora_no3_nh4_fns.py:210:def no3_immobilisation(soil_n_sply, nh4_immob, min_no3_nh4):
+ora_no3_nh4_fns.py:218:def no3_leaching(precip, wc_start, pet, wc_fld_cap, no3_start, no3_inputs, no3_min):
+ora_no3_nh4_fns.py:238:def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_decomp, no3_avail, n_d50):
+ora_no3_nh4_fns.py:273:def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, n_crop_dem, no3_avail, nh4_avail, pi_tonnes):
+ora_no3_nh4_fns.py:306:def _nh4_atmos_deposition(n_atmos_depos, proportion = 0.5):
+ora_no3_nh4_fns.py:316:def nh4_mineralisation(soil_n_sply):
+ora_no3_nh4_fns.py:331:def n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
+ora_no3_nh4_fns.py:341:def nh4_immobilisation(soil_n_sply, nh4_min):
+ora_no3_nh4_fns.py:352:def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif):
+ora_no3_nh4_fns.py:366:def nh4_volatilisation(precip, nh4_ow_fert, nh4_inorg_fert, precip_critic, prop_volat):
+ora_rothc_fns.py:25:def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity):
+ora_water_model.py:23:def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag = True):
+ora_water_model.py:42:def get_soil_water_constants(soil_vars, n_parms, tot_soc):
+ora_water_model.py:72:def add_pet_to_weather(latitude, pettmp_grid_cell):
+ora_water_model.py:111:def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
+ora_water_model.py:127:    def __init__(self):
+ora_water_model.py:145:    def get_wvals_for_tstep(self, tstep):
+ora_water_model.py:160:    def append_vars(self, imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap,
