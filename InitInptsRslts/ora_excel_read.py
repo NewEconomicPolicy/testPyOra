@@ -37,7 +37,6 @@ from ora_classes_excel_write import pyoraId as oraId
 from ora_gui_misc_fns import format_sbas, farming_system, region_validate, LivestockEntity
 
 METRIC_LIST = list(['precip', 'tair'])
-MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 ANML_ABBREVS = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
 ANML_PRODN_SHEET = 'Typical animal production'   # Herrero table
@@ -49,6 +48,17 @@ RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather'
                                                                                             'lvstck':'Livestock'}
 SOIL_METRICS = list(['t_depth', 't_clay', 't_sand', 't_silt', 't_carbon', 't_bulk', 't_pH', 't_salinity'])
 MNGMNT_SHT_HDRS = ['period', 'year', 'month', 'crop_name', 'yld', 'fert_type', 'fert_n', 'ow_type', 'ow_amnt', 'irrig']
+
+CROP_PARM_NAMES = Series(list(['lu_code', 'rat_dpm_rpm', 'harv_indx', 'prop_npp_to_pi', 'max_root_dpth',
+                               'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'max_yld', 'dummy1',
+                               'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
+                               'dummy3', 'n_rcoef_a', 'n_rcoef_b', 'n_rcoef_c', 'n_rcoef_d', 'gdds_scle_factr',
+                               'iws_scle_factr']))
+
+N_PARM_NAMES = list(['atmos_n_depos', 'prop_atmos_dep_no3', 'no3_min', 'k_nitrif',
+                     'n_denit_max', 'n_d50', 'prop_n2o_fc', 'prop_nitrif_gas', 'prop_nitrif_no',
+                     'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_soil', 'r_dry', 'k_c_rate'])
+
 T_DEPTH = 30
 
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
@@ -715,15 +725,10 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
     '''
     r_dry is an environmental constant
     '''
-
-    n_parm_names = list(['atmos_n_depos', 'prop_atmos_dep_no3', 'no3_min', 'k_nitrif',
-                      'n_denit_max', 'n_d50', 'prop_n2o_fc', 'prop_nitrif_gas', 'prop_nitrif_no',
-                      'precip_critic', 'prop_volat', 'prop_atmos_dep_nh4', 'c_n_rat_soil', 'r_dry', 'k_c_rate'])
-
     data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1,3))
     n_parms_df = data.dropna(how='all')
     n_parms = {}
-    for indx, defn in enumerate(n_parm_names):
+    for indx, defn in enumerate(N_PARM_NAMES):
         n_parms[defn]  = n_parms_df['Value'].values[indx]
 
     return n_parms
@@ -732,15 +737,11 @@ def _read_crop_vars(xls_fname, sheet_name):
     '''
     read maximum rooting depths etc. for each crop from sheet A1c
     '''
-    crop_parm_names = Series(list(['lu_code', 'rat_dpm_rpm', 'harv_indx', 'prop_npp_to_pi', 'max_root_dpth',
-                    'max_root_dpth_orig', 'sow_mnth', 'harv_mnth', 'max_yld', 'dummy1',
-                    'c_n_rat_pi', 'n_sply_min', 'n_sply_opt', 'n_respns_coef', 'fert_use_eff',
-                    'dummy3', 'n_rcoef_a', 'n_rcoef_b', 'n_rcoef_c', 'n_rcoef_d', 'gdds_scle_factr','iws_scle_factr']))
 
     data = read_excel(xls_fname, sheet_name)
     data = data.dropna(how='all')
     try:
-        crop_dframe = data.set_index(crop_parm_names)
+        crop_dframe = data.set_index(CROP_PARM_NAMES)
         crop_vars = crop_dframe.to_dict()
     except ValueError as err:
 

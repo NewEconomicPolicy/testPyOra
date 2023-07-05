@@ -89,6 +89,7 @@ class Form(QWidget):
 
         lbl20 = QLabel()
         lbl20.setPixmap(QPixmap(self.settings['fname_png']))
+        lbl20.setScaledContents(True)
         lh_vbox.addWidget(lbl20)
 
         # add grid consisting of combo boxes, labels and buttons to RH vertical box

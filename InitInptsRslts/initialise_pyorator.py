@@ -46,13 +46,13 @@ PROGRAM_ID = 'pyorator'
 EXCEL_EXE_PATH = 'C:\\Program Files\\Microsoft Office\\root\\Office16'
 NOTEPAD_EXE_PATH = 'C:\\Windows\\System32\\notepad.exe'
 
-FNAME_ECON = 'PurchasesSalesLabour.xlsx'
-
 ERROR_STR = '*** Error *** '
 WARN_STR = '*** Warning *** '
 sleepTime = 5
 
 MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
+
+FNAME_ECON = 'PurchasesSalesLabour.xlsx'
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
 def initiation(form): 

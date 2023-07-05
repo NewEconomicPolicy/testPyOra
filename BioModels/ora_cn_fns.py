@@ -208,8 +208,9 @@ def get_fert_vals_for_tstep(management, parameters, tstep):
     ow_parms = parameters.ow_parms
     nh4_ow_fert = amount*ow_parms[ow_type]['pcnt_urea']
 
-    # TODO: greater clarity required
-    nh4_inorg_fert, no3_inorg_fert = 2*[nut_n_fert]
+    # inputs of inorganic N fertiliser
+    # ================================
+    nh4_inorg_fert, no3_inorg_fert = [nut_n_fert, 0.0]     # see eq.2.4.3
 
     ow_parms = parameters.ow_parms
     c_n_rat_ow = ow_parms[ow_type]['c_n_rat']

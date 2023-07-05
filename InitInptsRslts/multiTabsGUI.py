@@ -38,6 +38,7 @@ from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
 
+from CropGui import edit_crop_parms
 from MgmtGui import display_subarea
 
 STD_FLD_SIZE_60 = 60
@@ -421,6 +422,14 @@ class AllTabs(QTabWidget):
         QApplication.processEvents()
         return
 
+    def editCropParms(self):
+        '''
+
+        '''
+        edit_crop_parms(self)
+
+        return
+
     # ================================ end of tab0UI =========================
 
     def tab1UI(self):
@@ -461,6 +470,14 @@ class AllTabs(QTabWidget):
         w_save_farm1.clicked.connect(self.saveFarmClicked)
         grid.addWidget(w_save_farm1, irow, 0)
         self.w_save_farm1 = w_save_farm1
+
+        w_crop_parms = QPushButton('Crop parms')
+        helpText = 'Change default crop parameters'
+        w_crop_parms.setToolTip(helpText)
+        w_crop_parms.setFixedWidth(STD_BTN_SIZE + 10)
+        w_crop_parms.clicked.connect(self.editCropParms)
+        grid.addWidget(w_crop_parms, irow, 1)
+        self.w_crop_parms = w_crop_parms
 
         ntab = 1
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
