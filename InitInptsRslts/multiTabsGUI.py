@@ -434,7 +434,7 @@ class AllTabs(QTabWidget):
 
     def tab1UI(self):
         '''
-        subareas
+        subareas crop management
         '''
         grid = QGridLayout()  # define layout
         grid.setSpacing(10)

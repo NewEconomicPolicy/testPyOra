@@ -279,4 +279,3 @@ def post_sbas_detail(form, run_xls_fn):
 
     return ret_code
 
-    return irow

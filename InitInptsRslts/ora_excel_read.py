@@ -329,7 +329,6 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess = format_sbas(subareas)
         if (_validate_timesteps(run_xls_fn, subareas)):
             w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
-        
 
     return mess
 
@@ -853,15 +852,16 @@ def read_farm_wthr_xls_file(run_xls_fn):
     '''
     check required sheets are present
     '''
-    wb_obj = load_workbook(run_xls_fn, data_only=True)
+    try:
+        wb_obj = load_workbook(run_xls_fn, data_only=True)
+    except (BadZipFile, BaseException) as err:
+        print(ERR_STR + 'file ' + run_xls_fn + ' is corrupt - error: ' + str(err))
+        return None
 
-    subareas = []
-    for sht in wb_obj.sheetnames:
-        if sht in oraId().SUBAREAS:
-            subareas.append(sht)
-
+    subareas = [sht for sht in wb_obj.sheetnames if sht in oraId().SUBAREAS]
     if len(subareas) == 0:
         print(ERR_STR + 'Uncompliant run file ' + run_xls_fn + ' - must have at least one subarea sheet e.g. B')
+        wb_obj.close()
         ret_var = None
     else:
         subareas.sort()     # returns null value

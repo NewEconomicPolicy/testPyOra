@@ -22,17 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action.">
-      <change beforePath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Constructor/weather_datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/weather_datasets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py" beforeDir="false" afterPath="$PROJECT_DIR$/../EnvModelModules/hwsd_bil.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code.">
+      <change beforePath="$PROJECT_DIR$/../Constructor/CropGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/CropGui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_gui_misc_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_gui_misc_fns.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/Docs/PyOrator setup guidance.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,11 +42,15 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../ORATOR_INTGR/setup" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;last_opened_file_path&quot;: &quot;G:/PyOraDev/testPyOra/Constructor&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="G:\PyOraDev\testPyOra\Constructor" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="PyOraBeta" type="PythonConfigurationType" factoryName="Python">
@@ -208,7 +206,14 @@
       <option name="project" value="LOCAL" />
       <updated>1680693185816</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code.">
+      <created>1688208567400</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1688208567400</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -239,14 +244,15 @@
     <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
     <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
-    <option name="LAST_COMMIT_MESSAGE" value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
+    <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>1023</line>
+          <line>1040</line>
           <option name="timeStamp" value="104" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -261,7 +267,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>249</line>
+          <line>250</line>
           <option name="timeStamp" value="127" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -275,24 +281,9 @@
           <option name="timeStamp" value="190" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py</url>
-          <line>58</line>
-          <option name="timeStamp" value="192" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>308</line>
-          <option name="timeStamp" value="203" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>289</line>
-          <option name="timeStamp" value="204" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>298</line>
-          <option name="timeStamp" value="205" />
+          <url>file://$PROJECT_DIR$/../BioModels/ora_nitrogen_model.py</url>
+          <line>74</line>
+          <option name="timeStamp" value="206" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

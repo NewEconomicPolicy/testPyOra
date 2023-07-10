@@ -278,7 +278,7 @@ def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
 
             data_frame.to_excel(writer, var_name, index = False)
 
-        writer.save()
+        writer.close()
 
         # reopen Excel file and write charts
         # ==================================

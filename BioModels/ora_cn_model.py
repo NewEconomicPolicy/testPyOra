@@ -174,8 +174,8 @@ def run_soil_cn_algorithms(form):
 
         mngmnt_ss = MngmntSubarea(ora_subareas[sba].crop_mngmnt_ss, ora_parms)
 
-        carbon_change, nitrogen_change, soil_water, converge_flag = \
-                                        _cn_steady_state(form, ora_parms, ora_weather, mngmnt_ss, soil_vars, sba)
+        carbon_change, nitrogen_change, soil_water, converge_flag = _cn_steady_state(form, ora_parms, ora_weather,
+                                                                                            mngmnt_ss, soil_vars, sba)
         if converge_flag is None:
             print('Skipping forward run for ' + sba)
             continue
@@ -183,8 +183,8 @@ def run_soil_cn_algorithms(form):
         pi_tonnes = carbon_change.data['c_pi_mnth']
 
         mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_parms, pi_tonnes)
-        complete_run = \
-            _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_change, nitrogen_change, soil_water)
+        complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
+                                                                        carbon_change, nitrogen_change, soil_water)
         if complete_run is None:
             continue
 

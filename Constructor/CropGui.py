@@ -15,22 +15,15 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from os.path import join, isfile
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QWidget, QGridLayout, QPushButton, QLineEdit, QLabel,
-                             QMessageBox, QComboBox, QAction, QScrollArea, QMainWindow)
+                       QApplication, QMessageBox, QComboBox, QAction, QScrollArea, QMainWindow)
 
-from ora_gui_misc_fns import simulation_yrs_validate, rotation_yrs_validate
-from ora_utils_write_mgmt_sheet import write_mgmt_sht
-from ora_excel_read_misc import get_mnth_yr_names
-from ora_excel_read import read_subarea_sheet
+from ora_cn_fns import plant_inputs_crops_distribution
 
 WARN_STR = '*** Warning *** '
-VAR_DESCRIPTIONS = ['Crop:', 'Typical yield\n(t/ha)', 'Inorganic\nfertiliser', 'Amount Nitrogen\napplied (kg/ha)',
-                    'Organic\nfertiliser', 'Amount typically\napplied (t/ha)', ' ', 'Irrigation\n(mm)']
-MNGMNT_HDRS = ['period', 'crop_name', 'yld_typcl', 'fert_typ', 'fert_n', 'ow_typ', 'ow_amnt', 'irrig']
-NO_CROP = 'No crop'
-NONE_STR = 'None'
+
+STD_FLD_SIZE_40 = 40
 
 def edit_crop_parms(form):
     '''
@@ -65,21 +58,6 @@ class DispCropVars(QMainWindow):
         self.setGeometry(150, 50, 400, 240)  # posx, posy, width, height
         self.show()  # showing all the widgets
 
-    def closeEvent(self, event):
-        '''
-
-        '''
-        close = QMessageBox()
-        close.setText("You sure?")
-        close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        close = close.exec()
-
-        if close == QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
-
-        return
 
     def UiGridWdgts(self):
         '''
@@ -93,16 +71,30 @@ class DispCropVars(QMainWindow):
         lay_grid.setSpacing(10)  # set spacing between widgets
 
         irow = 1
-        lbl00s = QLabel('Crops:')
-        lbl00s.setToolTip('list of crops')
-        lay_grid.addWidget(lbl00s, irow, 0)
+        w_lbl00s = QLabel('Crops:')
+        w_lbl00s.setToolTip('list of crops')
+        lay_grid.addWidget(w_lbl00s, irow, 0)
 
         w_combo00 = QComboBox()
         for crop_name in crop_names:
             w_combo00.addItem(str(crop_name))
-        lay_grid.addWidget(w_combo00, irow, 1)
+
         w_combo00.currentIndexChanged[str].connect(self.changeCrop)
+        lay_grid.addWidget(w_combo00, irow, 1)
         self.w_combo00 = w_combo00
+
+        irow += 1
+        lay_grid.addWidget(QLabel(' '), irow, 0)
+
+        w_lbl01s = QLabel('Number of growing months:')
+        w_lbl01s.setToolTip('list of crops')
+        lay_grid.addWidget(w_lbl01s, irow, 0)
+
+        w_tgrow = QLineEdit()
+        w_tgrow.setFixedWidth(STD_FLD_SIZE_40)
+        w_tgrow.setAlignment(Qt.AlignRight)
+        lay_grid.addWidget(w_tgrow, irow, 1, alignment=Qt.AlignHCenter)
+        self.w_tgrow = w_tgrow
 
         # add space
         # =========
@@ -119,6 +111,9 @@ class DispCropVars(QMainWindow):
 
         '''
         crop_name = self.w_combo00.currentText()
+
+        t_grow = self.crop_vars[crop_name]['t_grow']
+        self.w_tgrow.setText(str(t_grow))
 
         return
 
@@ -156,6 +151,33 @@ class DispCropVars(QMainWindow):
 
         return
 
+    def saveCropParsClicked(self, dummy):
+        '''
+        gather all fields
+        '''
+        crop_name = self.w_combo00.currentText()
+        t_grow = int(self.w_tgrow.text())
+
+        pi_tonnes, pi_props = plant_inputs_crops_distribution(t_grow)
+        self.crop_vars[crop_name]['pi_tonnes'] = pi_tonnes
+        self.crop_vars[crop_name]['pi_prop'] = pi_props
+        self.crop_vars[crop_name]['t_grow'] = t_grow
+
+        print('Updated ' + crop_name)
+        QApplication.processEvents()
+
+        return
+
+    def dismissClicked(self):
+
+        self.close()
+
+    def resetClicked(self):
+        '''
+
+        '''
+        pass
+
     def UiScrllLayout(self):
         '''
         method for laying out UI
@@ -180,26 +202,25 @@ class DispCropVars(QMainWindow):
         self.scroll_area.setWidget(self.widget)
         self.setCentralWidget(self.scroll_area)
 
-        # vertical box consists of grid and control button lay outs 
+        # vertical box consists of grid and control button lay outs
         # =========================================================
         lay_vbox.addLayout(self.lay_grid)
         lay_vbox.addLayout(self.lay_hbox_cntrl)  # the horizontal box fits inside the vertical layout
 
         return
 
-    def saveCropParsClicked(self, dummy):
-        '''
-        gather all fields
-        '''
-        pass
-        # write_mgmt_sht(self.fname_run, self.subarea, self.sba_descr, nmnths_ss, nmnths_fwd, rota_dict)
-
-    def dismissClicked(self):
-
-        self.close()
-
-    def resetClicked(self):
+    def closeEvent(self, event):
         '''
 
         '''
-        pass
+        close = QMessageBox()
+        close.setText("You sure?")
+        close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        close = close.exec()
+
+        if close == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+        return

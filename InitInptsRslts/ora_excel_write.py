@@ -119,7 +119,7 @@ def generate_excel_outfiles(lggr, study, subarea, lookup_df, out_dir,  weather, 
     writer = _write_excel_out(lggr, 'B1c Nitrogen Limitation', n_limitation_b1c, writer, wb_map)
 
     try:
-        writer.save()
+        writer.close()
     except PermissionError as err:
         print(err)
         return -1
