@@ -24,7 +24,7 @@ from os import remove
 
 from string import ascii_uppercase
 from openpyxl import load_workbook
-from openpyxl.chart import LineChart, Reference, Series
+from openpyxl.chart import LineChart, Reference
 from pandas import DataFrame, ExcelWriter
 
 from ora_lookup_df_fns import fetch_detail_from_varname
