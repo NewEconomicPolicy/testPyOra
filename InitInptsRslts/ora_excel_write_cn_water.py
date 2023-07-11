@@ -126,7 +126,7 @@ def _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_shee
                 sheet = wb_obj[metric]
 
                 data = Reference(sheet, min_col = col_indx, min_row = 2, max_col = col_indx, max_row = max_sheet_row)
-                group_chart.add_data(data, title = metric)
+                group_chart.add_data(data)
 
                 # Style the line just created
                 # ===========================
