@@ -22,11 +22,12 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code.">
-      <change beforePath="$PROJECT_DIR$/../Constructor/CropGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/CropGui.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Minor code Tidy">
+      <change beforePath="$PROJECT_DIR$/../BioModels/def.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_write.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -213,7 +214,21 @@
       <option name="project" value="LOCAL" />
       <updated>1688208567400</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Fixed an &quot;Unhandled Python exception&quot; during generation of Excel results files - fixed by use of write.close() instead of write.save() in ora_excel_write.py and ora_excel_write_cn_water.py modules. &#10;Tidied code.">
+      <created>1688999438437</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1688999438437</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Minor code Tidy">
+      <created>1689000378286</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1689000378286</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -245,7 +260,9 @@
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
     <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
+    <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during generation of Excel results files - fixed by use of write.close() instead of write.save() in ora_excel_write.py and ora_excel_write_cn_water.py modules. &#10;Tidied code." />
+    <MESSAGE value="Minor code Tidy" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor code Tidy" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -257,7 +274,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ora_excel_write.py</url>
-          <line>268</line>
+          <line>262</line>
           <option name="timeStamp" value="109" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -281,9 +298,14 @@
           <option name="timeStamp" value="190" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_nitrogen_model.py</url>
-          <line>74</line>
-          <option name="timeStamp" value="206" />
+          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
+          <line>128</line>
+          <option name="timeStamp" value="216" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
+          <line>79</line>
+          <option name="timeStamp" value="217" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

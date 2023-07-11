@@ -202,7 +202,8 @@ def run_soil_cn_algorithms(form):
 
     if len(all_runs) > 0:
         if excel_out_flag:
-            write_excel_all_subareas(study, out_dir, lookup_df, all_runs)
+            pass
+            # write_excel_all_subareas(study, out_dir, lookup_df, all_runs)
 
         # update GUI by activating the livestock and new Excel output files push buttons
         # ==============================================================================

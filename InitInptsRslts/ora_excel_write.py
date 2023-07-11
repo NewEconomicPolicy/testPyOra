@@ -31,9 +31,9 @@ from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference
 from openpyxl.styles import Alignment
 
-from ora_classes_excel_write import A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake, \
-                A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification, \
-                B1CropProduction, B1cNlimitation
+from ora_classes_excel_write import (A1SomChange, A2MineralN, A3SoilWater, A2aSoilNsupply, A2bCropNuptake,
+                A2cLeachedNloss, A2dDenitrifiedNloss, A2eVolatilisedNloss, A2fNitrification,
+                B1CropProduction, B1cNlimitation)
 
 from ora_lookup_df_fns import fetch_detail_from_varname
 
@@ -155,12 +155,6 @@ def _write_excel_out(lggr, sheet_name, out_obj, writer, wb_map):
                     data_frame[var_name] = Series(tmp_list)
                 else:
                     data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
-                    '''
-                    try:
-                        data_frame[var_name] = Series([round(val, ndecis) for val in tmp_list])
-                    except FutureWarning as warn:
-                        print(warn)
-                    '''
             except TypeError as err:
                 print(err)
                 return -1
