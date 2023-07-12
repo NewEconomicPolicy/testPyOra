@@ -22,11 +22,8 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Minor code Tidy">
-      <change beforePath="$PROJECT_DIR$/../BioModels/def.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_write.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -228,7 +225,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689000378286</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required.">
+      <created>1689075617826</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1689075617826</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -262,7 +266,8 @@
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during generation of Excel results files - fixed by use of write.close() instead of write.save() in ora_excel_write.py and ora_excel_write_cn_water.py modules. &#10;Tidied code." />
     <MESSAGE value="Minor code Tidy" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor code Tidy" />
+    <MESSAGE value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
+    <option name="LAST_COMMIT_MESSAGE" value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -296,16 +301,6 @@
           <url>file://$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py</url>
           <line>150</line>
           <option name="timeStamp" value="190" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
-          <line>128</line>
-          <option name="timeStamp" value="216" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
-          <line>79</line>
-          <option name="timeStamp" value="217" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

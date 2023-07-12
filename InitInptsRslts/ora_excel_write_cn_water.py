@@ -78,7 +78,7 @@ def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nro
         # ======================================================
         sheet = wb_obj[metric]
         data = Reference(sheet, min_col = col_indx, min_row = 2, max_col = col_indx, max_row = max_sheet_row)
-        group_chart.add_data(data, title = subarea)
+        group_chart.add_data(data) #   title = subarea
 
         # Style the line just created
         # ===========================
@@ -168,7 +168,7 @@ def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_she
         for isht, metric in enumerate(metrics_group):
             sheet = wb_obj[metric]
             data = Reference(sheet, min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
-            group_chart.add_data(data, title = metric)
+            group_chart.add_data(data)  # title = metric
 
             # Style the line just created
             # ===========================
