@@ -42,7 +42,7 @@ from ora_rothc_fns import run_rothc
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
 # =============================================================================================
 MAX_ITERS = 200
-SOC_MIN_DIFF = 0.0000001   # convergence criteria tonne/hectare
+SOC_MIN_DIFF = 0.0000001  # convergence criteria tonne/hectare
 # SOC_MIN_DIFF = 0.0005000   # convergence criteria tonne/hectare
 
 MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -51,14 +51,15 @@ WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
-def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
-    '''
 
-    '''
+def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
+    """
+
+    """
     pettmp = weather.pettmp_ss
     generate_miami_dyce_npp(pettmp, management)
 
-    dum, dum, dum, dum, tot_soc_meas, dum, dum, dum = get_soil_vars(soil_vars, subarea, write_flag = True)
+    dum, dum, dum, dum, tot_soc_meas, dum, dum, dum = get_soil_vars(soil_vars, subarea, write_flag=True)
     continuity = EnsureContinuity(tot_soc_meas)
 
     summary_table = gui_summary_table_add(continuity, management.pi_tonnes)
@@ -81,15 +82,15 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         # after steady state period has completed adjust plant inputs
         # ===========================================================
         tot_soc_simul = continuity.sum_c_pools()
-        rat_meas_simul_soc = tot_soc_meas/tot_soc_simul                                     # ratio of measured vs simulated SOC
-        management.pi_tonnes = [val*rat_meas_simul_soc for val in management.pi_tonnes]     # (eq.2.1.1) adjust PIs
+        rat_meas_simul_soc = tot_soc_meas / tot_soc_simul  # ratio of measured vs simulated SOC
+        management.pi_tonnes = [val * rat_meas_simul_soc for val in management.pi_tonnes]  # (eq.2.1.1) adjust PIs
 
         # check for convergence
         # =====================
         diff_abs = abs(tot_soc_meas - tot_soc_simul)
-        if  diff_abs < SOC_MIN_DIFF:
+        if diff_abs < SOC_MIN_DIFF:
             print('\nSimulated and measured SOC: {}\t*** converged *** after {} iterations'
-                                                            .format(round(tot_soc_simul, 3), iteration + 1))
+                  .format(round(tot_soc_simul, 3), iteration + 1))
             gui_summary_table_add(continuity, management.pi_tonnes, summary_table)
             converge_flag = True
             break
@@ -100,8 +101,9 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), round(tot_soc_meas, 3), iteration + 1))
 
-    QApplication.processEvents()    # allow event loop to update unprocessed events
+    QApplication.processEvents()  # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water, converge_flag
+
 
 def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):
     '''
@@ -112,7 +114,7 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
         print('Cannot proceed with forward run due to insuffient weather timesteps ')
         return None
 
-    management.pet_prev = weather.pettmp_ss['pet'][-1]    # TODO: ugly patch to ensure smooth tranistion in RothC
+    management.pet_prev = weather.pettmp_ss['pet'][-1]  # TODO: ugly patch to ensure smooth tranistion in RothC
     generate_miami_dyce_npp(pettmp, management)
 
     # run RothC
@@ -128,13 +130,14 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
 
     npp_zaks_grow_season(management)
 
-    return (carbon_change, nitrogen_change, soil_water)
+    return carbon_change, nitrogen_change, soil_water
+
 
 def run_soil_cn_algorithms(form):
-    '''
+    """
     retrieve weather and soil
     NB return code convention is 0 for success, -1 for failure
-    '''
+    """
     func_name = __prog__ + '\trun_soil_cn_algorithms'
 
     excel_out_flag = form.w_make_xls.isChecked()
@@ -166,7 +169,7 @@ def run_soil_cn_algorithms(form):
 
     # process each subarea
     # ====================
-    form.all_runs_output = {}   # clear previously recorded outputs
+    form.all_runs_output = {}  # clear previously recorded outputs
     all_runs = {}
     for sba in ora_subareas:
 
@@ -175,7 +178,7 @@ def run_soil_cn_algorithms(form):
         mngmnt_ss = MngmntSubarea(ora_subareas[sba].crop_mngmnt_ss, ora_parms)
 
         carbon_change, nitrogen_change, soil_water, converge_flag = _cn_steady_state(form, ora_parms, ora_weather,
-                                                                                            mngmnt_ss, soil_vars, sba)
+                                                                                     mngmnt_ss, soil_vars, sba)
         if converge_flag is None:
             print('Skipping forward run for ' + sba)
             continue
@@ -184,19 +187,19 @@ def run_soil_cn_algorithms(form):
 
         mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_parms, pi_tonnes)
         complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
-                                                                        carbon_change, nitrogen_change, soil_water)
+                                       carbon_change, nitrogen_change, soil_water)
         if complete_run is None:
             continue
 
         form.all_runs_crop_model[sba] = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars,
-                                                                                        ora_subareas[sba].area_ha)
+                                                  ora_subareas[sba].area_ha)
         form.crop_run = True
         # outputs only
         # ============
         form.all_runs_output[sba] = complete_run
         if excel_out_flag:
             generate_excel_outfiles(form.lggr, study, sba, lookup_df, out_dir, ora_weather, complete_run,
-                                                                                                mngmnt_ss, mngmnt_fwd)
+                                    mngmnt_ss, mngmnt_fwd)
         print()
         all_runs[sba] = complete_run
 
@@ -239,6 +242,7 @@ def run_soil_cn_algorithms(form):
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return 0
 
+
 def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     '''
     amend crop management organic waste application
@@ -256,7 +260,7 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
                 new_amt = ow_apl['amount'] + owex_amnt
                 if ow_type != ow_apl['ow_type']:
                     if warn_flag:
-                        print(WARN_STR + 'changing organic waste from ' +  ow_apl['ow_type'] + ' to ' + ow_type)
+                        print(WARN_STR + 'changing organic waste from ' + ow_apl['ow_type'] + ' to ' + ow_type)
                         warn_flag = False
 
             ow_apl_new = {'ow_type': ow_type, 'amount': new_amt}
@@ -267,6 +271,7 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
 
     crop_mngmnt_mod['org_fert'] = org_fert_mod
     return crop_mngmnt_mod
+
 
 def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
     '''
@@ -285,6 +290,7 @@ def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_s
         soil_h2o_chng.data[var_name] = soil_water.data[var_name][:nmnths_ss]
 
     return carbon_chng, nitrogen_chng, soil_h2o_chng
+
 
 def recalc_fwd_soil_cn(form):
     '''
@@ -308,7 +314,7 @@ def recalc_fwd_soil_cn(form):
 
     # process each subarea
     # ====================
-    all_runs_out = {}   # clear previously recorded outputs
+    all_runs_out = {}  # clear previously recorded outputs
     for sba in ora_subareas:
 
         nmnths_ss = len(ora_subareas[sba].crop_mngmnt_ss['fert_n'])
@@ -327,9 +333,9 @@ def recalc_fwd_soil_cn(form):
 
             mngmnt_fwd = MngmntSubarea(crop_mngmnt_fwd, ora_parms, pi_tonnes)
             complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars, carbon_chng,
-                                                                                            nitrogen_chng, soil_h2o)
+                                           nitrogen_chng, soil_h2o)
             carbon_chng, nitrogen_chng, soil_h2o = _abbrev_to_steady_state(carbon_chng,
-                                                                                    nitrogen_chng, soil_h2o, nmnths_ss)
+                                                                           nitrogen_chng, soil_h2o, nmnths_ss)
             if complete_run is None:
                 continue
 

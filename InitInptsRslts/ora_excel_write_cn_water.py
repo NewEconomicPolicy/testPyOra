@@ -1,4 +1,5 @@
-#-------------------------------------------------------------------------------
+"""
+# -------------------------------------------------------------------------------
 # Name:        ora_excel_write_cn_water.py
 # Purpose:     a collection of reusable functions
 # Author:      Mike Martin
@@ -10,9 +11,9 @@
 # Description:
 #
 #
-#-------------------------------------------------------------------------------
-#!/usr/bin/env python
-
+# -------------------------------------------------------------------------------
+# !/usr/bin/env python
+"""
 __prog__ = 'ora_excel_write_cn_water.py'
 __version__ = '0.0.0'
 
@@ -34,31 +35,30 @@ WARN_STR = '*** Warning *** '
 26 colors for the 2010 Colour Alphabet Project which proposed 26 "letters" coded by colors 
 stated to be near the maximum number reliably distinguishable. 
 '''
-COLORS_DISTING = {'Green':'2BCE48', 'Damson':'4C005C', 'Forest':'005C31', 'Sky':'5EF1F2', 'Khaki':'8F7C00',
-          'Lime':'9DCC00', 'Blue':'0075DC', 'Jade':'94FFB5', 'Violet':'740AFF', 'Caramel':'993F00',
-          'Turquoise':'00998F', 'Navy':'003380', 'Ebony':'191919', 'Quagmire':'426600', 'Iron':'808080',
-          'Wine':'990000', 'Mallow':'C20088', 'Uranium':'E0FF66', 'Amethyst':'F0A3FF', 'Red':'FF0010',
-          'Zinnia':'FF5005', 'Pink':'FFA8BB', 'Orpiment':'FFA405', 'Honeydew':'FFCC99', 'Yellow':'FFFF00',
-          'Xanthin':'FFFF80', 'White':'FFFFFF'}
+COLORS_DISTING = {'Green': '2BCE48', 'Damson': '4C005C', 'Forest': '005C31', 'Sky': '5EF1F2', 'Khaki': '8F7C00',
+                  'Lime': '9DCC00', 'Blue': '0075DC', 'Jade': '94FFB5', 'Violet': '740AFF', 'Caramel': '993F00',
+                  'Turquoise': '00998F', 'Navy': '003380', 'Ebony': '191919', 'Quagmire': '426600', 'Iron': '808080',
+                  'Wine': '990000', 'Mallow': 'C20088', 'Uranium': 'E0FF66', 'Amethyst': 'F0A3FF', 'Red': 'FF0010',
+                  'Zinnia': 'FF5005', 'Pink': 'FFA8BB', 'Orpiment': 'FFA405', 'Honeydew': 'FFCC99', 'Yellow': 'FFFF00',
+                  'Xanthin': 'FFFF80', 'White': 'FFFFFF'}
 
-POOL_GROUPS = {'Active Pools':list(['pool_c_dpm', 'pool_c_rpm', 'pool_c_bio']),
-               'Resistant Pools':list(['pool_c_hum', 'pool_c_iom', 'tot_soc_simul'])}
-LINE_COLORS_POOL_GROUPS  = list(['FF0000', '00FF00','0000FF'])
+POOL_GROUPS = {'Active Pools': list(['pool_c_dpm', 'pool_c_rpm', 'pool_c_bio']),
+               'Resistant Pools': list(['pool_c_hum', 'pool_c_iom', 'tot_soc_simul'])}
+LINE_COLORS_POOL_GROUPS = list(['FF0000', '00FF00', '0000FF'])
 
-LINE_COLORS_SUBAREAS = list(['Blue',  'Jade', 'Red', 'Honeydew', 'Yellow'])
+LINE_COLORS_SUBAREAS = list(['Blue', 'Jade', 'Red', 'Honeydew', 'Yellow'])
 
-CHANGE_VARS = {}
-CHANGE_VARS['carbon'] = list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
-                                                                                'tot_soc_simul',  'co2_emiss'])
-CHANGE_VARS['nitrogen'] = list(['soil_n_sply', 'no3_crop_dem', 'no3_nitrif', 'no3_leach', 'no3_denit',
-                                                                            'nh4_crop_dem', 'nh4_volat'])
-CHANGE_VARS['water'] = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
-                             'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'pcnt_c'])
+CHANGE_VARS = {'carbon': list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_bio', 'pool_c_hum', 'pool_c_iom',
+                               'tot_soc_simul', 'co2_emiss']),
+               'nitrogen': list(['soil_n_sply', 'no3_crop_dem', 'no3_nitrif', 'no3_leach', 'no3_denit',
+                                 'nh4_crop_dem', 'nh4_volat']),
+               'water': list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
+                              'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'pcnt_c'])}
 
-PREFERRED_LINE_WIDTH = 25000       # 100020 taken from chart_example.py  width in EMUs
+PREFERRED_LINE_WIDTH = 25000  # 100020 taken from chart_example.py  width in EMUs
+
 
 def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart, metric, max_sheet_row):
-
     # generate charts for each subarea for two sets of metrics
     # ========================================================
     group_chart = LineChart()
@@ -72,13 +72,11 @@ def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nro
     group_chart.width = 60
 
     for iarea, col_indx in enumerate(col_indices):
-        subarea = col_indices[col_indx]
-
         # by design the sheet name is synonymous with the metric
         # ======================================================
         sheet = wb_obj[metric]
-        data = Reference(sheet, min_col = col_indx, min_row = 2, max_col = col_indx, max_row = max_sheet_row)
-        group_chart.add_data(data) #   title = subarea
+        data = Reference(sheet, min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
+        group_chart.add_data(data)  # title = subarea
 
         # Style the line just created
         # ===========================
@@ -97,11 +95,12 @@ def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nro
 
     return nrow_chart
 
+
 def _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row):
-    '''
+    """
     carbon only: generate charts for each subarea for two sets of metrics
     =====================================================================
-    '''
+    """
     for col_indx in col_indices:
         subarea = col_indices[col_indx]
         if subarea is None:
@@ -125,7 +124,7 @@ def _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_shee
             for isht, metric in enumerate(metrics_group):
                 sheet = wb_obj[metric]
 
-                data = Reference(sheet, min_col = col_indx, min_row = 2, max_col = col_indx, max_row = max_sheet_row)
+                data = Reference(sheet, min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
                 group_chart.add_data(data)
 
                 # Style the line just created
@@ -145,11 +144,12 @@ def _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_shee
 
     return nrow_chart
 
+
 def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row):
-    '''
+    """
        water only: generate charts for each subarea
        ============================================
-       '''
+    """
     for col_indx in col_indices:
         subarea = col_indices[col_indx]
         if subarea is None:
@@ -184,11 +184,11 @@ def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_she
 
     return nrow_chart
 
+
 def _generate_charts(fname, metric, sub_system, lookup_df):
-    '''
+    """
     add charts to an existing Excel file
-    '''
-    func_name =  __prog__ + ' _generate_charts'
+    """
 
     # load workbook previously created
     # ================================
@@ -219,18 +219,18 @@ def _generate_charts(fname, metric, sub_system, lookup_df):
     if sub_system == 'carbon':
         nrow_chart = _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
         nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                                                            'co2_emiss', max_sheet_row)
+                                                 'co2_emiss', max_sheet_row)
     elif sub_system == 'nitrogen':
         for metric in CHANGE_VARS['nitrogen']:
             nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                                                                metric, max_sheet_row)
+                                                     metric, max_sheet_row)
     elif sub_system == 'water':
         nrow_chart = _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
         for metric in CHANGE_VARS['water']:
             nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                                                                metric, max_sheet_row)
+                                                     metric, max_sheet_row)
     try:
-        wb_obj.active = len(wb_obj.sheetnames) - 1 # make the charts sheet active
+        wb_obj.active = len(wb_obj.sheetnames) - 1  # make the charts sheet active
         wb_obj.save(fname)
         print('\tcreated: ' + fname)
     except PermissionError as e:
@@ -238,16 +238,18 @@ def _generate_charts(fname, metric, sub_system, lookup_df):
 
     return
 
-def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
-    '''
 
-    '''
+def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
+    """
+    Entry
+    """
+    var_name = None
     for indx, sub_system in enumerate(CHANGE_VARS):
 
         # make a safe name
         # ===============
         sht_abbrev = sub_system
-        fname = join(out_dir, study.study_name + ' z_' + sht_abbrev + '.xlsx')   # add 'z' to force order
+        fname = join(out_dir, study.study_name + ' z_' + sht_abbrev + '.xlsx')  # add 'z' to force order
         if isfile(fname):
             try:
                 remove(fname)
@@ -274,7 +276,7 @@ def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
                 print(WARN_STR + str(err) + ' for variable ' + var_name)
                 data_frame = DataFrame()
 
-            data_frame.to_excel(writer, var_name, index = False)
+            data_frame.to_excel(writer, var_name, index=False)
 
         writer.close()
 

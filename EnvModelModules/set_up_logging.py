@@ -21,13 +21,13 @@ import time
 from glob import glob
 from PyQt5.QtGui import QTextCursor
 
-bbox_default = [116.90045, 28.2294, 117.0, 29.0] # bounding box default - somewhere in SE Europe
+bbox_default = [116.90045, 28.2294, 117.0, 29.0]  # bounding box default - somewhere in SE Europe
 sleepTime = 5
 
 def set_up_logging(form, appl_name):
-    '''
-    # this function is called to setup logging
-    '''
+    """
+    this function is called to setup logging
+    """
 
     # for log file
     date_stamp = time.strftime('_%Y_%m_%d_%I_%M_%S')
@@ -71,6 +71,9 @@ def set_up_logging(form, appl_name):
     return
 
 class OutLog:
+    """
+    C
+    """
     def __init__(self, edit, out=None, color=None):
         """
         can write stdout, stderr to a QTextEdit widget
@@ -83,10 +86,15 @@ class OutLog:
         self.color = color
 
     def flush(self):
-
+        """
+        C
+        """
         pass
 
     def write(self, mstr):
+        """
+        C
+        """
         if self.color:
             tc = self.edit.textColor()
             self.edit.setTextColor(self.color)

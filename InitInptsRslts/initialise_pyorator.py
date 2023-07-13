@@ -26,7 +26,6 @@ from json.decoder import JSONDecodeError
 
 from time import sleep
 import sys
-from win32api import GetLogicalDriveStrings
 
 from ora_excel_read_misc import identify_study_areas
 from farm_detailGui import repopulate_farms_dropdown

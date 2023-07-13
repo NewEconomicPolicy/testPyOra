@@ -1039,9 +1039,9 @@ class AllTabs(QTabWidget):
         return
 
     def changeHelpText(self, w_combo):
-        '''
+        """
         modify help text according to metric
-        '''
+        """
         metric = w_combo.currentText()
         defn, units = fetch_defn_units_from_pyora_display(self.settings['lookup_df'], metric)
         helpText = 'Display ' + defn
@@ -1062,7 +1062,9 @@ class AllTabs(QTabWidget):
             display_metric(self, group, metric, sba, recalc_flag)
 
     def displayXlsxOutput(self):
-
+        """
+        C
+        """
         excel_file = self.settings['out_dir'] + '\\' + self.w_combo17.currentText()
         excel_path = self.settings['excel_path']
         Popen(list([excel_path, excel_file]), stdout = DEVNULL)
