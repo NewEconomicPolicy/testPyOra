@@ -22,9 +22,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required.">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module.">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +42,8 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;last_opened_file_path&quot;: &quot;G:/PyOraDev/testPyOra/Constructor&quot;
+    &quot;last_opened_file_path&quot;: &quot;G:/PyOraDev/testPyOra/Constructor&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -232,7 +233,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689075617826</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module.">
+      <created>1689137774165</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1689137774165</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -267,7 +275,8 @@
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during generation of Excel results files - fixed by use of write.close() instead of write.save() in ora_excel_write.py and ora_excel_write_cn_water.py modules. &#10;Tidied code." />
     <MESSAGE value="Minor code Tidy" />
     <MESSAGE value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
-    <option name="LAST_COMMIT_MESSAGE" value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
+    <MESSAGE value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
+    <option name="LAST_COMMIT_MESSAGE" value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
