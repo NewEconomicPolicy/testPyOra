@@ -22,9 +22,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module.">
-      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature.">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -240,7 +241,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689137774165</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature.">
+      <created>1689309271928</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1689309271928</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -276,7 +284,8 @@
     <MESSAGE value="Minor code Tidy" />
     <MESSAGE value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
     <MESSAGE value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
-    <option name="LAST_COMMIT_MESSAGE" value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
+    <MESSAGE value="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature." />
+    <option name="LAST_COMMIT_MESSAGE" value="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -310,6 +319,11 @@
           <url>file://$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py</url>
           <line>150</line>
           <option name="timeStamp" value="190" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>312</line>
+          <option name="timeStamp" value="197" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

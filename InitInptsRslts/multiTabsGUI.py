@@ -57,9 +57,9 @@ from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 
 class AllTabs(QTabWidget):
-    '''
+    """
     create 3 tabs each of which use QGridLayout
-    '''
+    """
     def __init__(self, settings, lggr, ora_parms, wthr_sets, wthr_rsrces_gnrc, anml_prodn, parent = None):
 
         super(AllTabs, self).__init__(parent)
@@ -97,11 +97,11 @@ class AllTabs(QTabWidget):
     # ================================ end of AllTabs =========================
 
     def tab0UI(self):
-        '''
+        """
         tab for farm and weather details
         creates these QComboBox names for studies: w_combo00  farm detail: .w_combo02
                             weather:  w_combo29s, w_combo30, w_combo30w, w_combo31s
-        '''
+        """
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
 
@@ -236,16 +236,16 @@ class AllTabs(QTabWidget):
         self.w_tab0.setLayout(grid)
 
     def checkLvstck(self):
-        '''
+        """
 
-        '''
+        """
         ngroups = check_livestock_run_data(self, ntab = 0)
         print('Livestock animal types to process: {}'.format(ngroups))
 
     def viewEconFile(self):
-        '''
+        """
         view Excel economics file
-        '''
+        """
         mgmt_dir = self.w_run_dir0.text()
         econ_xls_fname = normpath(join(mgmt_dir, FNAME_ECON))
         if not isfile(econ_xls_fname):
@@ -261,9 +261,9 @@ class AllTabs(QTabWidget):
         Popen(list([excel_path, econ_xls_fname]), stdout = DEVNULL)
 
     def viewRunFile0(self):
-        '''
+        """
         view Excel run file
-        '''
+        """
         mgmt_dir = self.w_run_dir0.text()
         run_xls_fname = normpath(join(mgmt_dir, FNAME_RUN))
 
@@ -271,23 +271,23 @@ class AllTabs(QTabWidget):
         Popen(list([excel_path, run_xls_fname]), stdout = DEVNULL)
 
     def checkForInteger(self):
-        '''
+        """
         TODO: not used as yet
-        '''
+        """
         s = 1.2
         isinstance(s, float)
         isinstance(s, int)
 
     def checkWthrSrces(self):
-        '''
+        """
         invoked when user clicks use CSV checkbox
-        '''
+        """
         print('CSV checkbox status: {}'.format(self.w_use_csv.isChecked()))
 
     def fetchCsvFile(self):
-        '''
+        """
 
-        '''
+        """
         csv_fn_cur = self.w_csv_fn.text()
         csv_fn, dummy = QFileDialog.getOpenFileName(self, 'Open file', csv_fn_cur, 'CSV files (*.csv)')
         if csv_fn != '' and csv_fn != csv_fn_cur:
@@ -296,9 +296,9 @@ class AllTabs(QTabWidget):
                 self.w_csv_fn.setText(csv_fn)
 
     def viewCsvFile(self):
-        '''
+        """
         invoke notepad to display weather file and report details
-        '''
+        """
         csv_fn_cur = self.w_csv_fn.text()
         notepad_path = self.settings['notepad_path']
         Popen(list([notepad_path, csv_fn_cur]), stdout=DEVNULL)
@@ -308,9 +308,9 @@ class AllTabs(QTabWidget):
         '''
 
     def removeFarmClicked(self):
-        '''
+        """
 
-        '''
+        """
         w_close = QMessageBox()
         w_close.setText('You sure?')
         w_close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
@@ -332,34 +332,34 @@ class AllTabs(QTabWidget):
         return
 
     def checkFarm(self):
-        '''
+        """
 
-        '''
+        """
         mgmt_dir = self.w_run_dir0.text()
         run_fn_dscr = check_xls_run_file(self.w_run_model, mgmt_dir)
 
         return
 
     def checkFarms(self):
-        '''
+        """
 
-        '''
+        """
         check_sheets_for_farms(self)
 
         return
 
     def changeStudy(self):
-        '''
+        """
         if study is changed then farm must also be changed
-        '''
+        """
         repopulate_farms_dropdown(self)
 
         return
 
     def changeFarmName(self):
-        '''
+        """
         at start up there are zero farms
-        '''
+        """
         clear_farm_fields(self)
 
         farms = identify_farms_for_study(self)
@@ -372,9 +372,9 @@ class AllTabs(QTabWidget):
         return
 
     def postFarmDetail(self):
-        '''
+        """
         when the farm changes disable action push buttons
-        '''
+        """
         farm_name = self.w_combo02.currentText()
         self.w_farm_name.setText(farm_name)
 
@@ -403,9 +403,9 @@ class AllTabs(QTabWidget):
                 self.w_combo36.addItem(sba)
 
     def saveFarmClicked(self):
-        '''
+        """
 
-        '''
+        """
         if validate_farm_var_fields(self):          # checks farm name and numeric fields
             print('Saving farm... ' + self.w_farm_name.text())
             QApplication.processEvents()
@@ -423,9 +423,9 @@ class AllTabs(QTabWidget):
         return
 
     def editCropParms(self):
-        '''
+        """
 
-        '''
+        """
         edit_crop_parms(self)
 
         return
@@ -433,9 +433,9 @@ class AllTabs(QTabWidget):
     # ================================ end of tab0UI =========================
 
     def tab1UI(self):
-        '''
+        """
         subareas crop management
-        '''
+        """
         grid = QGridLayout()  # define layout
         grid.setSpacing(10)
 
@@ -488,9 +488,9 @@ class AllTabs(QTabWidget):
 
     def makeMngmntWidgets(self, sba_indx, grid, w_sba_descrs,  w_areas, w_nrota_ss, w_ss_mgmt, w_cpy_mgmt,
                                                                                     w_nrota_fwd, w_fwd_mgmt, irow):
-        '''
+        """
         construct grid of widgets defining subareas
-        '''
+        """
 
         # descriptions
         # ============
@@ -556,9 +556,9 @@ class AllTabs(QTabWidget):
         display_subarea(self, sba_indx)     # w_lbl_res.setText(summary)
 
     def sbaDescRotaTextChanged(self, sba_indx):
-        '''
+        """
         adjust active subareas according to user input
-        '''
+        """
         mess = 'Number of rotation years '
         rota_flag = False
 
@@ -586,9 +586,9 @@ class AllTabs(QTabWidget):
     # ================================ end of tab1UI =========================
 
     def tab2UI(self):
-        '''
+        """
         Livestock - creates widgets: w_bought_in, w_feed_qties, w_feed_types, w_numbers, w_strtgs
-        '''
+        """
         grid = QGridLayout()  # define layout
         grid.setSpacing(10)
 
@@ -599,9 +599,9 @@ class AllTabs(QTabWidget):
         w_feed_qties = {}
         w_bought_in = {}
 
-        '''
+        """
         construct grid of widgets defining livestock values
-        '''
+        """
         irow = 0
         anml_typs = self.anml_prodn.gnrc_anml_types
 
@@ -735,9 +735,9 @@ class AllTabs(QTabWidget):
         self.w_tab2.setLayout(grid)
 
     def clearDataClicked(self):
-        '''
+        """
         resets livestock widgets
-        '''
+        """
         for anml in ANML_ABBREVS:
             for findx in range(NFEED_TYPES):
                 fd_typ = str(findx + 1)
@@ -750,18 +750,18 @@ class AllTabs(QTabWidget):
         return
 
     def changeSystem(self):
-        '''
+        """
         if system is changed then expand 3 letter code
-        '''
+        """
         prod_system = self.w_systems.currentText()
         self.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
 
         return
 
     def evaluateBoughtIn(self):
-        '''
+        """
 
-        '''
+        """
         anml_typs = self.anml_prodn.gnrc_anml_types
         for anml in anml_typs:
             try:
@@ -791,10 +791,10 @@ class AllTabs(QTabWidget):
     # ================================ end of tab2UI =========================
 
     def tab3UI(self):
-        '''
+        """
         Enables user to run PyOrator operations
         creates these QComboBox names:  w_combo07, w_combo08, w_combo09, w_combo10, w_combo11, w_combo17
-        '''
+        """
 
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
@@ -1017,9 +1017,9 @@ class AllTabs(QTabWidget):
         self.w_tab3.setLayout(grid)
 
     def viewRunFile(self):
-        '''
+        """
         view Excel run file
-        '''
+        """
         mgmt_dir = self.w_run_dir3.text()
         run_xls_fname = normpath(join(mgmt_dir, FNAME_RUN))
 
@@ -1048,9 +1048,9 @@ class AllTabs(QTabWidget):
         w_combo.setToolTip(helpText)
 
     def displayMetric(self, w_combo, group, recalc_flag = False):
-        '''
+        """
         this function is used by the main and recalculation tabs
-        '''
+        """
         if recalc_flag:
             sba = self.w_combo36.currentText()
         else:
@@ -1075,9 +1075,9 @@ class AllTabs(QTabWidget):
         '''
 
     def runModelClicked(self):
-        '''
+        """
 
-        '''
+        """
         ret_code = run_soil_cn_algorithms(self)
         if ret_code == 0:
             calc_livestock_data(self)
@@ -1102,11 +1102,11 @@ class AllTabs(QTabWidget):
     # ================================ end of tab3UI =========================
 
     def tab4UI(self):
-        '''
+        """
         tab for foward run sensitivity analysis
         creates these QComboBox names:  w_combo13 w_combo37, w_combo38, w_combo39, w_combo41s
 
-        '''
+        """
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
 
@@ -1260,9 +1260,9 @@ class AllTabs(QTabWidget):
         self.w_tab4.setLayout(grid)
 
     def recalcClicked(self):
-        '''
+        """
 
-        '''
+        """
         recalc_runs_fwd = recalc_fwd_soil_cn(self)
         if recalc_runs_fwd is None:
             self.w_disp2_c.setEnabled(False)
@@ -1286,11 +1286,11 @@ class AllTabs(QTabWidget):
     # ================================ end of tab4UI =========================
 
     def tab5UI(self):
-        '''
+        """
         tab for catchment
         creates these QComboBox names:
 
-        '''
+        """
         grid = QGridLayout()    # define layout
         grid.setSpacing(10)
 

@@ -106,9 +106,9 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
 
 def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):
-    '''
+    """
 
-    '''
+    """
     pettmp = weather.pettmp_fwd
     if management.ntsteps > len(pettmp['precip']):
         print('Cannot proceed with forward run due to insuffient weather timesteps ')
@@ -244,9 +244,9 @@ def run_soil_cn_algorithms(form):
 
 
 def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
-    '''
+    """
     amend crop management organic waste application
-    '''
+    """
     crop_mngmnt_mod = copy(crop_mngmnt)
 
     warn_flag = True
@@ -274,9 +274,9 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
 
 
 def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
-    '''
+    """
     abbreviate carbon, nitrogen and soil water objects to steady state only
-    '''
+    """
     carbon_chng = CarbonChange()
     for var_name in carbon_chng.var_name_list:
         carbon_chng.data[var_name] = carbon_change.data[var_name][:nmnths_ss]
@@ -293,10 +293,10 @@ def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_s
 
 
 def recalc_fwd_soil_cn(form):
-    '''
+    """
     apply modified management to the forward run
     typically additional organic waste or irrigation
-    '''
+    """
     func_name = __prog__ + '\trecalc_fwd_soil_cn'
 
     ora_weather = form.ora_weather
@@ -305,8 +305,13 @@ def recalc_fwd_soil_cn(form):
     ora_parms = form.ora_parms
 
     ow_type = form.w_combo13.currentText()
-    owex_min = float(form.w_owex_min.text())
-    owex_max = float(form.w_owex_max.text())
+    try:
+        owex_min = float(form.w_owex_min.text())
+        owex_max = float(form.w_owex_max.text())
+    except ValueError as err:
+        print(ERROR_STR + str(err) + ' organic waste applied must be a number')
+        return None
+
     nsteps = 6
     owext_incr = (owex_max - owex_min) / nsteps
 
