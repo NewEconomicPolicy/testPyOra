@@ -347,7 +347,7 @@ def read_config_file(form):
 
     form.w_tab_wdgt.w_owex_min.setText(str(owex_min))
     form.w_tab_wdgt.w_owex_max.setText(str(owex_max))
-    form.w_tab_wdgt.w_combo13.setCurrentIndex(ow_type_indx)
+    form.w_tab_wdgt.w_combo13.setCurrentIndex(max(0, ow_type_indx))     # value must >= 0
     form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
     # populate popup lists

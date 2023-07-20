@@ -22,10 +22,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature.">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Resolved in Sensitivity Analysis to trap non-numeric values for organic waste applied.&#10;Minor changes to conform to PEP standards.">
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,12 +41,12 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;last_opened_file_path&quot;: &quot;G:/PyOraDev/testPyOra/Constructor&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "last_opened_file_path": "C:/Apps/PyOrator/ORATOR/setup",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="G:\PyOraDev\testPyOra\Constructor" />
@@ -61,7 +61,8 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="E:\Python38\python.exe" />
-      <option name="WORKING_DIRECTORY" value="E:/ORATOR/setup" />
+      <option name="SDK_NAME" value="Python 3.8" />
+      <option name="WORKING_DIRECTORY" value="C:/Apps/PyOrator/ORATOR/setup" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -248,7 +249,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689309271928</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Resolved in Sensitivity Analysis to trap non-numeric values for organic waste applied.&#10;Minor changes to conform to PEP standards.">
+      <created>1689757461809</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1689757461809</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -285,16 +293,12 @@
     <MESSAGE value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
     <MESSAGE value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
     <MESSAGE value="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature." />
-    <option name="LAST_COMMIT_MESSAGE" value="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature." />
+    <MESSAGE value="Resolved in Sensitivity Analysis to trap non-numeric values for organic waste applied.&#10;Minor changes to conform to PEP standards." />
+    <option name="LAST_COMMIT_MESSAGE" value="Resolved in Sensitivity Analysis to trap non-numeric values for organic waste applied.&#10;Minor changes to conform to PEP standards." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>1040</line>
-          <option name="timeStamp" value="104" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ora_excel_write.py</url>
           <line>262</line>
@@ -319,11 +323,6 @@
           <url>file://$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py</url>
           <line>150</line>
           <option name="timeStamp" value="190" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>312</line>
-          <option name="timeStamp" value="197" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

@@ -312,6 +312,10 @@ def recalc_fwd_soil_cn(form):
         print(ERROR_STR + str(err) + ' organic waste applied must be a number')
         return None
 
+    if (owex_max - owex_min) <= 0:
+        print(ERROR_STR + ' maximum organic waste applied must exceed minimum')
+        return None
+
     nsteps = 6
     owext_incr = (owex_max - owex_min) / nsteps
 
