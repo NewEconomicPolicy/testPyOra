@@ -15,8 +15,8 @@ __author__ = 's03mm5'
 
 import sys
 from PyQt5.QtGui import QPixmap, QFont, QColor
-from PyQt5.QtWidgets import QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout,  \
-                                                                                                QPushButton, QTextEdit
+from PyQt5.QtWidgets import (QLabel, QWidget, QApplication, QHBoxLayout, QVBoxLayout, QGridLayout,
+                                                                                        QPushButton, QTextEdit)
 from multiTabsGUI import AllTabs
 
 from initialise_pyorator import read_config_file, initiation, write_config_file
@@ -28,11 +28,11 @@ STD_BTN_SIZE = 75
 STD_CMBO_SIZE = 150
 
 class Form(QWidget):
-    '''
+    """
    define two vertical boxes - in LH vertical box put the painter and in RH put the grid
    define main horizontal box to put LH and RH vertical boxes in
    grid layout consists of combo boxes, labels and buttons
-   '''
+   """
     def __init__(self, parent=None):
 
         super(Form, self).__init__(parent)
@@ -122,8 +122,7 @@ class Form(QWidget):
         outer_layout.addLayout(bot_hbox)
         self.setLayout(outer_layout)
 
-        # posx, posy, width, height
-        self.setGeometry(500, 50, 750, 400)
+        self.setGeometry(500, 50, 750, 400)     # posx, posy, width, height
         self.setWindowTitle('Run ORATOR analysis')
 
         # reads and set values from last run
@@ -150,9 +149,9 @@ class Form(QWidget):
         self.close_down()
 
     def close_down(self):
-        '''
+        """
         exit cleanly
-        '''
+        """
 
         # close various files
         # ===================
@@ -170,11 +169,11 @@ class Form(QWidget):
         self.close()
 
 def main():
-    '''
+    """
     program entry point
     The splash screen is controlled from within Python by the pyi_splash module, which can be imported at runtime.
     This module cannot be installed by a package manager because it is part of PyInstaller and is included as needed.
-    '''
+    """
     try:
         import pyi_splash
 

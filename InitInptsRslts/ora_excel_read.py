@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Name:        ora_excel_read.py
 # Purpose:     a collection of reusable functions
 # Author:      Mike Martin
@@ -7,11 +7,9 @@
 # Definitions:
 #   spin_up
 #
-# Description:
+# Description:#
 #
-#
-#-------------------------------------------------------------------------------
-#!/usr/bin/env python
+# -------------------------------------------------------------------------------
 
 __prog__ = 'ora_excel_read.py'
 __version__ = '0.0.0'
@@ -22,6 +20,7 @@ __version__ = '0.0.0'
 from os.path import isfile, isdir, split, normpath, join
 from os import mkdir, sep as os_sep
 
+from string import ascii_uppercase
 from copy import copy
 from openpyxl import load_workbook
 from pandas import Series, read_excel, DataFrame
@@ -39,13 +38,13 @@ from ora_gui_misc_fns import format_sbas, farming_system, region_validate, Lives
 METRIC_LIST = list(['precip', 'tair'])
 
 ANML_ABBREVS = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
-ANML_PRODN_SHEET = 'Typical animal production'   # Herrero table
+ANML_PRODN_SHEET = 'Typical animal production'  # Herrero table
 
 REQUIRED_SHEET_NAMES = list(['N constants', 'Crop parms', 'Org Waste parms', ANML_PRODN_SHEET])
-FARM_WTHR_SHEET_NAMES = {'lctn': 'Farm location', 'wthr':'Weather'}
+FARM_WTHR_SHEET_NAMES = {'lctn': 'Farm location', 'wthr': 'Weather'}
 
 RUN_SHT_NAMES = {'sign': 'Signature', 'lctn': 'Farm location', 'wthr': 'Weather', 'sbas': 'Subareas',
-                                                                                            'lvstck':'Livestock'}
+                 'lvstck': 'Livestock'}
 SOIL_METRICS = list(['t_depth', 't_clay', 't_sand', 't_silt', 't_carbon', 't_bulk', 't_pH', 't_salinity'])
 MNGMNT_SHT_HDRS = ['period', 'year', 'month', 'crop_name', 'yld', 'fert_type', 'fert_n', 'ow_type', 'ow_amnt', 'irrig']
 
@@ -67,164 +66,9 @@ ERR_STR = '*** Error *** '
 ERR_STR_SHEET = ERR_STR + 'reading sheet\t'
 WARN_STR = '*** Warning *** '
 
-from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 MAX_SUB_AREAS = 8
 NFEED_TYPES = 5
-
-class ReadLivestockSheet(object, ):
-
-    def __init__(self, w_run_dir3, anml_prodn_obj):
-        """
-
-        """
-        mgmt_dir = w_run_dir3.text()
-        run_xls_fn = join(mgmt_dir, FNAME_RUN)
-
-        wb_obj = load_workbook(run_xls_fn, data_only=True)
-
-        print('Reading livestock sheet ')
-        anml_abbrevs = ANML_ABBREVS
-
-        lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
-        max_row = lvstck_sht.max_row
-        max_col = lvstck_sht.max_column
-
-        df = DataFrame(lvstck_sht.values, columns=['descr'] + anml_abbrevs)
-        lvstck_dscrs = list(df.values[0][1:])
-
-        wb_obj.close()
-
-        # construct previous JSON derived dictionary
-        lvstck_content = {'site definition': {'area name': 'all', 'area (ha)': 3.5, 'region': 'Eastern Africa',
-                                                                                                    'system': 'MRA'}}
-        # step through each animal type
-        # =============================
-        lvstck_indx = 0
-        for anml, descr in zip(anml_abbrevs, lvstck_dscrs):
-            nanmls = df[anml].values[1]
-            if nanmls == 0:
-                continue
-            strtgy =  df[anml].values[2]
-            lvstck = {'type': descr, 'number': nanmls, 'strategy': strtgy}
-
-            indx = 3
-            feed_indx = 0
-            for ic in range(NFEED_TYPES):
-                feed_type = df[anml].values[indx]
-                val = df[anml].values[indx + 1]
-                if feed_type != 'None' and val > 0:
-                    feed_indx += 1
-                    feed_id = 'feed' + str(feed_indx)
-                    lvstck[feed_id] = {'type': feed_type, 'value': val}
-
-                indx += 2
-
-            # check for bought in
-            # ===================
-            val = df[anml].values[-1]
-            if val is not None:
-                feed_indx += 1
-                feed_id = 'feed' + str(feed_indx)
-                lvstck[feed_id] = {'type': 'bought in', 'value': float(val)}
-
-
-            if feed_indx > 0:
-                lvstck_indx += 1
-                lvstck_id = 'livestock' + str(lvstck_indx)
-                lvstck_content['site definition'][lvstck_id] = lvstck
-
-        # from JSON legacy
-        # ================
-        site_defn = lvstck_content['site definition']
-        area = site_defn['area name']
-
-        region = region_validate(site_defn, anml_prodn_obj)
-        system = farming_system(site_defn)
-
-        lvstck_grp = []
-        for key in site_defn:
-            if key.find('livestock') > -1:
-                lvstck_grp.append(LivestockEntity(site_defn[key], anml_prodn_obj))
-
-        subareas = {}
-        subareas[area] = {'region': region, 'system': system, 'lvstck_grp': lvstck_grp}
-
-        self.subareas = subareas
-
-        print()  # cosmetic
-        '''
-        for anml, nmbr in zip(anml_abbrevs, df.values[irow][1:]):  # numbers of animals
-            if nmbr is not None:
-                pass
-        irow += 1
-        for anml, strtg in zip(anml_abbrevs, df.values[irow][1:]):  # strategies
-            pass    # strtg
-
-        for findx in range(NFEED_TYPES):
-            irow += 1
-            fd_typ = str(findx + 1)
-            for anml, feed_typ in zip(anml_abbrevs, df.values[irow][1:]):  # feed type
-                pass  # feed_typ
-
-            irow += 1
-            for anml, feed_qty in zip(anml_abbrevs, df.values[irow][1:]):  # feed quantity as a percentage
-                pass  # feed_qty
-
-        irow += 1
-        for anml, pcnt in zip(anml_abbrevs, df.values[irow][1:]):  # percentage bought in
-            if pcnt is not None:
-                pass  # pcnt     
-        '''
-
-def _create_ow_fert(df):
-    """
-'   create fertiliser and organic waste lists from series
-    """
-    fert_ns = []
-    for fert_type, fert_n in zip(df['fert_type'].values, df['fert_n'].values):
-        if fert_type is None:
-            fert_ns.append(None)
-        else:
-            fert_ns.append({'fert_type': fert_type, 'fert_n': fert_n})
-
-    org_ferts = []
-    for ow_type, ow_amnt in zip(df['ow_type'].values, df['ow_amnt'].values):
-        if ow_type is None:
-            org_ferts.append(None)
-        else:
-            org_ferts.append({'ow_type': ow_type, 'amount': ow_amnt})
-
-    irrigs_tmp = list(df['irrig'].values)
-    irrigs = []
-    for irrig in irrigs_tmp:
-        if irrig is None:
-            irrigs.append(0)
-        else:
-            if isnan(irrig):
-                irrigs.append(0)
-            else:
-                irrigs.append(irrig)
-
-    return fert_ns, org_ferts, irrigs
-
-def _add_tgdd_to_weather(tair_list):
-    """
-    growing degree days indicates the cumulative temperature when plant growth is assumed to be possible (above 5Â°C)
-    """
-    imnth = 1
-    grow_dds = []
-    for tair in tair_list:
-
-        dummy, ndays = monthrange(2011, imnth)
-        n_grow_days = max(0, ndays * (tair - 5))    #  (eq.3.2.2)
-        grow_dds.append(round(n_grow_days,3))
-
-        imnth += 1
-        if imnth > 12:
-            imnth = 1
-
-    return grow_dds
 
 def _validate_timesteps(run_xls_fn, subareas):
     """
@@ -240,7 +84,7 @@ def _validate_timesteps(run_xls_fn, subareas):
     # ==========================
     wthr_sht = wb_obj[RUN_SHT_NAMES['wthr']]
     wthr_cols = ['period', 'year', 'month', 'precip', 'tair']
-    if wthr_sht.max_column == 6:                                      # Arkan: where does .max_column property come from? (which library, cannot find online)
+    if wthr_sht.max_column == 6:  # Arkan: where does .max_column property come from? (which library, cannot find online)
         wthr_cols += ['actl_yr']
     try:
         df = DataFrame(wthr_sht.values, columns=wthr_cols)
@@ -284,7 +128,7 @@ def _validate_timesteps(run_xls_fn, subareas):
         else:
             warn_mess += 'subarea sheets have inconsistent number of months: ' + str(nmnths_subareas)
 
-    wb_obj.close
+    wb_obj.close()
 
     # add warnings
     # ============
@@ -294,6 +138,7 @@ def _validate_timesteps(run_xls_fn, subareas):
     print(mess)
 
     return ret_code
+
 
 def check_xls_run_file(w_run_model, mgmt_dir):
     """
@@ -323,17 +168,41 @@ def check_xls_run_file(w_run_model, mgmt_dir):
         mess += 'uncompliant'
         return mess
 
-    
     ret_var = read_farm_wthr_xls_file(run_xls_fn)
     if ret_var is None:
         mess += 'uncompliant'
     else:
         subareas = ret_var[0]
         mess = format_sbas(subareas)
-        if (_validate_timesteps(run_xls_fn, subareas)):
-            w_run_model.setEnabled(True)      # activate carbon nitrogen model push button
+        if _validate_timesteps(run_xls_fn, subareas):
+            w_run_model.setEnabled(True)  # activate carbon nitrogen model push button
 
     return mess
+
+def _sync_wthr_to_mgmt(pettmp, ntsteps_wthr, ntsteps_sim):
+    """
+    Truncate or stretch supplied weather to match length for simulation period
+    """
+    if ntsteps_sim > ntsteps_wthr:
+        mess = 'Stretched'
+    else:
+        mess = 'Truncated'
+
+    nsim_yrs = int(ntsteps_sim / 12)
+    nwthr_yrs = int(ntsteps_wthr / 12)
+    print(mess + ' weather from {} years to match simulation period of {} years'.format(nwthr_yrs, nsim_yrs))
+
+    NPERIODS = 10
+    pettmp_sim = {}
+    for metric in pettmp:
+        pettmp_lst = []
+        for iyr in range(NPERIODS):
+            pettmp_lst += pettmp[metric]
+            if len(pettmp_lst) > ntsteps_sim:
+                pettmp_sim[metric] = pettmp_lst[:ntsteps_sim]
+                break
+
+    return pettmp_sim
 
 def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     """
@@ -405,7 +274,7 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     if wthr_sht.max_column == 6:
         wthr_cols += ['actl_yr']
     try:
-        df = DataFrame(wthr_sht.values, columns = wthr_cols)
+        df = DataFrame(wthr_sht.values, columns=wthr_cols)
     except ValueError as err:
         print(ERR_STR + 'reading run file weather sheet: ' + str(err))
         return ret_var
@@ -443,31 +312,6 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
         ret_var = (ora_weather, ora_subareas)
 
     return ret_var
-
-def _sync_wthr_to_mgmt(pettmp, ntsteps_wthr, ntsteps_sim):
-    """
-    Truncate or stretch supplied weather to match length for simulation period
-    """
-    if ntsteps_sim > ntsteps_wthr:
-        mess = 'Stretched'
-    else:
-        mess = 'Truncated'
-
-    nsim_yrs = int(ntsteps_sim / 12)
-    nwthr_yrs = int(ntsteps_wthr / 12)
-    print(mess + ' weather from {} years to match simulation period of {} years'.format(nwthr_yrs, nsim_yrs))
-
-    NPERIODS = 10
-    pettmp_sim = {}
-    for metric in pettmp:
-        pettmp_lst = []
-        for iyr in range(NPERIODS):
-            pettmp_lst += pettmp[metric]
-            if len(pettmp_lst) > ntsteps_sim:
-                pettmp_sim[metric] = pettmp_lst[:ntsteps_sim]
-                break
-
-    return pettmp_sim
 
 def _make_current_crop_list(crop_names):
     """
@@ -510,8 +354,8 @@ def _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
         pi_tonnes[indx_strt:indx_end] = crop_vars[crop]['pi_tonnes']
         pi_props[indx_strt:indx_end] = crop_vars[crop]['pi_prop']
     else:
-        pi_tonnes[indx_strt:indx_end] = ngrow_mnths*[999]
-        pi_props[indx_strt:indx_end] = ngrow_mnths*[999]
+        pi_tonnes[indx_strt:indx_end] = ngrow_mnths * [999]
+        pi_props[indx_strt:indx_end] = ngrow_mnths * [999]
 
     yield_typ = crop_vars[crop]['max_yld']  # TODO: should get yield from run file
 
@@ -525,8 +369,8 @@ def _make_pi_props_tonnes(crop_names, indx_mode, crop_vars):
     func_name = __prog__ + '\t_make_pi_props_tonnes'
 
     ntsteps = len(crop_names)
-    pi_props = ntsteps*[0]
-    pi_tonnes = ntsteps*[0]
+    pi_props = ntsteps * [0]
+    pi_tonnes = ntsteps * [0]
 
     crops_ss = []
     crops_fwd = []
@@ -569,10 +413,11 @@ def _make_pi_props_tonnes(crop_names, indx_mode, crop_vars):
 
     return pi_props, pi_tonnes, crops_ss, crops_fwd
 
-class Crop(object,):
+class Crop(object, ):
+    """
+    X
     """
 
-    """
     def __init__(self, crop_name, yield_typ):
         """
         Assumptions:
@@ -580,8 +425,41 @@ class Crop(object,):
         self.crop_lu = crop_name
         self.yield_typ = yield_typ
 
-class ReadMngmntSubareas(object, ):
+def _create_ow_fert(df):
+    """
+'   create fertiliser and organic waste lists from series
+    """
+    fert_ns = []
+    for fert_type, fert_n in zip(df['fert_type'].values, df['fert_n'].values):
+        if fert_type is None:
+            fert_ns.append(None)
+        else:
+            fert_ns.append({'fert_type': fert_type, 'fert_n': fert_n})
 
+    org_ferts = []
+    for ow_type, ow_amnt in zip(df['ow_type'].values, df['ow_amnt'].values):
+        if ow_type is None:
+            org_ferts.append(None)
+        else:
+            org_ferts.append({'ow_type': ow_type, 'amount': ow_amnt})
+
+    irrigs_tmp = list(df['irrig'].values)
+    irrigs = []
+    for irrig in irrigs_tmp:
+        if irrig is None:
+            irrigs.append(0)
+        else:
+            if isnan(irrig):
+                irrigs.append(0)
+            else:
+                irrigs.append(irrig)
+
+    return fert_ns, org_ferts, irrigs
+
+class ReadMngmntSubareas(object, ):
+    """
+    X
+    """
     def __init__(self, wb_obj, sba, soil_for_area, crop_vars, area_ha):
         """
 
@@ -594,7 +472,7 @@ class ReadMngmntSubareas(object, ):
         header_row = next(rows_generator)
         data_rows = [list(row) for (_, row) in zip(range(ntsteps), rows_generator)]
 
-        df = DataFrame(data_rows, columns = MNGMNT_SHT_HDRS)
+        df = DataFrame(data_rows, columns=MNGMNT_SHT_HDRS)
         period_list = list(df['period'].values)
         try:
             indx_mode = period_list.index('forward run')
@@ -610,26 +488,15 @@ class ReadMngmntSubareas(object, ):
 
         # TODO: crude and unpythonic
         # ==========================
-        crop_mngmnt_fwd = {}
-        crop_mngmnt_ss = {}
+        crop_mngmnt_ss = {'crop_name': crop_names[:indx_mode], 'crop_curr': crop_currs[:indx_mode],
+                          'crop_mngmnt': crops_ss, 'fert_n': fert_n_list[:indx_mode],
+                          'org_fert': org_fert_list[:indx_mode], 'pi_prop': pi_props[:indx_mode],
+                          'pi_tonne': pi_tonnes[:indx_mode], 'irrig': irrigs[:indx_mode]}
 
-        crop_mngmnt_ss['crop_name'] = crop_names[:indx_mode]
-        crop_mngmnt_ss['crop_curr'] = crop_currs[:indx_mode]
-        crop_mngmnt_ss['crop_mngmnt'] = crops_ss
-        crop_mngmnt_ss['fert_n'] = fert_n_list[:indx_mode]
-        crop_mngmnt_ss['org_fert'] = org_fert_list[:indx_mode]
-        crop_mngmnt_ss['pi_prop'] = pi_props[:indx_mode]
-        crop_mngmnt_ss['pi_tonne'] = pi_tonnes[:indx_mode]
-        crop_mngmnt_ss['irrig'] = irrigs[:indx_mode]
-
-        crop_mngmnt_fwd['crop_name'] = crop_names[indx_mode:]
-        crop_mngmnt_fwd['crop_curr'] = crop_currs[indx_mode:]
-        crop_mngmnt_fwd['crop_mngmnt'] = crops_fwd
-        crop_mngmnt_fwd['fert_n'] = fert_n_list[indx_mode:]
-        crop_mngmnt_fwd['org_fert'] = org_fert_list[indx_mode:]
-        crop_mngmnt_fwd['pi_prop'] = pi_props[indx_mode:]
-        crop_mngmnt_fwd['pi_tonne'] = pi_tonnes[indx_mode:]
-        crop_mngmnt_fwd['irrig'] = irrigs[indx_mode:]
+        crop_mngmnt_fwd = {'crop_name': crop_names[indx_mode:], 'crop_curr': crop_currs[indx_mode:],
+                           'crop_mngmnt': crops_fwd, 'fert_n': fert_n_list[indx_mode:],
+                           'org_fert': org_fert_list[indx_mode:], 'pi_prop': pi_props[indx_mode:],
+                           'pi_tonne': pi_tonnes[indx_mode:], 'irrig': irrigs[indx_mode:]}
 
         self.soil_for_area = soil_for_area
         self.crop_mngmnt_ss = crop_mngmnt_ss
@@ -639,8 +506,28 @@ class ReadMngmntSubareas(object, ):
         self.ntsteps_ss = len(crop_mngmnt_ss['crop_name'])
         self.ntsteps_fwd = len(crop_mngmnt_fwd['crop_name'])
 
-class WeatherRelated(object, ):
+def _add_tgdd_to_weather(tair_list):
+    """
+    growing degree days indicates the cumulative temperature when plant growth is assumed to be possible (above 5Â°C)
+    """
+    imnth = 1
+    grow_dds = []
+    for tair in tair_list:
 
+        dummy, ndays = monthrange(2011, imnth)
+        n_grow_days = max(0, ndays * (tair - 5))  # (eq.3.2.2)
+        grow_dds.append(round(n_grow_days, 3))
+
+        imnth += 1
+        if imnth > 12:
+            imnth = 1
+
+    return grow_dds
+
+class WeatherRelated(object, ):
+    """
+    X
+    """
     def __init__(self, pettmp_ss, pettmp_fwd, latitude):
         """
         onstruct weather object including degree days
@@ -658,19 +545,20 @@ class WeatherRelated(object, ):
         # average monthly precip and temp is required for spin up
         # =======================================================
         self.ave_precip_ss, self.ave_temp_ss, self.ave_pet_ss = \
-                            average_weather(latitude, self.pettmp_ss['precip'], self.pettmp_ss['tair'])
+            average_weather(latitude, self.pettmp_ss['precip'], self.pettmp_ss['tair'])
 
         # get average annual rain and temperature of first 10 years
         # =========================================================
         nmnths = len(pettmp_ss['precip'])
-        nyrs = nmnths/12
-        self.ann_ave_precip_ss = sum(pettmp_ss['precip'])/nyrs
-        self.ann_ave_temp_ss = sum(pettmp_ss['tair'])/nmnths
+        nyrs = nmnths / 12
+        self.ann_ave_precip_ss = sum(pettmp_ss['precip']) / nyrs
+        self.ann_ave_temp_ss = sum(pettmp_ss['tair']) / nmnths
 
-class Soil(object,):
+class Soil(object, ):
+    """
+    X
     """
 
-    """
     def __init__(self, soil_defn):
         """
         Assumptions:
@@ -710,7 +598,7 @@ def check_params_excel_file(params_xls_fn):
 
     print('ORATOR parameters file: ' + params_xls_fn)
     try:
-        wb_obj = load_workbook(params_xls_fn, data_only = True)
+        wb_obj = load_workbook(params_xls_fn, data_only=True)
         sheet_names = wb_obj.sheetnames
     except (PermissionError, BadZipFile) as err:
         print(ERR_STR + str(err))
@@ -731,13 +619,14 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
     """
     r_dry is an environmental constant
     """
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1,3))
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until), usecols=range(1, 3))
     n_parms_df = data.dropna(how='all')
     n_parms = {}
     for indx, defn in enumerate(N_PARM_NAMES):
-        n_parms[defn]  = n_parms_df['Value'].values[indx]
+        n_parms[defn] = n_parms_df['Value'].values[indx]
 
     return n_parms
+
 
 def _read_crop_vars(xls_fname, sheet_name):
     """
@@ -757,7 +646,7 @@ def _read_crop_vars(xls_fname, sheet_name):
     # discard unwanted entries
     # ========================
     for crop in ['Crop', 'None', 'Null']:
-        del(crop_vars[crop])
+        del (crop_vars[crop])
 
     for crop_name in crop_vars:
 
@@ -798,47 +687,6 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
 
     return all_ow_parms
 
-def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
-    """
-    Read data on purchases and sales, required for econ module
-    """
-
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
-    purch_sales_df = DataFrame(data)
-
-    return purch_sales_df
-
-def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
-    """
-    Read data on labour, required for econ module
-    """
-
-    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
-    labour_df = DataFrame(data)
-
-    return labour_df
-
-def _repopulate_excel_dropdown(form, study_name):
-    """
-    repopulate Excel drop-down associated with Display output Excel files
-    """
-    if hasattr(form, 'w_combo17'):
-        w_combo17 = form.w_combo17
-        w_disp_out = form.w_disp_out
-    else:
-        w_combo17 = form.w_tab_wdgt.w_combo17
-        w_disp_out = form.w_tab_wdgt.w_disp_out
-
-    out_dir = form.settings['out_dir']
-    xlsx_list = glob(out_dir + '/' + study_name + '*.xlsx')
-    w_combo17.clear()
-    if len(xlsx_list) > 0:
-        w_disp_out.setEnabled(True)
-        for out_xlsx in xlsx_list:
-            dummy, short_fn = split(out_xlsx)
-            w_combo17.addItem(short_fn)
-    return
-
 def _make_retvar_safe(ret_var):
     """
     ret_var is a list
@@ -851,7 +699,7 @@ def _make_retvar_safe(ret_var):
         ret_var = ret_var[:NVALS_SAFE]
     elif nvals < NVALS_SAFE:
         nvals_add = NVALS_SAFE - nvals
-        ret_var += nvals_add*[None]
+        ret_var += nvals_add * [None]
 
     safe_ret_var = []
     for var in ret_var:
@@ -876,7 +724,7 @@ def read_farm_wthr_xls_file(run_xls_fn):
     if len(subareas) == 0:
         print(WARN_STR + 'run file ' + run_xls_fn + ' - has no subarea sheets')
 
-    subareas.sort()     # returns null value
+    subareas.sort()  # returns null value
     ret_var = list([subareas])
 
     rqrd_sheet = FARM_WTHR_SHEET_NAMES['lctn']
@@ -893,9 +741,68 @@ def read_farm_wthr_xls_file(run_xls_fn):
 
     return ret_var
 
+def read_subarea_sheet(wthr_xls, sba_indx, nyrs_rota, mngmnt_hdrs):
+    """
+    read first rotation period of management sheet
+    """
+    df = None
+    data_rows = None
+
+    nmnths = 12 * nyrs_rota
+    wb_obj = load_workbook(wthr_xls, data_only=True)
+    if sba_indx in wb_obj.sheetnames:
+        sba_sht = wb_obj[sba_indx]
+        rows_generator = sba_sht.values
+        header_row = next(rows_generator)
+        data_rows = [list(row) for (_, row) in zip(range(nmnths), rows_generator)]
+
+        # df = DataFrame(data_rows, columns=mngmnt_hdrs)
+
+    wb_obj.close()
+
+    if data_rows is None:
+        return data_rows
+
+    if len(data_rows[0]) < 9:
+        print(ERR_STR_SHEET + sba_indx + ' must have at least 9 values per line')
+        return None
+
+    # condition data so yield, Fert N amount, OW amount and	irrigation are mapped from None to zero
+    # =============================================================================================
+    data_recs = []
+    for row in data_rows:
+        new_row = copy(row)
+        for icol in list([4, 5, 8, 9]):  # corresponds to columns E, G, I and J
+            if row[icol] is None:
+                new_row[icol] = '0'
+
+        data_recs.append(new_row)
+
+    return data_recs
+
+def read_econ_purch_sales_sheet(xls_fname, sheet_name, skip_until):
+    """
+    Read data on purchases and sales, required for econ module
+    """
+
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    purch_sales_df = DataFrame(data)
+
+    return purch_sales_df
+
+def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
+    """
+    Read data on labour, required for econ module
+    """
+
+    data = read_excel(xls_fname, sheet_name, skiprows=range(0, skip_until))
+    labour_df = DataFrame(data)
+
+    return labour_df
+
 class ReadStudy(object, ):
 
-    def __init__(self, form, mgmt_dir, run_xls_fname = None, output_excel = True):
+    def __init__(self, form, mgmt_dir, run_xls_fname=None, output_excel=True):
         """
         read location sheet from ORATOR inputs Excel file
         """
@@ -955,91 +862,31 @@ class ReadStudy(object, ):
                 _repopulate_excel_dropdown(form, farm_name)
                 self.study_ok_flag = True
 
-class ReadAnmlProdn(object, ):
-
-    def __init__(self, xls_fname, crop_vars):
-        """
-        read values from sheet C1a: Typical animal production in Africa provided Herrero et al. (2016)
-        """
-        func_name =  __prog__ +  ' oratorExcelDetail __init__'
-
-        self.retcode = None
-        self.header_mappings = {'Type': 'Livestock type', 'ProdSystem': 'Livestock production system',
-             'Region': 'Region', 'System': 'System', 'Milk': 'Milk', 'Meat': 'Meat',
-             'FSgraze': 'Feedstock dry matter from grazing',
-             'FSstovers': 'Feedstock dry matter from stovers',
-             'FSoccas': 'Feedstock dry matter from occasional sources',
-             'FSgrain': 'Feedstock dry matter from grain',
-             'Manure': 'Manure dry matter', 'ExcreteN': 'Excreted N'}
-
-        print('Reading animal production data from sheet: ' + ANML_PRODN_SHEET)
-        column_names = 	list(self.header_mappings.keys())
-        data = read_excel(xls_fname, header=None, names= column_names, sheet_name=ANML_PRODN_SHEET,
-                                                                        usecols=range(1,13), skiprows=range(0,13))
-        anml_prodn = data.dropna(how='all')
-        self.anml_prodn = anml_prodn
-
-        # allowable values required for validation
-        # ========================================
-        self.anml_types = list(anml_prodn['Type'].unique())   # + list(['Pigs','Poultry'])
-        self.prodn_systms = list(anml_prodn['ProdSystem'].unique())
-        self.world_regions = list(anml_prodn['Region'].unique())
-        self.farm_systems = list(anml_prodn['System'].unique())
-        self.crop_names = ['None'] + list(crop_vars.keys())
-
-        # TODO: a patch to get through transition
-        # create dictionary of generic animal types
-        # =======================================
-        anml_abbrevs = ['catdry','catmt','rumdry','rummt','pigs','pltry']
-        gnrc_anml_types = {}
-        for abbrev, anml_typ in zip(anml_abbrevs, self.anml_types):
-            gnrc_anml_types[abbrev] = anml_typ
-        self.gnrc_anml_types = gnrc_anml_types
-
-        self.retcode = 0
-
-def read_subarea_sheet(wthr_xls, sba_indx, nyrs_rota, mngmnt_hdrs):
+def _repopulate_excel_dropdown(form, study_name):
     """
-    read first rotation period of management sheet
+    repopulate Excel drop-down associated with Display output Excel files
     """
-    df = None
-    data_rows = None
+    if hasattr(form, 'w_combo17'):
+        w_combo17 = form.w_combo17
+        w_disp_out = form.w_disp_out
+    else:
+        w_combo17 = form.w_tab_wdgt.w_combo17
+        w_disp_out = form.w_tab_wdgt.w_disp_out
 
-    nmnths = 12*nyrs_rota
-    wb_obj = load_workbook(wthr_xls, data_only=True)
-    if sba_indx in wb_obj.sheetnames:
-        sba_sht = wb_obj[sba_indx]
-        rows_generator = sba_sht.values
-        header_row = next(rows_generator)
-        data_rows = [list(row) for (_, row) in zip(range(nmnths), rows_generator)]
-
-        # df = DataFrame(data_rows, columns=mngmnt_hdrs)
-
-    wb_obj.close()
-
-    if data_rows is None:
-        return data_rows
-
-    if len(data_rows[0]) < 9:
-        print(ERR_STR_SHEET + sba_indx + ' must have at least 9 values per line')
-        return None
-
-    # condition data so yield, Fert N amount, OW amount and	irrigation are mapped from None to zero
-    # =============================================================================================
-    data_recs = []
-    for row in data_rows:
-        new_row = copy(row)
-        for icol in list([4, 5, 8, 9]):     # corresponds to columns E, G, I and J
-            if row[icol] is None:
-                new_row[icol] = '0'
-
-        data_recs.append(new_row)
-
-    return data_recs
-
+    out_dir = form.settings['out_dir']
+    xlsx_list = glob(out_dir + '/' + study_name + '*.xlsx')
+    w_combo17.clear()
+    if len(xlsx_list) > 0:
+        w_disp_out.setEnabled(True)
+        for out_xlsx in xlsx_list:
+            dummy, short_fn = split(out_xlsx)
+            w_combo17.addItem(short_fn)
+    return
 
 class ReadCropOwNitrogenParms(object, ):
-
+    """
+    X
+    """
     def __init__(self, params_xls_fn):
         """
         read parameters from ORATOR inputs Excel file
@@ -1055,3 +902,153 @@ class ReadCropOwNitrogenParms(object, ):
         # =====================================================
         self.ow_parms = _read_organic_waste_sheet(params_xls_fn, 'Org Waste parms', 0)
         self.crop_vars = _read_crop_vars(params_xls_fn, 'Crop parms')
+
+class ReadAnmlProdn(object, ):
+    """
+    X
+    """
+    def __init__(self, xls_fname, crop_vars):
+        """
+        read values from sheet C1a: Typical animal production in Africa provided Herrero et al. (2016)
+        """
+        func_name = __prog__ + ' oratorExcelDetail __init__'
+
+        self.retcode = None
+        self.header_mappings = {'Type': 'Livestock type', 'ProdSystem': 'Livestock production system',
+                                'Region': 'Region', 'System': 'System', 'Milk': 'Milk', 'Meat': 'Meat',
+                                'FSgraze': 'Feedstock dry matter from grazing',
+                                'FSstovers': 'Feedstock dry matter from stovers',
+                                'FSoccas': 'Feedstock dry matter from occasional sources',
+                                'FSgrain': 'Feedstock dry matter from grain',
+                                'Manure': 'Manure dry matter', 'ExcreteN': 'Excreted N'}
+
+        print('Reading animal production data from sheet: ' + ANML_PRODN_SHEET)
+        column_names = list(self.header_mappings.keys())
+        data = read_excel(xls_fname, header=None, names=column_names, sheet_name=ANML_PRODN_SHEET,
+                          usecols=range(1, 13), skiprows=range(0, 13))
+        anml_prodn = data.dropna(how='all')
+        self.anml_prodn = anml_prodn
+
+        # allowable values required for validation
+        # ========================================
+        self.anml_types = list(anml_prodn['Type'].unique())  # + list(['Pigs','Poultry'])
+        self.prodn_systms = list(anml_prodn['ProdSystem'].unique())
+        self.world_regions = list(anml_prodn['Region'].unique())
+        self.farm_systems = list(anml_prodn['System'].unique())
+        self.crop_names = ['None'] + list(crop_vars.keys())
+
+        # TODO: a patch to get through transition
+        # create dictionary of generic animal types
+        # =======================================
+        anml_abbrevs = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
+        gnrc_anml_types = {}
+        for abbrev, anml_typ in zip(anml_abbrevs, self.anml_types):
+            gnrc_anml_types[abbrev] = anml_typ
+        self.gnrc_anml_types = gnrc_anml_types
+
+        self.retcode = 0
+
+class ReadLivestockSheet(object, ):
+    """
+    X
+    """
+    def __init__(self, w_run_dir3, anml_prodn_obj):
+        """
+
+        """
+        mgmt_dir = w_run_dir3.text()
+        run_xls_fn = join(mgmt_dir, FNAME_RUN)
+
+        wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+        print('Reading livestock sheet ')
+        anml_abbrevs = ANML_ABBREVS
+
+        lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
+        max_row = lvstck_sht.max_row
+        max_col = lvstck_sht.max_column
+
+        df = DataFrame(lvstck_sht.values, columns=['descr'] + anml_abbrevs)
+        lvstck_dscrs = list(df.values[0][1:])
+
+        wb_obj.close()
+
+        # construct previous JSON derived dictionary
+        lvstck_content = {'site definition': {'area name': 'all', 'area (ha)': 3.5, 'region': 'Eastern Africa',
+                                              'system': 'MRA'}}
+        # step through each animal type
+        # =============================
+        lvstck_indx = 0
+        for anml, descr in zip(anml_abbrevs, lvstck_dscrs):
+            nanmls = df[anml].values[1]
+            if nanmls == 0:
+                continue
+            strtgy = df[anml].values[2]
+            lvstck = {'type': descr, 'number': nanmls, 'strategy': strtgy}
+
+            indx = 3
+            feed_indx = 0
+            for ic in range(NFEED_TYPES):
+                feed_type = df[anml].values[indx]
+                val = df[anml].values[indx + 1]
+                if feed_type != 'None' and val > 0:
+                    feed_indx += 1
+                    feed_id = 'feed' + str(feed_indx)
+                    lvstck[feed_id] = {'type': feed_type, 'value': val}
+
+                indx += 2
+
+            # check for bought in
+            # ===================
+            val = df[anml].values[-1]
+            if val is not None:
+                feed_indx += 1
+                feed_id = 'feed' + str(feed_indx)
+                lvstck[feed_id] = {'type': 'bought in', 'value': float(val)}
+
+            if feed_indx > 0:
+                lvstck_indx += 1
+                lvstck_id = 'livestock' + str(lvstck_indx)
+                lvstck_content['site definition'][lvstck_id] = lvstck
+
+        # from JSON legacy
+        # ================
+        site_defn = lvstck_content['site definition']
+        area = site_defn['area name']
+
+        region = region_validate(site_defn, anml_prodn_obj)
+        system = farming_system(site_defn)
+
+        lvstck_grp = []
+        for key in site_defn:
+            if key.find('livestock') > -1:
+                lvstck_grp.append(LivestockEntity(site_defn[key], anml_prodn_obj))
+
+        subareas = {area: {'region': region, 'system': system, 'lvstck_grp': lvstck_grp}}
+
+        self.subareas = subareas
+
+        print()  # cosmetic
+        '''
+        for anml, nmbr in zip(anml_abbrevs, df.values[irow][1:]):  # numbers of animals
+            if nmbr is not None:
+                pass
+        irow += 1
+        for anml, strtg in zip(anml_abbrevs, df.values[irow][1:]):  # strategies
+            pass    # strtg
+
+        for findx in range(NFEED_TYPES):
+            irow += 1
+            fd_typ = str(findx + 1)
+            for anml, feed_typ in zip(anml_abbrevs, df.values[irow][1:]):  # feed type
+                pass  # feed_typ
+
+            irow += 1
+            for anml, feed_qty in zip(anml_abbrevs, df.values[irow][1:]):  # feed quantity as a percentage
+                pass  # feed_qty
+
+        irow += 1
+        for anml, pcnt in zip(anml_abbrevs, df.values[irow][1:]):  # percentage bought in
+            if pcnt is not None:
+                pass  # pcnt     
+        '''
