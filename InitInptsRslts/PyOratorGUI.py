@@ -129,7 +129,7 @@ class Form(QWidget):
         # ==================================
         read_config_file(self)
         sys.stdout = OutLog(self.w_report, sys.stdout)
-        sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))   # RGB
+        # sys.stderr = OutLog(self.w_report, sys.stderr, QColor(255, 0, 0))   # RGB
 
     def clearReporting(self):
         #
@@ -144,7 +144,6 @@ class Form(QWidget):
         write_config_file(self)  # write last GUI selections
 
     def exitClicked(self):
-
         write_config_file(self)  # write last GUI selections
         self.close_down()
 
