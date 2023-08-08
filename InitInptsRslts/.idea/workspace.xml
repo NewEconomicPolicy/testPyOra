@@ -22,10 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="Added error trapping in relation to runfile creation and condition where there are no subarea sheets or where there is a subarea sheet but no corresponding entry in the subarea lookup sheet.">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult.">
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_excel_read_misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyOratorGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyOratorGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -270,7 +271,14 @@
       <option name="project" value="LOCAL" />
       <updated>1691144743102</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult.">
+      <created>1691389647979</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1691389647979</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -285,7 +293,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="insignificant changes for harmonisation purposes only" />
     <MESSAGE value="minor changes to trap various bugs on the way to a more robust program" />
     <MESSAGE value="more minor changes to improve feedback to the user and GUI layout on the Run tab" />
     <MESSAGE value="added farm system and region drop-downs to GUI" />
@@ -310,16 +317,12 @@
     <MESSAGE value="Resolved in Sensitivity Analysis to trap non-numeric values for organic waste applied.&#10;Minor changes to conform to PEP standards." />
     <MESSAGE value="Added further error traping in relation to the configuration file and Sensitivity Analysis values for organic waste applied.." />
     <MESSAGE value="Added error trapping in relation to runfile creation and condition where there are no subarea sheets or where there is a subarea sheet but no corresponding entry in the subarea lookup sheet." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added error trapping in relation to runfile creation and condition where there are no subarea sheets or where there is a subarea sheet but no corresponding entry in the subarea lookup sheet." />
+    <MESSAGE value="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult." />
+    <option name="LAST_COMMIT_MESSAGE" value="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ora_excel_write.py</url>
-          <line>262</line>
-          <option name="timeStamp" value="109" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
           <line>388</line>
@@ -334,6 +337,26 @@
           <url>file://$PROJECT_DIR$/display_gui_charts.py</url>
           <line>308</line>
           <option name="timeStamp" value="158" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
+          <line>408</line>
+          <option name="timeStamp" value="159" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
+          <line>81</line>
+          <option name="timeStamp" value="164" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
+          <line>130</line>
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ora_excel_write_cn_water.py</url>
+          <line>173</line>
+          <option name="timeStamp" value="166" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

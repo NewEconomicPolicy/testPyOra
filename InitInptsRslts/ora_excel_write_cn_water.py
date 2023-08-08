@@ -24,8 +24,11 @@ from os.path import isfile, join, exists
 from os import remove
 
 from string import ascii_uppercase
+ALPHABET = list(ascii_uppercase)
+
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference
+from openpyxl.styles import Alignment
 from pandas import DataFrame, ExcelWriter
 
 from ora_lookup_df_fns import fetch_detail_from_varname
@@ -184,12 +187,10 @@ def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_she
 
     return nrow_chart
 
-
-def _generate_charts(fname, metric, sub_system, lookup_df):
+def _generate_charts(fname, sub_system, lookup_df):
     """
     add charts to an existing Excel file
     """
-
     # load workbook previously created
     # ================================
     if not exists(fname):
@@ -197,53 +198,34 @@ def _generate_charts(fname, metric, sub_system, lookup_df):
         return -1
 
     wb_obj = load_workbook(fname, data_only=True)
-    alphabet_string = ascii_uppercase
-    alphabet = list(alphabet_string)
-
-    # sheet for charts
-    # ================
     chart_sheet = wb_obj.create_sheet('charts')
-    nrow_chart = 4  # locates cd top of chart
-
-    # must have subareas in correct order
-    # ===================================
-    sheet = wb_obj[metric]
-    max_sheet_row = sheet.max_row
-
-    col_indices = {}
-    for col_indx in range(2, 7):
-        column = alphabet[col_indx - 1]
-        subarea = sheet[column + '1'].value
-        col_indices[col_indx] = subarea
+    nrow_chart = 4  # locates top of chart
 
     if sub_system == 'carbon':
-        nrow_chart = _generate_pool_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
-        nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                 'co2_emiss', max_sheet_row)
+        nrow_chart = _generate_pool_charts(wb_obj, chart_sheet, nrow_chart)
+        nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, 'co2_emiss')
+
     elif sub_system == 'nitrogen':
         for metric in CHANGE_VARS['nitrogen']:
-            nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                     metric, max_sheet_row)
+            nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, metric)
+
     elif sub_system == 'water':
-        nrow_chart = _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row)
+        nrow_chart = _generate_water_charts(wb_obj, chart_sheet, nrow_chart)
         for metric in CHANGE_VARS['water']:
-            nrow_chart = _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart,
-                                                     metric, max_sheet_row)
+            nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, metric)
     try:
         wb_obj.active = len(wb_obj.sheetnames) - 1  # make the charts sheet active
         wb_obj.save(fname)
         print('\tcreated: ' + fname)
-    except PermissionError as e:
-        print(str(e) + ' - could not create: ' + fname)
+    except PermissionError as err:
+        print(str(err) + ' - could not create: ' + fname)
 
     return
-
 
 def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
     """
     Entry
     """
-    var_name = None
     for indx, sub_system in enumerate(CHANGE_VARS):
 
         # make a safe name
@@ -259,29 +241,49 @@ def write_excel_all_subareas(study, out_dir, lookup_df, all_runs):
 
         writer = ExcelWriter(fname)
 
-        for var_name in CHANGE_VARS[sub_system]:
-            month_flag = True
-            plot_dict = {}
+        for subarea in all_runs:
+            plot_dict = {'month': all_runs[subarea][0].data['imnth']}
 
-            for subarea in all_runs:
-                if month_flag:
-                    plot_dict['month'] = all_runs[subarea][0].data['imnth']
-                    month_flag = False
-
-                plot_dict[subarea] = all_runs[subarea][indx].data[var_name]
+            for metric in CHANGE_VARS[sub_system]:
+                defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
+                plot_dict[pyora_disp] = all_runs[subarea][indx].data[metric]
 
             try:
                 data_frame = DataFrame.from_dict(plot_dict)
             except ValueError as err:
-                print(WARN_STR + str(err) + ' for variable ' + var_name)
+                print(WARN_STR + str(err) + ' for variable ' + metric)
                 data_frame = DataFrame()
 
-            data_frame.to_excel(writer, var_name, index=False)
+            data_frame.to_excel(writer, subarea, index=False)
 
         writer.close()
 
+        # reopen Excel file and make legible
+        # ==================================
+        MAX_WDTH = 15
+        wb_obj = load_workbook(fname, data_only=True)
+        for sheet_name in wb_obj.sheetnames:
+            sheet = wb_obj[sheet_name]
+
+            # column width
+            # ============
+            for ch in ALPHABET[1:sheet.max_column + 1]:
+                sheet.column_dimensions[ch].width = MAX_WDTH
+                cell_ref = ch + '1'
+                sheet[cell_ref].alignment = Alignment(wrap_text=True, horizontal='center', vertical='center')
+
+            # rows
+            # ====
+            for irow in range(sheet.max_row + 1):
+                sheet.row_dimensions[irow].height = 18
+            sheet.row_dimensions[1].height = 48
+
+        wb_obj.save(fname)
+        print('\tadjusted row heights: ' + fname)
+
         # reopen Excel file and write charts
         # ==================================
-        _generate_charts(fname, var_name, sub_system, lookup_df)
+        # _generate_charts(fname, sub_system, lookup_df)
+        print('\tadded charts to: ' + fname)
 
     return 0

@@ -56,9 +56,9 @@ SOIL_METRIC_DESCRS = {'area': 'Area (ha)', 'depth': 'Soil depth (cm)',
                        'bulk': 'Bulk Density g/cm**3', 'ph': 'PH', 'salinity': 'salinity (EC 1:5)'}
 
 def _fetch_actual_year_lists(strt_yr_ss, end_yr_ss, nmnths_ss, strt_yr_fwd, end_yr_fwd):
-    '''
+    """
     return list of years for both steady state and forward runs
-    '''
+    """
     yr_lst = [] # steady state
     for year in range(strt_yr_ss, end_yr_ss):
         yr_lst += 12 * [year]
@@ -74,9 +74,9 @@ def _fetch_actual_year_lists(strt_yr_ss, end_yr_ss, nmnths_ss, strt_yr_fwd, end_
     return actl_yr_lst
 
 def _fetch_existing_subarea_sheets(fname_run):
-    '''
+    """
     return list of subarea sheets
-    '''
+    """
     wb_obj = load_workbook(fname_run, data_only=True)
     sheet_names = wb_obj.sheetnames
     wb_obj.close()
@@ -89,14 +89,14 @@ def _fetch_existing_subarea_sheets(fname_run):
     return sba_sheets
 
 def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, writer):
-    '''
+    """
     write sheet recording state of subarea widgets
 
     TODO: for future
     subarea_field_map = {'sba': 'Subarea', 'descr': 'Description', 'irrig': 'Irrigation (mm)', 'rota': 'Rotation (yrs)',
                          'area': 'Area (ha)'}
     Irrigation (mm)': [],  'Rotation (yrs)':
-    '''
+    """
     # condition data
     # ==============
     if soil_recs is None:
@@ -151,10 +151,10 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
     return writer
 
 def _delete_lctn_wthr_sheets(fname_run, sheet_del = 'all'):
-    '''
+    """
     sheets_del: sheets to delete, all or a key in  SHEET_NAMES
     Signature sheet is not deleted
-    '''
+    """
     func_name =  __prog__ + ' _remove_excel_sheets'
 
     ret_code = False
@@ -180,11 +180,11 @@ def _delete_lctn_wthr_sheets(fname_run, sheet_del = 'all'):
     return ret_code
 
 def make_or_update_farm(form):
-    '''
+    """
     use pandas to write to Excel
     if new_runfile_flag is set to True then a new run file will be created or, if False, edited
     return code is -1 for fail and 0 for success together with new_runfile_flag
-    '''
+    """
 
     # weather
     # =======
@@ -319,9 +319,9 @@ def make_or_update_farm(form):
     return 0, new_runfile_flag
 
 def _adjust_excel_workbook(fname_run):
-    '''
+    """
     improve readability of sheets and record modification time in Signature sheet
-    '''
+    """
     greenFill = PatternFill(start_color='90EE90', end_color='90EE90', fill_type='solid')
 
     wb_obj = load_workbook(fname_run, data_only=True)
@@ -391,9 +391,9 @@ def _adjust_excel_workbook(fname_run):
     return
 
 def _write_excel_weather(sheet_name, out_obj, writer):
-    '''
+    """
     condition data before outputting
-    '''
+    """
     func_name =  __prog__ +  ' write_excel_out'
 
     # create data frame from dictionary
@@ -423,9 +423,9 @@ def _write_excel_weather(sheet_name, out_obj, writer):
     return writer
 
 def _write_excel_signature(sheet_name, writer):
-    '''
+    """
     this sheet edited when changing run file
-    '''
+    """
     username = getuser()
     create_date = datetime.now().strftime("%b %d %Y %H:%M:%S")
     hostname = gethostname()
@@ -444,9 +444,9 @@ def _write_excel_signature(sheet_name, writer):
     return writer
 
 def _write_excel_location(sheet_name, form, writer):
-    '''
+    """
     TODO: validate data before outputting
-    '''
+    """
     latitude = float(form.w_lat.text())
     longitude = float(form.w_lon.text())
     subdist = form.w_subdist.text()
@@ -472,9 +472,9 @@ def _write_excel_location(sheet_name, form, writer):
     return writer
 
 def _write_excel_livestock(sheet_name, form, writer):
-    '''
+    """
     condition data before outputting - uses widgets: w_bought_in, w_feed_qties, w_feed_types, w_numbers, w_strtgs
-    '''
+    """
     func_name =  __prog__ +  ' _write_excel_livestock'
 
     anml_typs = form.anml_prodn.gnrc_anml_types
@@ -515,9 +515,9 @@ def _write_excel_livestock(sheet_name, form, writer):
 class WeatherSheet(object, ):
 
     def __init__(self, pettmp):
-        '''
+        """
         B1      TODO: removed 'days_month': 'd' from var_format_dict - don't know why it was there
-        '''
+        """
         self.title = 'Weather'
 
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'precip': '2f', 'tair': '2f', 'actl_yr': 'd'}

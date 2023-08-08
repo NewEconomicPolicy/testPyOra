@@ -1,4 +1,4 @@
-'''
+"""
 -------------------------------------------------------------------------------
  Name:        ora_excel_read_misc.py
  Purpose:     collection of miscellaneus functions required by the constructor
@@ -8,7 +8,7 @@
  Description:
 
 -------------------------------------------------------------------------------
-'''
+"""
 
 __prog__ = 'ora_excel_read_misc.py'
 __version__ = '0.0.1'
@@ -34,12 +34,12 @@ ISDA_URL = 'https://api.isda-africa.com/v1/soilproperty'
 SOIL_DATA_API_KEY = 'AIzaSyDdmmXVqnAVXRE28meqX2XMQxzRox_25RM'
 
 def fetch_isda_soil_data(lggr, lat, lon):
-    '''
+    """
     original request string from Dave McBey:
           f'https://api.isda-africa.com/v1/soilproperty?key={soil_data_api_key}&lat={lat}&lon={lon}')
 
     It is possible to request specific properties: '&lat={}&lon={}&property=ph&depth=0-20'.format(lat, lon)
-    '''
+    """
     soil_recs = []
     request_str = ISDA_URL + '?key=' + SOIL_DATA_API_KEY + '&lat={}&lon={}'.format(lat, lon)
     soil_data = requests.get(request_str)
@@ -59,9 +59,9 @@ def fetch_isda_soil_data(lggr, lat, lon):
     return soil_data.ok, soil_recs
 
 def retrieve_hwsd_soil_recs(lggr, hwsd_dir, lat, lon):
-    '''
+    """
     extract required metrics from the HWSD database
-    '''
+    """
     try:
         hwsd = hwsd_bil.HWSD_bil(lggr, hwsd_dir)
     except:
@@ -106,9 +106,9 @@ def retrieve_hwsd_soil_recs(lggr, hwsd_dir, lat, lon):
     return soil_recs
 
 def read_farm_wthr_sbsa_xls_file(form, run_xls_fn):
-    '''
+    """
     check required sheets are present
-    '''
+    """
 
     # set widgets belonging to subareas to defaults
     # =============================================
@@ -192,9 +192,9 @@ def read_farm_wthr_sbsa_xls_file(form, run_xls_fn):
     return ret_var
 
 def clear_farm_fields(form):
-    '''
-
-    '''
+    """
+    C
+    """
     form.w_farm_desc.setText('')
     form.w_prcnt.setText('')
     form.w_subdist.setText('')
@@ -203,9 +203,9 @@ def clear_farm_fields(form):
     form.w_lon.setText(str(''))
 
 def validate_farm_var_fields(form):
-    '''
+    """
     invoked when Save farm push button is changed
-    '''
+    """
     mess = ERROR_STR
     validate_flag = True
 
@@ -244,9 +244,9 @@ def validate_farm_var_fields(form):
     return validate_flag
 
 def get_mnth_yr_names(nyears):
-    '''
+    """
     returns unique month year strings
-    '''
+    """
     mnth_keys = []
     for yr in range(nyears):
         str_yr = str(yr + 1)
@@ -270,10 +270,10 @@ def identify_study_areas(form, study_area_dir, fname_run):
     return study_areas_valid
 
 def identify_farms_for_study(form, study_dir = None, fname_run = None):
-    '''
+    """
     is called at start up and when user creates a new farm project
     farms = {'New farm':''}
-    '''
+    """
     if form is not None:
         if hasattr(form, 'w_combo00'):
             study = form.w_combo00.currentText()
@@ -293,10 +293,10 @@ def identify_farms_for_study(form, study_dir = None, fname_run = None):
     return farms
 
 def check_sheets_for_farms(form):
-    '''
+    """
     is called at start up and when user creates a new farm project
     farms = {'New farm':''}
-    '''
+    """
 
     study = form.w_combo00.currentText()
     study_dir = join(form.settings['study_area_dir'], study)
@@ -327,9 +327,9 @@ def check_sheets_for_farms(form):
     return
 
 def setup_sheet_data_dict(data_dict, var_format_dict):
-    '''
+    """
     all classes require sheet_data dictionary to be initiated
-    '''
+    """
     sheet_data = {}
     var_name_list = list(var_format_dict.keys())
     for var_name in var_name_list:
