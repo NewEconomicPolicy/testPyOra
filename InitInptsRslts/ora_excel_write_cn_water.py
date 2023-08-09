@@ -59,48 +59,73 @@ CHANGE_VARS = {'carbon': list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_b
 
 PREFERRED_LINE_WIDTH = 25000  # 100020 taken from chart_example.py  width in EMUs
 
-def _generate_comparison_charts(lookup_df, col_indices, wb_obj, chart_sheet, nrow_chart, metric, max_sheet_row):
+def _generate_comparison_charts(metrics_group, lookup_df, wb_obj, chart_sheet, nrow_chart):
     """
-    generate charts for each subarea for two sets of metrics
+    generate charts for each metric
     """
-    group_chart = LineChart()
-    group_chart.style = 13
 
-    defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
-    group_chart.title = defn
-    group_chart.y_axis.title = units
-    group_chart.x_axis.title = 'Time step'
-    group_chart.height = 10
-    group_chart.width = 60
+    # identify metric names and subarea sheets
+    # ========================================
+    hdrs = None
+    sba_shts = []
+    for sht_indx, shtnm in enumerate(wb_obj.sheetnames):
+        if shtnm not in ALPHABET:
+            continue
 
-    for iarea, col_indx in enumerate(col_indices):
+        sba_shts.append(shtnm)
 
-        #
-        # ======================================================
-        sheet = wb_obj[metric]
-        data = Reference(sheet, min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
-        group_chart.add_data(data)  # title = subarea
+        # construct header record
+        # =======================
+        if hdrs is None:
+            sheet = wb_obj[shtnm]
+            max_sheet_row = sheet.max_row
+            max_column = sheet.max_column - 1
+            hdrs = [sheet[ch + '1'].value for ch in ALPHABET[:max_column]]
 
-        # Style the line just created
-        # ===========================
-        sref = group_chart.series[iarea]
-        sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
+    # copy data from each subarea sheet for the each metric
+    # =====================================================
+    for isqnce, metric in enumerate(metrics_group):
+        defn, units, out_format, pyora_disp = fetch_detail_from_varname(lookup_df, metric)
 
-        dum, indx_color = divmod(iarea, 5)  # prevent IndexError by using remainder
-        color_key = LINE_COLORS_SUBAREAS[indx_color]
-        sref.graphicalProperties.line.solidFill = COLORS_DISTING[color_key]
-        sref.smooth = True
+        if pyora_disp not in hdrs:
+            print(WARN_STR + pyora_disp + ' not in headers')
+            continue
 
-    # now write to previously created sheet
-    # =====================================
-    chart_sheet.add_chart(group_chart, "B" + str(nrow_chart))
-    nrow_chart += 20
+        col_indx = hdrs.index(pyora_disp) + 1       # address Excel column numbering
+
+        group_chart = LineChart()
+        group_chart.style = 13
+
+        group_chart.title = defn
+        group_chart.y_axis.title = units
+        group_chart.x_axis.title = 'Time step'
+        group_chart.height = 10
+        group_chart.width = 60
+
+        for iline, shtnm in enumerate(sba_shts):
+            data = Reference(wb_obj[shtnm], min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
+            group_chart.add_data(data)
+
+            # Style the line just created
+            # ===========================
+            sref = group_chart.series[iline]
+            sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
+
+            dum, indx_color = divmod(iline, 5)  # prevent IndexError by using remainder
+            color_key = LINE_COLORS_SUBAREAS[indx_color]
+            sref.graphicalProperties.line.solidFill = COLORS_DISTING[color_key]
+            sref.smooth = True
+
+        # now write to previously created sheet
+        # =====================================
+        chart_sheet.add_chart(group_chart, "B" + str(nrow_chart))
+        nrow_chart += 20
 
     return nrow_chart
 
-def _generate_pool_charts(sub_system, lookup_df, wb_obj, chart_sheet, nrow_chart):
+def _generate_pool_charts(lookup_df, wb_obj, chart_sheet, nrow_chart):
     """
-    initially for carbon only: generate charts for each subarea for two sets of metrics
+    initially for carbon only: generate charts for each subarea for two sets of metrics in POOL_GROUPS
     """
     for sht_indx, shtnm in enumerate(wb_obj.sheetnames):
         if shtnm not in ALPHABET:
@@ -111,7 +136,7 @@ def _generate_pool_charts(sub_system, lookup_df, wb_obj, chart_sheet, nrow_chart
         # construct header record
         # =======================
         sheet = wb_obj[subarea]
-        max_sheet_row = sheet
+        max_sheet_row = sheet.max_row
         max_column = sheet.max_column - 1
         hdrs = [sheet[ch + '1'].value for ch in ALPHABET[:max_column]]
 
@@ -136,9 +161,9 @@ def _generate_pool_charts(sub_system, lookup_df, wb_obj, chart_sheet, nrow_chart
                     print(WARN_STR + pyora_disp + ' not in headers')
                     continue
 
-                col_indx = hdrs.index(pyora_disp)
+                col_indx = hdrs.index(pyora_disp) + 1       # address Excel column numbering
                 data = Reference(sheet, min_col=col_indx, min_row=1, max_col=col_indx, max_row=max_sheet_row)
-                group_chart.add_data(data)
+                group_chart.add_data(data, titles_from_data = True)
 
                 # Style the line just created
                 # ===========================
@@ -157,44 +182,6 @@ def _generate_pool_charts(sub_system, lookup_df, wb_obj, chart_sheet, nrow_chart
 
     return nrow_chart
 
-def _generate_water_charts(col_indices, wb_obj, chart_sheet, nrow_chart, max_sheet_row):
-    """
-    water only: generate charts for each subarea
-    """
-    for col_indx in col_indices:
-        subarea = col_indices[col_indx]
-        if subarea is None:
-            break
-        metrics_group = list(['wat_soil', 'wat_drain'])
-        group_chart = LineChart()
-        group_chart.style = 13
-        group_chart.title = subarea + '\tSteady state and forward run'
-        group_chart.y_axis.title = ' Soil water content (mm)'
-        group_chart.x_axis.title = 'Time step'
-        group_chart.height = 10
-        group_chart.width = 20
-
-        # by design the sheet name is synonymous with the metric
-        # ======================================================
-        for isht, metric in enumerate(metrics_group):
-            sheet = wb_obj[metric]
-            data = Reference(sheet, min_col=col_indx, min_row=2, max_col=col_indx, max_row=max_sheet_row)
-            group_chart.add_data(data)  # title = metric
-
-            # Style the line just created
-            # ===========================
-            sref = group_chart.series[isht]
-            sref.graphicalProperties.line.width = PREFERRED_LINE_WIDTH
-            sref.graphicalProperties.line.solidFill = LINE_COLORS_POOL_GROUPS[isht]
-            sref.smooth = True
-
-        # write to previously created sheet
-        # =================================
-        chart_sheet.add_chart(group_chart, "B" + str(nrow_chart))
-        nrow_chart += 20
-
-    return nrow_chart
-
 def _generate_charts(fname, sub_system, lookup_df):
     """
     add charts to an existing Excel file
@@ -210,19 +197,15 @@ def _generate_charts(fname, sub_system, lookup_df):
     nrow_chart = 4  # locates top of chart
 
     if sub_system == 'carbon':
-        nrow_chart = _generate_pool_charts(sub_system, lookup_df, wb_obj, chart_sheet, nrow_chart)
-        # nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, 'co2_emiss')
+        nrow_chart = _generate_pool_charts(lookup_df, wb_obj, chart_sheet, nrow_chart)
+        nrow_chart = _generate_comparison_charts(CHANGE_VARS['carbon'], lookup_df, wb_obj, chart_sheet, nrow_chart)
 
     elif sub_system == 'nitrogen':
-        for metric in CHANGE_VARS['nitrogen']:
-            # nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, metric)
-            pass
+        nrow_chart = _generate_comparison_charts(CHANGE_VARS['nitrogen'], lookup_df, wb_obj, chart_sheet, nrow_chart)
 
     elif sub_system == 'water':
-        nrow_chart = _generate_water_charts(wb_obj, chart_sheet, nrow_chart)
-        for metric in CHANGE_VARS['water']:
-            # nrow_chart = _generate_comparison_charts(lookup_df, wb_obj, chart_sheet, nrow_chart, metric)
-            pass
+        nrow_chart = _generate_comparison_charts(CHANGE_VARS['water'], lookup_df, wb_obj, chart_sheet, nrow_chart)
+
     try:
         wb_obj.active = len(wb_obj.sheetnames) - 1  # make the charts sheet active
         wb_obj.save(fname)
