@@ -139,6 +139,48 @@ def _validate_timesteps(run_xls_fn, subareas):
 
     return ret_code
 
+def read_subareas_soil(run_xls_fn):
+    """
+    check required sheets are present and read data from these
+    """
+    ret_var = None
+    wb_obj = load_workbook(run_xls_fn, data_only=True)
+
+    # check required sheet is present
+    # ===============================
+    sbas_shtnm = RUN_SHT_NAMES['sbas']
+
+    if sbas_shtnm not in wb_obj.sheetnames:
+        print('Sheet ' + sbas_shtnm + ' not present in ' + run_xls_fn)
+        return ret_var
+
+    sbas_sht = wb_obj[sbas_shtnm]
+
+    rows_generator = sbas_sht.values
+    hdr_row = next(rows_generator)  # skip headers
+    data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]
+
+    # fetch soils
+    # ===========
+    all_soils = {}
+    for rec in data_rows:
+        sba = rec[0]
+
+        soil_defn = {}
+        for val, metric in zip([T_DEPTH] + rec[5:], SOIL_METRICS):
+            if val is None:
+                print(ERR_STR + 'Soil for subarea ' + sba + ' not defined in run file')
+                return ret_var
+            else:
+                soil_defn[metric] = val
+
+        # read subarea sheet
+        # ==================
+        all_soils[sba] = Soil(soil_defn)
+
+    wb_obj.close()
+
+    return all_soils
 
 def check_xls_run_file(w_run_model, mgmt_dir):
     """

@@ -15,7 +15,7 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from os.path import isfile, join, isdir, getsize
+from os.path import isfile, join, isdir, getsize, exists
 from os import remove, makedirs, name as name_os
 
 from pandas import DataFrame, ExcelWriter, Series
@@ -26,6 +26,7 @@ from datetime import datetime
 from socket import gethostname
 
 from ora_excel_read_misc import setup_sheet_data_dict, retrieve_hwsd_soil_recs, fetch_isda_soil_data
+from ora_excel_read import read_subareas_soil
 from getClimGenNC import ClimGenNC
 from ora_wthr_misc_fns import associate_climate, fetch_csv_wthr
 from ora_gui_misc_fns import simulation_yrs_validate, rotation_yrs_validate
@@ -102,7 +103,9 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
     if soil_recs is None:
         return None
 
-    t_depth, t_bulk, t_ph, t_clay, t_silt, t_sand, t_c_prcnt = soil_recs[0]
+    if type(soil_recs) is list:
+        t_depth, t_bulk, t_ph, t_clay, t_silt, t_sand, t_c_prcnt = soil_recs[0]
+        t_salinity = SALINITY
 
     subarea_dict = {'Subarea': [], 'Description': [], 'Irrig (mm)': [],  'Rota (yrs)': [], 'Area (ha)': [],
                     't_clay':[], 't_sand':[], 't_silt':[],  't_oc':[], 't_bulk':[], 't_ph':[], 'salin':[] }
@@ -132,13 +135,23 @@ def _write_xls_subarea_summary_sheet(sheet_name, exstng_sbas, form, soil_recs, w
             area_ha = 0
         subarea_dict['Area (ha)'].append(float(area_ha))
 
+        if type(soil_recs) is dict:
+            soil_rec = soil_recs[sba_indx]
+            t_clay = soil_rec.t_clay
+            t_sand = soil_rec.t_sand
+            t_silt = soil_rec.t_silt
+            t_c_prcnt = soil_rec.t_carbon
+            t_bulk = soil_rec.t_bulk
+            t_ph = soil_rec.t_pH_h2o
+            t_salinity = soil_rec.t_salinity
+
         subarea_dict['t_clay'].append(t_clay)
         subarea_dict['t_sand'].append(t_sand)
         subarea_dict['t_silt'].append(t_silt)
         subarea_dict['t_oc'].append(t_c_prcnt)
         subarea_dict['t_bulk'].append(t_bulk)
         subarea_dict['t_ph'].append(t_ph)
-        subarea_dict['salin'].append(SALINITY)
+        subarea_dict['salin'].append(t_salinity)
 
     # create data frame from dictionary
     # =================================
@@ -206,14 +219,27 @@ def make_or_update_farm(form):
     lon = float(form.w_lon.text())
     bbox_aoi = list([lon - 0.01, lat - 0.01, lon + 0.01, lat + 0.01])
 
-    # soil - if lat/lon are out of area for iSDA then use HWSD
-    # ========================================================
-    use_isda_flag = form.w_use_isda.isChecked()
-    if use_isda_flag:
-        use_isda_flag, soil_recs = fetch_isda_soil_data(lggr, lat, lon)
+    # soil - use existing soil if available
+    # =====================================
+    use_exstng_soil_flag = True
+    soil_recs = None
+    if use_exstng_soil_flag:
+        run_xls_fname = join(farm_dir, form.settings['fname_run'])
+        if exists(run_xls_fname):
+            print('Reading soils: Run file: ' + run_xls_fname)
+            soil_recs = read_subareas_soil(run_xls_fname)
+        else:
+            use_exstng_soil_flag = False
 
-    if not use_isda_flag:
-        soil_recs = retrieve_hwsd_soil_recs(lggr, form.settings['hwsd_dir'], lat, lon)
+    if soil_recs is None:
+        # soil - if lat/lon are out of area for iSDA then use HWSD
+        # ========================================================
+        use_isda_flag = form.w_use_isda.isChecked()
+        if use_isda_flag:
+            use_isda_flag, soil_recs = fetch_isda_soil_data(lggr, lat, lon)
+
+        if not use_isda_flag:
+            soil_recs = retrieve_hwsd_soil_recs(lggr, form.settings['hwsd_dir'], lat, lon)
 
     gran_lat = int(round((90.0 - lat) * hwsd.granularity))
     gran_lon = int(round((180.0 + lon) * hwsd.granularity))

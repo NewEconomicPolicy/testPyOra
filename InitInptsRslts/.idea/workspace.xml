@@ -22,9 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="part way through major revision of the ora_excel_write_cn_water.py module.">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="completed revision of the ora_excel_write_cn_water.py module for now.">
+      <change beforePath="$PROJECT_DIR$/../Constructor/CropGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/CropGui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,12 +42,12 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "last_opened_file_path": "E:/ORATOR/setup",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;last_opened_file_path&quot;: &quot;E:/ORATOR/setup&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="G:\PyOraDev\testPyOra\Constructor" />
@@ -283,7 +285,14 @@
       <option name="project" value="LOCAL" />
       <updated>1691491531408</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="completed revision of the ora_excel_write_cn_water.py module for now.">
+      <created>1691570754985</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1691570754985</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -298,7 +307,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="more minor changes to improve feedback to the user and GUI layout on the Run tab" />
     <MESSAGE value="added farm system and region drop-downs to GUI" />
     <MESSAGE value="addressed a number of I/O related bugs" />
     <MESSAGE value="created a Run model push button in the Run tab which replaces soil C and N, livestock and economics push button&#10;also, improved run file checking to improve robustness, albeit this will require revisiting to clean up the code." />
@@ -323,14 +331,15 @@
     <MESSAGE value="Added error trapping in relation to runfile creation and condition where there are no subarea sheets or where there is a subarea sheet but no corresponding entry in the subarea lookup sheet." />
     <MESSAGE value="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult." />
     <MESSAGE value="part way through major revision of the ora_excel_write_cn_water.py module." />
-    <option name="LAST_COMMIT_MESSAGE" value="part way through major revision of the ora_excel_write_cn_water.py module." />
+    <MESSAGE value="completed revision of the ora_excel_write_cn_water.py module for now." />
+    <option name="LAST_COMMIT_MESSAGE" value="completed revision of the ora_excel_write_cn_water.py module for now." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py</url>
-          <line>388</line>
+          <line>414</line>
           <option name="timeStamp" value="112" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -344,9 +353,14 @@
           <option name="timeStamp" value="158" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/multiTabsGUI.py</url>
-          <line>408</line>
-          <option name="timeStamp" value="159" />
+          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py</url>
+          <line>41</line>
+          <option name="timeStamp" value="160" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>162</line>
+          <option name="timeStamp" value="162" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
