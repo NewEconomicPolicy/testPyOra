@@ -349,13 +349,13 @@ def nh4_immobilisation(soil_n_sply, nh4_min):
 
     return nh4_immob
 
-def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif):
+def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif, rate_inhibit):
     '''
     nitrified ammonium is assumed to occur by a first order reaction, using the same environmental
     rate modifiers as in soil organic matter decomposition
     k_nitrif - rate constant for nitrification, per month
+    rate_inhibit - inhibition rate modifier, 0.5 for Neem
     '''
-    rate_inhibit = 1     # inhibition rate modifier TODO - see manual
 
     tmp_var = nh4*(1 - exp(-k_nitrif*rate_mod*rate_inhibit))
 

@@ -22,11 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="completed revision of the ora_excel_write_cn_water.py module for now.">
-      <change beforePath="$PROJECT_DIR$/../Constructor/CropGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/CropGui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="modified save farm data so that the soil parameters are not overwritten.">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_nitrogen_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_nitrogen_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_no3_nh4_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_no3_nh4_fns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/MgmtGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/MgmtGui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,7 +292,14 @@
       <option name="project" value="LOCAL" />
       <updated>1691570754985</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="modified save farm data so that the soil parameters are not overwritten.">
+      <created>1691752048437</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1691752048437</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -307,7 +314,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added farm system and region drop-downs to GUI" />
     <MESSAGE value="addressed a number of I/O related bugs" />
     <MESSAGE value="created a Run model push button in the Run tab which replaces soil C and N, livestock and economics push button&#10;also, improved run file checking to improve robustness, albeit this will require revisiting to clean up the code." />
     <MESSAGE value="removed view CSV weather push button and slighly rearanged Farm GUI" />
@@ -332,7 +338,8 @@
     <MESSAGE value="commented out call to class OutLog for  standard error stream, sys.stderr, which was surpressing runtime errors and making error trapping difficult." />
     <MESSAGE value="part way through major revision of the ora_excel_write_cn_water.py module." />
     <MESSAGE value="completed revision of the ora_excel_write_cn_water.py module for now." />
-    <option name="LAST_COMMIT_MESSAGE" value="completed revision of the ora_excel_write_cn_water.py module for now." />
+    <MESSAGE value="modified save farm data so that the soil parameters are not overwritten." />
+    <option name="LAST_COMMIT_MESSAGE" value="modified save farm data so that the soil parameters are not overwritten." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -351,16 +358,6 @@
           <url>file://$PROJECT_DIR$/display_gui_charts.py</url>
           <line>308</line>
           <option name="timeStamp" value="158" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../Constructor/ora_utils_write_mgmt_sheet.py</url>
-          <line>41</line>
-          <option name="timeStamp" value="160" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>162</line>
-          <option name="timeStamp" value="162" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

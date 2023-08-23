@@ -37,7 +37,7 @@ def display_subarea(form, sba_indx):
     check to see if subarea sheet already exists - if so read it
     create arguments
     '''
-    inorg_ferts = [NONE_STR, 'Urea']
+    inorg_ferts = [NONE_STR, 'Urea', 'Neem']
     org_wastes = [NONE_STR]
     for ow_typ in form.ora_parms.ow_parms:
         if ow_typ != 'Organic waste type':

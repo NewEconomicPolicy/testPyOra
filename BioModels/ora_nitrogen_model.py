@@ -32,6 +32,14 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
     n_parms = parameters.n_parms
     crop_vars = parameters.crop_vars
 
+    # determine if using Neem
+    # =======================
+    rate_inhibit = 1.0
+    applics = [val for val in management.fert_n if val is not None]
+    if len(applics) > 0:
+        if applics[0]['fert_type'] == 'Neem':
+            rate_inhibit = 0.5
+
     # initialise the zeroth timestep
     # ==============================
     no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_soil, precip_critic, prop_volat = \
@@ -99,7 +107,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         nh4_immob = nh4_immobilisation(soil_n_sply, min_no3_nh4)
 
         nh4_total_inp = nh4_inorg_fert + nh4_miner + nh4_atmos
-        nh4_nitrif = nh4_nitrification(nh4_total_inp, min_no3_nh4, rate_mod, k_nitrif)
+        nh4_nitrif = nh4_nitrification(nh4_total_inp, min_no3_nh4, rate_mod, k_nitrif, rate_inhibit)
 
         # Nitrate N (kg/ha)
         # =================
