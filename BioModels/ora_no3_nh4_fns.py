@@ -32,13 +32,27 @@ from calendar import monthrange
 WARN_STR = '*** Warning *** '
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
+def get_rate_inhibit(management):
+    """
+    required for Neem
+    """
+    rate_inhibit = 1.0
+
+    applics = [val for val in management.fert_n if val is not None]
+    if len(applics) > 0:
+        fert_type = applics[0]['fert_type']
+        if fert_type.find('Neem') >= 0:
+            rate_inhibit = 0.5
+
+    return rate_inhibit
+
 def _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, c_n_rat_dpm_prev):
-    '''
+    """
     equation 3.3.10  C:N ratio for DPM
         numer = pool_c_dpm + pi_to_dpm + cow_to_dpm
         denom = (pool_c_dpm/c_n_rat_dpm_prev) + (pi_to_dpm/c_n_rat_pi) + (cow_to_dpm/c_n_rat_ow)
         c_n_rat_dpm = numer/denom
-    '''
+    """
     term1 = pool_c_dpm/c_n_rat_dpm_prev
     term2 = pi_to_dpm/c_n_rat_pi
     term3 = cow_to_dpm/c_n_rat_ow
@@ -51,10 +65,10 @@ def _get_c_n_rat_dpm(c_n_rat_pi, c_n_rat_ow, cow_to_dpm, pi_to_dpm, pool_c_dpm, 
     return c_n_rat_dpm
 
 def _get_c_n_rat_rpm(c_n_rat_pi, pool_c_rpm, pi_to_rpm, c_n_rat_rpm_prev):
-    '''
+    """
     equation 3.3.11  C:N ratio for RPM
         c_n_rat_rpm = (pool_c_rpm + pi_to_rpm)/((pool_c_rpm/c_n_rat_rpm_prev) + (pi_to_rpm/c_n_rat_pi))
-    '''
+    """
     term1 = pool_c_rpm/c_n_rat_rpm_prev
     term2 = pi_to_rpm/c_n_rat_pi
 
@@ -63,11 +77,11 @@ def _get_c_n_rat_rpm(c_n_rat_pi, pool_c_rpm, pi_to_rpm, c_n_rat_rpm_prev):
     return c_n_rat_rpm
 
 def _get_c_n_rat_hum(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow, c_n_rat_soil):
-    '''
+    """
     equation 3.3.12  C:N ratio for RPM
     Whereas the C : nutrient ratio of the BIO pool remains at the steady state for the soil, the
     HUM pool receives nutrient inputs from the applied organic wastes
-    '''
+    """
     term1 = pool_c_hum/c_n_rat_hum_prev
     term2 = cow_to_hum/c_n_rat_ow
     numer = pool_c_hum + cow_to_hum
@@ -83,9 +97,9 @@ def _get_c_n_rat_hum(pool_c_hum, cow_to_hum, c_n_rat_hum_prev, c_n_rat_ow, c_n_r
 
 def _get_n_release(prop_co2, c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, c_loss_bio, c_loss_hum,
                    c_n_rat_hum):
-    '''
+    """
     (eq.3.3.8) release of N due to CO2-C loss depends on loss of C from soil and C:N ratio for each pool
-    '''
+    """
     n_loss_dpm = c_loss_dpm/c_n_rat_dpm
     n_loss_rpm = c_loss_rpm/c_n_rat_rpm
     n_loss_bio = c_loss_bio/c_n_rat_soil
@@ -97,10 +111,10 @@ def _get_n_release(prop_co2, c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c
 
 def _get_n_adjust(c_loss_dpm, c_n_rat_dpm, c_loss_rpm, c_n_rat_rpm, c_n_rat_soil, prop_bio,
                   prop_hum, pool_c_hum, c_n_rat_hum):
-    '''
+    """
     (eq.3.3.9) N adjustment is difference in the stable C:N ratio of the soil and
                C material being transformed into BIO and HUM from DPM and RPM pools
-    '''
+    """
     term_bio  = prop_bio*(c_loss_dpm*(1/c_n_rat_soil - 1/c_n_rat_dpm) + c_loss_rpm*(1/c_n_rat_soil - 1/c_n_rat_rpm))
     term_hum1 = prop_hum*(c_loss_dpm*(1/c_n_rat_hum - 1/c_n_rat_dpm) + c_loss_rpm*(1/c_n_rat_hum - 1/c_n_rat_rpm))
     term_hum2 = pool_c_hum*(1/c_n_rat_soil - 1/c_n_rat_hum)
@@ -113,9 +127,9 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
         cow_to_dpm, pi_to_dpm, pool_c_dpm, c_loss_dpm, c_n_rat_dpm_prev,
                     pi_to_rpm, pool_c_rpm, c_loss_rpm, c_n_rat_rpm_prev,
         cow_to_hum,            pool_c_hum, c_loss_hum, c_n_rat_hum_prev, c_loss_bio):
-    '''
+    """
     equations 3.3.7 to 3.3.12
-    '''
+    """
     
     # C to N ratios for DPM, RPM and HUM
     # ==================================
@@ -134,9 +148,9 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
     return soil_n_sply, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum
 
 def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
-    '''
+    """
     TODO: put warning message in log file
-    '''
+    """
     denom = nut_n_opt - nut_n_min
     if denom == 0.0:
         mess = WARN_STR + 'potential division by zero in eq.3.3.1 - '
@@ -151,20 +165,19 @@ def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt)
     return max( min(prop_n_opt,1), 0)
 
 def prop_n_optimal_from_yield(prop_yld_opt, crop_vars):
-    '''
+    """
     calculate proportion of the optimum supply of N in the soil using fitted curve coefficients
     pXopt = a pYldopt3 + b pYldopt2 + c pYldopt + d
-    '''
+    """
     prop_n_opt = crop_vars['n_rcoef_a']*prop_yld_opt**3 + crop_vars['n_rcoef_b']*prop_yld_opt**2 + \
                                                     crop_vars['n_rcoef_c']*prop_yld_opt + crop_vars['n_rcoef_d']
     return prop_n_opt
 
-
 def get_n_parameters(n_parms):
-    '''
+    """
     assume atmospheric deposition is composed of equal proportions of nitrate and ammonium-N
     This assumption may differ according to region
-    '''
+    """
     atmos_n_depos = n_parms['atmos_n_depos']
     prop_atmos_dep_no3 = n_parms['prop_atmos_dep_no3']  # typically 0.5
 
@@ -180,26 +193,26 @@ def get_n_parameters(n_parms):
     return no3_atmos, nh4_atmos, k_nitrif, min_no3_nh4, n_d50, c_n_rat_soil, precip_critic, prop_volat
 
 def _fertiliser_inputs(fert_amount):
-    '''
+    """
     Urea fertiliser (the main form of fertiliser used in Africa and India, decomposes on application
     to the soil to produce ammonium, therefore, the proportion of nitrate added in the fertiliser is zero (eq.2.3.5)
-    '''
+    """
     prop_no3_to_fert = 0
     fert_to_no3_pool = prop_no3_to_fert*fert_amount
 
     return fert_to_no3_pool
 
 '''
-     =====================================
-                Losses of nitrate
-     =====================================
+ =====================================
+            Losses of nitrate
+ =====================================
 '''
 
 def loss_adjustment_ratio(n_start, n_sum_inputs, n_sum_losses):
-    '''
+    """
     for nitrate and ammonium (eq.2.4.1)
     unless losses are big or start plus inputs are small then value will be 1
-    '''
+    """
     if n_sum_losses <= n_start + n_sum_inputs:
         loss_adj_rat = 1
     else:
@@ -208,15 +221,15 @@ def loss_adjustment_ratio(n_start, n_sum_inputs, n_sum_losses):
     return loss_adj_rat
 
 def no3_immobilisation(soil_n_sply, nh4_immob, min_no3_nh4):
-    '''
+    """
     A negative soil N supply represents immobilised N. Immobilisation is assumed to occur first from the ammonium pool.
-    '''
+    """
     no3_immob = min( - min(soil_n_sply - nh4_immob, 0), min_no3_nh4) #  (eq.2.4.5)
 
     return no3_immob
 
 def no3_leaching(precip, wc_start, pet, wc_fld_cap, no3_start, no3_inputs, no3_min):
-    '''
+    """
     Nitrate-N lost by leaching is calculated from the concentration of available nitrate in the soil at the start of
     the time step plus any inputs of nitrate after dilution with rainwater and the water drained from the soil
         precip_t1       rainfall during the time step (mm)
@@ -225,7 +238,7 @@ def no3_leaching(precip, wc_start, pet, wc_fld_cap, no3_start, no3_inputs, no3_m
         pet_t1          potential evapotranspiration during the time step (mm)
         wc_fld_cap      field capacity (mm)
     no3_start, no3_inputs, no3_min
-    '''
+    """
 
     # volume of water drained (mm) during the time step
     # =================================================
@@ -236,12 +249,12 @@ def no3_leaching(precip, wc_start, pet, wc_fld_cap, no3_start, no3_inputs, no3_m
     return  no3_leach, wat_drain
 
 def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_decomp, no3_avail, n_d50):
-    '''
+    """
     Denitrification is a microbially facilitated process where nitrate is reduced and ultimately produces molecular
     nitrogen through a series of intermediate gaseous nitrogen oxide products. The process is performed primarily by
     heterotrophic bacteria although autotrophic denitrifiers have also been identified
     based on the simple approach used in ECOSSE
-    '''
+    """
     no3_d50 = n_d50*t_depth     # soil nitrate-N content at which denitrification is 50% of its full potential (kg ha-1)
     dummy, days_in_mnth = monthrange(2011, imnth)   # TODO: ignores leap year, is this correct?
 
@@ -271,13 +284,13 @@ def no3_denitrific(imnth, t_depth, wat_soil, wc_pwp, wc_fld_cap, co2_aerobic_dec
     return n_denit, n_denit_max, rate_denit_no3, rate_denit_moist, rate_denit_bio, prop_n2_wat, prop_n2_no3
 
 def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, n_crop_dem, no3_avail, nh4_avail, pi_tonnes):
-    '''
+    """
     crop N demand is calculated from proportion of optimum yield estimated assuming no other losses of mineral N
         0 <= prop_n_opt <= 1
         n_crop_dem:  N supply required for the optimum yield
         t_grow:     number of months in the growing season
         pi_tonnes:  used as a proxy to indicate if time step is in a growing season
-    '''
+    """
     if pi_tonnes == 0:
         n_crop_dem, no3_crop_dem, n_crop_dem_adj, nh4_crop_dem, prop_yld_opt = 5*[0]
     else:
@@ -298,64 +311,64 @@ def no3_nh4_crop_uptake(prop_n_opt, n_respns_coef, n_crop_dem, no3_avail, nh4_av
     return n_crop_dem_adj, no3_crop_dem, nh4_crop_dem, prop_yld_opt
 
 '''
-     =====================================
-                Ammonium functions
-     =====================================
+ =====================================
+            Ammonium functions
+ =====================================
 '''
 
 def _nh4_atmos_deposition(n_atmos_depos, proportion = 0.5):
-    '''
+    """
     atmospheric deposition of N to the soil (24)
     assume atmospheric deposition is composed of equal proportions of nitrate and ammonium-N
     This assumption may differ according to region.
-    '''
+    """
     n_to_soil = n_atmos_depos*proportion
 
     return n_to_soil
 
 def nh4_mineralisation(soil_n_sply):
-    '''
+    """
     Mineralisation - Mineralisation of organic N is assumed to release N in the form of ammonium.
     Therefore, a positive net soil N supply, Nsoil (kg ha-1) (see section 3.3), is equivalent to the input
     of ammonium-N due to mineralisation, nh4,miner (kg ha-1),
-    '''
+    """
     nh4_miner = max(soil_n_sply, 0)  # eq.2.4.21
 
     return nh4_miner
 
 '''
-     =====================================
-                Losses of ammonium
-     =====================================
+ =====================================
+            Losses of ammonium
+ =====================================
 '''
 def n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms):
-    '''
+    """
     After Bell et al. (2012), 2% of the fully nitrified N is assumed to be lost as gas, with 40% lost as NO and
     60% s N2O, and 2% of the partially nitrified N is assumed to be lost as gas at field capacity, with a linear
     decrease in this loss as water declines to wilting point
-    '''
+    """
     n2o_emiss_nitrif = nh4_nitrif*( (n_parms['prop_n2o_fc']*(wat_soil/wc_fld_cap)) +
                                       (n_parms['prop_nitrif_gas']*(1 - n_parms['prop_nitrif_no'])))  # (eq.2.4.24)
     return n2o_emiss_nitrif
 
 def nh4_immobilisation(soil_n_sply, nh4_min):
-    '''
+    """
     Immobilisation – A negative soil N supply represents immobilised N and is assumed
     to occur first from the ammonium pool before drawing on nitrate.
     soil_n_sply:  soil N supply
     nh4_min:        minimum possible amount of ammonium-N,
-    '''
+    """
     nh4_immob = min( - min(soil_n_sply, 0), nh4_min)    # (eq.2.4.22)
 
     return nh4_immob
 
 def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif, rate_inhibit):
-    '''
+    """
     nitrified ammonium is assumed to occur by a first order reaction, using the same environmental
     rate modifiers as in soil organic matter decomposition
     k_nitrif - rate constant for nitrification, per month
     rate_inhibit - inhibition rate modifier, 0.5 for Neem
-    '''
+    """
 
     tmp_var = nh4*(1 - exp(-k_nitrif*rate_mod*rate_inhibit))
 
@@ -364,7 +377,7 @@ def nh4_nitrification(nh4, nh4_min, rate_mod, k_nitrif, rate_inhibit):
     return nh4_nitrif
 
 def nh4_volatilisation(precip, nh4_ow_fert, nh4_inorg_fert, precip_critic, prop_volat):
-    '''
+    """
     Ammonia volatilisation: a chemical process that occurs at the soil surface when ammonium from urea or
     ammonium-containing fertilisers (e.g. urea) is converted to ammonia gas at high pH. Losses are minimal when
     fertiliser is incorporated, but can be high when fertiliser is surface-applied.
@@ -374,11 +387,10 @@ def nh4_volatilisation(precip, nh4_ow_fert, nh4_inorg_fert, precip_critic, prop_
     uses:
      prop_volat:        proportion of ammonium-N or urea-N that can be volatilised
      precip_critic:     critical level of rainfall below which losses due to volatilisation take place
-    '''
+    """
     if precip < precip_critic:
         nh4_volat = prop_volat*(nh4_ow_fert + nh4_inorg_fert)   # (eq.2.4.25)
     else:
         nh4_volat = 0.0
 
     return  nh4_volat
-

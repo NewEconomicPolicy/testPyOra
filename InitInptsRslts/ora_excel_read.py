@@ -669,6 +669,13 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
 
     return n_parms
 
+def _read_synthetic_ferts_sheet(xls_fname, sheet_name, skip_until):
+    """
+
+    """
+    inorg_ferts = ['Urea', 'Neem coated urea']
+    syn_fert_parms = None
+    return syn_fert_parms
 
 def _read_crop_vars(xls_fname, sheet_name):
     """

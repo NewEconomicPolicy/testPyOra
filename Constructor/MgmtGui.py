@@ -4,7 +4,7 @@
 # Author:      Mike Martin
 # Created:     14/04/2021
 # Licence:     <your licence>
-# Description:#
+# Description:
 #
 # -------------------------------------------------------------------------------
 # !/usr/bin/env python
@@ -37,7 +37,7 @@ def display_subarea(form, sba_indx):
     check to see if subarea sheet already exists - if so read it
     create arguments
     '''
-    inorg_ferts = [NONE_STR, 'Urea', 'Neem']
+    inorg_ferts = [NONE_STR, 'Urea', 'Neem coated urea']
     org_wastes = [NONE_STR]
     for ow_typ in form.ora_parms.ow_parms:
         if ow_typ != 'Organic waste type':

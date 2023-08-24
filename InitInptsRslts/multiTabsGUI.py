@@ -38,7 +38,7 @@ from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
 
-from CropGui import edit_crop_parms
+from CropGui import edit_dyn_vars
 from MgmtGui import display_subarea
 
 STD_FLD_SIZE_60 = 60
@@ -422,11 +422,11 @@ class AllTabs(QTabWidget):
         QApplication.processEvents()
         return
 
-    def editCropParms(self):
+    def editDynVars(self):
         """
 
         """
-        edit_crop_parms(self)
+        edit_dyn_vars(self)
 
         return
 
@@ -464,20 +464,22 @@ class AllTabs(QTabWidget):
         grid.addWidget(QLabel(), irow, 3)  # spacer
 
         irow += 2
+        icol = 0
         w_save_farm1 = QPushButton('Save farm')
         helpText = 'Create a new or update an existing Excel file for a PyOrator run consisting of farm details, management and weather data'
         w_save_farm1.setToolTip(helpText)
         w_save_farm1.clicked.connect(self.saveFarmClicked)
-        grid.addWidget(w_save_farm1, irow, 0)
-        self.w_save_farm1 = w_save_farm1
+        grid.addWidget(w_save_farm1, irow, icol)
+        self.w_save_farm1 = w_save_farm1       
 
-        w_crop_parms = QPushButton('Crop parms')
-        helpText = 'Change default crop parameters'
-        w_crop_parms.setToolTip(helpText)
-        w_crop_parms.setFixedWidth(STD_BTN_SIZE + 10)
-        w_crop_parms.clicked.connect(self.editCropParms)
-        grid.addWidget(w_crop_parms, irow, 1)
-        self.w_crop_parms = w_crop_parms
+        icol += 2
+        w_dyn_vars = QPushButton('Dynamic variables')
+        helpText = 'Change dynamic variables e.g. default crop or fertiliser parameters'
+        w_dyn_vars.setToolTip(helpText)
+        w_dyn_vars.setFixedWidth(STD_BTN_SIZE + 40)
+        w_dyn_vars.clicked.connect(self.editDynVars)
+        grid.addWidget(w_dyn_vars, irow, icol)
+        self.w_dyn_vars = w_dyn_vars     
 
         ntab = 1
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))

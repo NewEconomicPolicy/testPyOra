@@ -19,26 +19,21 @@ __version__ = '0.0.0'
 # ---------------
 #
 from ora_cn_fns import get_fert_vals_for_tstep, get_soil_vars, get_crop_vars
-from ora_no3_nh4_fns import soil_nitrogen_supply, no3_nh4_crop_uptake, get_n_parameters, no3_immobilisation, no3_denitrific, \
-                    no3_leaching, loss_adjustment_ratio, prop_n_opt_from_soil_n_supply, \
-                    nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_lost_nitrif
+from ora_no3_nh4_fns import (soil_nitrogen_supply, no3_nh4_crop_uptake, get_n_parameters, no3_immobilisation,
+                    no3_denitrific, no3_leaching, loss_adjustment_ratio, prop_n_opt_from_soil_n_supply,
+                    get_rate_inhibit,
+                    nh4_mineralisation, nh4_immobilisation, nh4_nitrification, nh4_volatilisation, n2o_lost_nitrif)
 
 def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, soil_vars, nitrogen_change, continuity):
-    '''
+    """
     The soil organic matter pools (BIO and HUM-N) are assumed to have a constant C:N ratio (8.5 after Bradbury et al., 1993)
     also default for c_n_rat_hum_prev
-    '''
+    """
     no3_start, nh4_start, c_n_rat_hum_prev = continuity.get_n_change_vars()
     n_parms = parameters.n_parms
     crop_vars = parameters.crop_vars
 
-    # determine if using Neem
-    # =======================
-    rate_inhibit = 1.0
-    applics = [val for val in management.fert_n if val is not None]
-    if len(applics) > 0:
-        if applics[0]['fert_type'] == 'Neem':
-            rate_inhibit = 0.5
+    rate_inhibit = get_rate_inhibit(management)     # inhibition rate modifier is usually 1
 
     # initialise the zeroth timestep
     # ==============================

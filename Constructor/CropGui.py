@@ -25,24 +25,24 @@ WARN_STR = '*** Warning *** '
 
 STD_FLD_SIZE_40 = 40
 
-def edit_crop_parms(form):
-    '''
+def edit_dyn_vars(form):
+    """
     
-    '''
+    """
     form.crop_vars_gui = DispCropVars(form.ora_parms.crop_vars)
     return
 
 class DispCropVars(QMainWindow):
-    '''
+    """
 
-    '''
+    """
     submitted = pyqtSignal(str, str)  # will send 2 strings
 
     def __init__(self, crop_vars, parent=None):
-        '''
+        """
          calls the __init__() method of the QMainWindow (or QWidget) class, allowing
          the DispCropParms class to be used without repeating code
-        '''
+        """
         super(DispCropVars, self).__init__(parent)
 
         self.crop_vars = crop_vars
@@ -60,9 +60,9 @@ class DispCropVars(QMainWindow):
 
 
     def UiGridWdgts(self):
-        '''
+        """
         method for grid components
-        '''
+        """
         crop_names = [crop_name for crop_name in self.crop_vars]
 
         # grid will be put in RH vertical box
@@ -107,9 +107,9 @@ class DispCropVars(QMainWindow):
         return
 
     def changeCrop(self):
-        '''
+        """
 
-        '''
+        """
         crop_name = self.w_combo00.currentText()
 
         t_grow = self.crop_vars[crop_name]['t_grow']
@@ -118,9 +118,9 @@ class DispCropVars(QMainWindow):
         return
 
     def UiControlPanel(self):
-        '''
+        """
         method for constructing control panel
-        '''
+        """
         w_clr_crps = QPushButton("Clear crops")
         w_clr_crps.setFixedWidth(65)
         w_clr_crps.clicked.connect(self.resetClicked)
@@ -152,9 +152,9 @@ class DispCropVars(QMainWindow):
         return
 
     def saveCropParsClicked(self, dummy):
-        '''
+        """
         gather all fields
-        '''
+        """
         crop_name = self.w_combo00.currentText()
         t_grow = int(self.w_tgrow.text())
 
@@ -173,15 +173,15 @@ class DispCropVars(QMainWindow):
         self.close()
 
     def resetClicked(self):
-        '''
+        """
 
-        '''
+        """
         pass
 
     def UiScrllLayout(self):
-        '''
+        """
         method for laying out UI
-        '''
+        """
         quit = QAction("Quit", self)
         quit.triggered.connect(self.closeEvent)
 
@@ -210,9 +210,9 @@ class DispCropVars(QMainWindow):
         return
 
     def closeEvent(self, event):
-        '''
+        """
 
-        '''
+        """
         close = QMessageBox()
         close.setText("You sure?")
         close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
