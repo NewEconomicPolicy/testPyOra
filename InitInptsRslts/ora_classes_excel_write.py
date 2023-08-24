@@ -24,9 +24,9 @@ from string import ascii_uppercase
 ALPHABET = list(ascii_uppercase)
 
 class pyoraId():
-    '''
+    """
     define unique program identifiers which will be used for setup and configuration files etc.
-    '''
+    """
 
     def __init__(self):
 
@@ -37,9 +37,9 @@ class pyoraId():
         self.applic_str = 'glbl_ecss_site_spec_mk'
 
 def _setup_sheet_data_dict(pettmp, var_format_dict):
-    '''
+    """
     all classes require sheet_data dictionary to be initiated
-    '''
+    """
     sheet_data = {}
     var_name_list = list(var_format_dict.keys())
     for var_name in var_name_list:
@@ -68,9 +68,9 @@ def _setup_sheet_data_dict(pettmp, var_format_dict):
 class  B1CropProduction(object, ):
 
     def __init__(self, pettmp, soil_water, mngmnt_ss, mngmnt_fwd):
-        '''
+        """
         B1      TODO: removed 'days_month': 'd' from var_format_dict - don't know why it was there
-        '''
+        """
         self.title = 'Crop Production'
 
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
@@ -94,12 +94,12 @@ class  B1CropProduction(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  B1cNlimitation(object, ):
+class B1cNlimitation(object, ):
 
     def __init__(self, pettmp, carbon_change, nitrogen_change, soil_water, mngmnt_ss, mngmnt_fwd):
-        '''
+        """
         B1c
-        '''
+        """
         self.title = 'Nitrogen limitation'
 
 
@@ -124,12 +124,12 @@ class  B1cNlimitation(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  A2fNitrification(object, ):
+class A2fNitrification(object, ):
 
     def __init__(self, pettmp, nitrogen_change):
-        '''
+        """
         A2f
-        '''
+        """
         self.title = 'Nitrification'
 
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
@@ -147,12 +147,12 @@ class  A2fNitrification(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  A2eVolatilisedNloss(object, ):
+class A2eVolatilisedNloss(object, ):
 
     def __init__(self, pettmp, nitrogen_change):
-        '''
+        """
         A2e
-        '''
+        """
         self.title = 'Volatilised N loss'
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'precip': '2f',
@@ -182,9 +182,9 @@ class  A2eVolatilisedNloss(object, ):
 class A2dDenitrifiedNloss(object, ):
 
     def __init__(self, pettmp, carbon_change, nitrogen_change, soil_water):
-        '''
+        """
         A2d
-        '''
+        """
         self.title = 'Denitrified N loss'
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',
@@ -212,12 +212,12 @@ class A2dDenitrifiedNloss(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  A2cLeachedNloss(object, ):
+class A2cLeachedNloss(object, ):
 
     def __init__(self, pettmp, soil_water, nitrogen_change):
-        '''
+        """
         A2c
-        '''
+        """
         self.title = 'Leached N loss'
 
         var_format_dict = {'period': 's',  'year':'d', 'month': 'd', 'crop_name': 's',
@@ -238,12 +238,12 @@ class  A2cLeachedNloss(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  A2bCropNuptake(object, ):
+class A2bCropNuptake(object, ):
 
     def __init__(self, pettmp, nitrogen_change):
-        '''
+        """
         A2b
-        '''
+        """
         self.title = 'Crop N uptake'
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',
@@ -262,12 +262,12 @@ class  A2bCropNuptake(object, ):
         self.var_name_list = var_name_list
         self.var_formats = var_format_dict
 
-class  A2aSoilNsupply(object, ):
+class A2aSoilNsupply(object, ):
 
     def __init__(self, pettmp, nitrogen_change):
-        '''
+        """
         A2a
-        '''
+        """
         self.title = 'Soil N supply'
 
         var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'crop_name': 's',
@@ -288,9 +288,9 @@ class  A2aSoilNsupply(object, ):
 class A2MineralN(object,):
 
     def __init__(self, pettmp, nitrogen_change):
-        '''
+        """
         A2
-        '''
+        """
         self.title = 'Mineral N'
 
         var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'tair': '2f',
@@ -316,9 +316,9 @@ class A2MineralN(object,):
 class A3SoilWater(object, ):
 
     def __init__(self, pettmp, nitrogen_change, soil_water):
-        '''
+        """
         A3
-        '''
+        """
         self.title = 'Soil water'
 
         # TODO: rooting depth
@@ -346,9 +346,9 @@ class A3SoilWater(object, ):
 class A1SomChange(object, ):
 
     def __init__(self, pettmp, carbon_obj, soil_water, mngmnt_ss, mngmnt_fwd):
-        '''
+        """
         A1. Change in soil organic matter
-        '''
+        """
         self.title = 'SOM_change'
         # 'crop_name': 's',
         var_format_dict = {'period':'s', 'year':'d', 'month':'d', 'crop_name': 's', 'tair':'2f',

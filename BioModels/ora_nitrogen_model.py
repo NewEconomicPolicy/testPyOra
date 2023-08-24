@@ -32,8 +32,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
     no3_start, nh4_start, c_n_rat_hum_prev = continuity.get_n_change_vars()
     n_parms = parameters.n_parms
     crop_vars = parameters.crop_vars
-
-    rate_inhibit = get_rate_inhibit(management)     # inhibition rate modifier is usually 1
+    rate_inhibit = get_rate_inhibit(management, parameters)     # inhibition rate modifier is usually 1
 
     # initialise the zeroth timestep
     # ==============================

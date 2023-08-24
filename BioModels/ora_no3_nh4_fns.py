@@ -32,7 +32,7 @@ from calendar import monthrange
 WARN_STR = '*** Warning *** '
 N_DENITR_DAY_MAX = 0.2      # Maximum potential denitrification rate in 1 cm layer, used in function  no3_denitrific
 
-def get_rate_inhibit(management):
+def get_rate_inhibit(management, parameters):
     """
     required for Neem
     """
@@ -42,7 +42,7 @@ def get_rate_inhibit(management):
     if len(applics) > 0:
         fert_type = applics[0]['fert_type']
         if fert_type.find('Neem') >= 0:
-            rate_inhibit = 0.5
+            rate_inhibit = parameters.syn_fert_parms['Neem coated urea']['rate_inhibit']
 
     return rate_inhibit
 

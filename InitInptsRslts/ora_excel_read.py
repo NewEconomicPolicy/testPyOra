@@ -669,13 +669,6 @@ def _read_n_constants_sheet(xls_fname, sheet_name, skip_until):
 
     return n_parms
 
-def _read_synthetic_ferts_sheet(xls_fname, sheet_name, skip_until):
-    """
-
-    """
-    inorg_ferts = ['Urea', 'Neem coated urea']
-    syn_fert_parms = None
-    return syn_fert_parms
 
 def _read_crop_vars(xls_fname, sheet_name):
     """
@@ -735,6 +728,13 @@ def _read_organic_waste_sheet(xls_fname, sheet_name, skip_until):
         all_ow_parms = None
 
     return all_ow_parms
+
+def _read_synthetic_ferts_sheet(xls_fname, sheet_name, skip_until):
+    """
+
+    """
+    syn_fert_parms = {'Urea': {'rate_inhibit': 1}, 'Neem coated urea': {'rate_inhibit': 0.5}}
+    return syn_fert_parms
 
 def _make_retvar_safe(ret_var):
     """
@@ -940,7 +940,6 @@ class ReadCropOwNitrogenParms(object, ):
         """
         read parameters from ORATOR inputs Excel file
         """
-
         print('Reading crop, organic waste and Nitrogen parameter sheets...')
 
         # Nitrogen params plus r_dry, drying potential
@@ -950,6 +949,7 @@ class ReadCropOwNitrogenParms(object, ):
         # Organic Waste and Crop params e.g. max rooting depths
         # =====================================================
         self.ow_parms = _read_organic_waste_sheet(params_xls_fn, 'Org Waste parms', 0)
+        self.syn_fert_parms = _read_synthetic_ferts_sheet(params_xls_fn, 'Syn fert parms', 0)
         self.crop_vars = _read_crop_vars(params_xls_fn, 'Crop parms')
 
 class ReadAnmlProdn(object, ):

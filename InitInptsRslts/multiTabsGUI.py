@@ -472,15 +472,6 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_save_farm1, irow, icol)
         self.w_save_farm1 = w_save_farm1       
 
-        icol += 2
-        w_dyn_vars = QPushButton('Dynamic variables')
-        helpText = 'Change dynamic variables e.g. default crop or fertiliser parameters'
-        w_dyn_vars.setToolTip(helpText)
-        w_dyn_vars.setFixedWidth(STD_BTN_SIZE + 40)
-        w_dyn_vars.clicked.connect(self.editDynVars)
-        grid.addWidget(w_dyn_vars, irow, icol)
-        self.w_dyn_vars = w_dyn_vars     
-
         ntab = 1
         self.lggr.info('Last row: {} for tab {}'.format(irow, ntab))
 
@@ -933,7 +924,6 @@ class AllTabs(QTabWidget):
         irow += 1
         grid.addWidget(QLabel(), irow, 0)  # spacer
 
-        # line 16: generate Excel files
         # =============================
         irow += 1
         w_make_xls = QCheckBox('Write Excel output files')
@@ -943,7 +933,6 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_make_xls, irow, 0, 1, 2)
         self.w_make_xls = w_make_xls
 
-        # line 17: display output
         # ========================
         irow += 1
         w_disp_out = QPushButton('Display output')
@@ -964,52 +953,66 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_opt_cycle, irow, 1, 1, 6)
         self.w_opt_cycle = w_opt_cycle
 
-        # line 19
+        # actions
         # =======
         irow += 1
+        icol = 1
         w_run_model = QPushButton('Run model')
         helpText = 'Runs ORATOR soil carbon and nitrogen, livestock and economics models'
         w_run_model.setToolTip(helpText)
         w_run_model.setEnabled(False)
         w_run_model.setFixedWidth(STD_BTN_SIZE)
         w_run_model.clicked.connect(self.runModelClicked)
-        grid.addWidget(w_run_model, irow, 0)
+        grid.addWidget(w_run_model, irow, icol)
         self.w_run_model = w_run_model
 
+        icol += 2
+        w_dyn_vars = QPushButton('Dynamic variables')
+        helpText = 'Change dynamic variables e.g. default crop or fertiliser parameters'
+        w_dyn_vars.setToolTip(helpText)
+        w_dyn_vars.setFixedWidth(STD_BTN_SIZE + 40)
+        w_dyn_vars.clicked.connect(self.editDynVars)
+        grid.addWidget(w_dyn_vars, irow, icol)
+        self.w_dyn_vars = w_dyn_vars
+
+        icol += 2
         w_economics = QPushButton('Economics')
         helpText = 'Runs ORATOR economics model'
         w_economics.setToolTip(helpText)
         w_economics.setEnabled(True)
         w_economics.setFixedWidth(STD_BTN_SIZE)
         w_economics.clicked.connect(self.runEconomicsClicked)
-        grid.addWidget(w_economics, irow, 4)
+        grid.addWidget(w_economics, irow, icol)
         self.w_economics = w_economics
 
+        icol += 1
         w_livestock = QPushButton('Livestock')
         helpText = 'Runs ORATOR livestock model'
         w_livestock.setToolTip(helpText)
         w_livestock.setEnabled(False)
         w_livestock.setFixedWidth(STD_BTN_SIZE)
         w_livestock.clicked.connect(self.runLivestockClicked)
-        grid.addWidget(w_livestock, irow, 5)
+        grid.addWidget(w_livestock, irow, icol)
         self.w_livestock = w_livestock
 
+        icol += 1
         w_soil_cn = QPushButton('Soil C and N')
         helpText = 'Runs ORATOR soil carbon and nitrogen code'
         w_soil_cn.setToolTip(helpText)
         w_soil_cn.setEnabled(False)
         w_soil_cn.setFixedWidth(STD_BTN_SIZE)
         w_soil_cn.clicked.connect(self.runSoilCnClicked)
-        grid.addWidget(w_soil_cn, irow, 6)
+        grid.addWidget(w_soil_cn, irow, icol)
         self.w_soil_cn = w_soil_cn
 
+        icol += 1
         w_optimise = QPushButton('Optimise')
         helpText = 'Optimisation - not ready'
         w_optimise.setToolTip(helpText)
         w_optimise.setEnabled(False)
         w_optimise.setFixedWidth(STD_BTN_SIZE)
         w_optimise.clicked.connect(self.runOptimiseClicked)
-        grid.addWidget(w_optimise, irow, 7)
+        grid.addWidget(w_optimise, irow, icol)
         self.w_optimise = w_optimise
 
         ntab = 3

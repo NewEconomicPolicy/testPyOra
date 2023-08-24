@@ -35,17 +35,21 @@ FLDS_ROW_HGHT = 20
 STD_ROW_HGHT = 18
 
 def write_mgmt_sht(fname, subarea, sba_descr, nmnths_ss, nmnths_fwd, rota_dict, overwrite_flag = True):
-    '''
+    """
     use pandas to create a data frame and write a management sheet to Excel
     if overwrite_flag is set to True then the existing sheet will deleted then be rewritten
-    '''
+    """
     period_lst = nmnths_ss * ['steady state']
     period_lst += nmnths_fwd * ['forward run']
 
     mngmnt = _rework_rota_to_mngmnt(period_lst, rota_dict)
 
     _remove_subarea_sheet(fname, subarea)
-    writer = ExcelWriter(fname, mode='a')
+    try:
+        writer = ExcelWriter(fname, mode='a')
+    except PermissionError as err:
+        print(err)
+        return -1
 
     # create data frame from dictionary
     # =================================
@@ -69,9 +73,9 @@ def write_mgmt_sht(fname, subarea, sba_descr, nmnths_ss, nmnths_fwd, rota_dict, 
     return
 
 def _blank_zeroes(sheet, val_col, irow):
-    '''
+    """
        blank zeros
-    '''
+    """
     cell_val = val_col + str(irow)
     if sheet[cell_val].value == 0:
         sheet[cell_val].value = ''
@@ -79,9 +83,9 @@ def _blank_zeroes(sheet, val_col, irow):
     return
 
 def _blank_empty_attrib_value(sheet, attr_col, amnt_col, irow):
-    '''
+    """
     blank empty attribute and associated value e.g. organic waste and amount
-    '''
+    """
     cell_type = attr_col + str(irow)
     cell_val = amnt_col + str(irow)
     if sheet[cell_type].value == 'None':
@@ -91,13 +95,13 @@ def _blank_empty_attrib_value(sheet, attr_col, amnt_col, irow):
     return
 
 def _adjust_subarea_sheets(fname, subarea):
-    '''
+    """
     update signature sheet and improve readability of this subarea sheet by adjusting column widths and alignments
     possible future modification to make more readable:
         remove zeros from yield, Fert N, OW amount and irrigation, columns E, G, I and J
         remove No crop from Crop, column D
         remove Nones from Fert type and OW type, columns F and H
-    '''
+    """
     # greenFill = PatternFill(start_color= 'lightGreen', end_color='lightGreen', fill_type='solid')
     # greenFill = PatternFill(start_color='00FF0000', end_color='00FF0000', fill_type='solid')
 
@@ -164,9 +168,9 @@ def _adjust_subarea_sheets(fname, subarea):
     return
 
 def _cnvrt_list_to_numbers(val_lst):
-    '''
+    """
 
-    '''
+    """
     rslt_lst = []
     for val in val_lst:
         try:
@@ -179,9 +183,9 @@ def _cnvrt_list_to_numbers(val_lst):
     return rslt_lst
 
 def _rework_rota_to_mngmnt(period_lst, rota_dict):
-    '''
+    """
     expand rotation to management for steady state and forward run
-    '''
+    """
     rota_len = len(rota_dict['crop_names'])
     nperiods = int(len(period_lst)/rota_len)
 
@@ -215,9 +219,9 @@ def _rework_rota_to_mngmnt(period_lst, rota_dict):
     return mngmnt
 
 def _remove_subarea_sheet(fname, subarea):
-    '''
+    """
     remove subarea sheet from pre-existing Excel file
-    '''
+    """
     wb_obj = load_workbook(fname, data_only=True)
     if subarea in wb_obj.sheetnames:
         del wb_obj[subarea]

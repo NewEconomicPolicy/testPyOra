@@ -33,10 +33,10 @@ from hwsd_bil import check_hwsd_integrity
 from weather_datasets import read_weather_dsets_detail
 
 from set_up_logging import set_up_logging
-from ora_excel_read import check_params_excel_file, check_xls_run_file, \
-                                                                ReadStudy, ReadCropOwNitrogenParms, ReadAnmlProdn
+from ora_excel_read import (check_params_excel_file, check_xls_run_file,
+                            ReadStudy, ReadCropOwNitrogenParms, ReadAnmlProdn)
 from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, LivestockModel, EconomicsModel
-from ora_water_model import  SoilWaterChange
+from ora_water_model import SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 from ora_gui_misc_fns import simulation_yrs_validate
 from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
@@ -54,7 +54,7 @@ MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 FNAME_ECON = 'PurchasesSalesLabour.xlsx'
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
 
-def initiation(form): 
+def initiation(form):
     """
     this function is called to initiate the programme and process all settings
     """
@@ -92,6 +92,7 @@ def initiation(form):
 
     return
 
+
 def _read_setup_file(program_id):
     """
     read settings used for programme from the setup file, if it exists,
@@ -121,7 +122,7 @@ def _read_setup_file(program_id):
     # ===============
     settings = setup['setup']
     settings_list = ['config_dir', 'fname_png', 'log_dir', 'fname_lookup', 'study_area_dir', 'hwsd_dir',
-                'nsubareas', 'irrig_dflt', 'nrota_yrs_dflt', 'areas_dflt', 'excel_dir', 'wthr_dir', 'params_xls']
+                     'nsubareas', 'irrig_dflt', 'nrota_yrs_dflt', 'areas_dflt', 'excel_dir', 'wthr_dir', 'params_xls']
     for key in settings_list:
         if key not in settings:
             print(ERROR_STR + 'setting {} is required in setup file {} '.format(key, setup_file))
@@ -168,7 +169,6 @@ def _read_setup_file(program_id):
         print('Excel economics file ' + econ_xls_fn + ' must exist')
         sleep(sleepTime)
         sys.exit(0)
-    
 
     settings['econ_xls_fn'] = econ_xls_fn
 
@@ -244,6 +244,7 @@ def _read_setup_file(program_id):
 
     return settings
 
+
 def _write_default_config_file(config_file, study_area_dir):
     """
 
@@ -272,6 +273,7 @@ def _write_default_config_file(config_file, study_area_dir):
     with open(config_file, 'w') as fconfig:
         dump_json(_default_config, fconfig, indent=2, sort_keys=True)
         return _default_config
+
 
 def read_config_file(form):
     """
@@ -347,7 +349,7 @@ def read_config_file(form):
 
     form.w_tab_wdgt.w_owex_min.setText(str(owex_min))
     form.w_tab_wdgt.w_owex_max.setText(str(owex_max))
-    form.w_tab_wdgt.w_combo13.setCurrentIndex(max(0, ow_type_indx))     # value must >= 0
+    form.w_tab_wdgt.w_combo13.setCurrentIndex(max(0, ow_type_indx))  # value must >= 0
     form.w_tab_wdgt.w_mnth_appl.setCurrentIndex(mnth_appl_indx)
 
     # populate popup lists
@@ -395,14 +397,14 @@ def read_config_file(form):
         # sys.exit(0)
 
     for sba in study.subareas:
-        form.w_tab_wdgt.w_combo36.addItem(sba)      # Sensitivity Analysis tab
+        form.w_tab_wdgt.w_combo36.addItem(sba)  # Sensitivity Analysis tab
 
     form.settings['study'] = study
 
     # from constructor
     # ================
     for attrib in list(['clim_scnr_indx', 'strt_yr_ss_indx', 'strt_yr_fwd_indx', 'study', 'farm_name',
-                                                            'use_isda', 'use_csv', 'nyrs_ss', 'nyrs_fwd']):
+                        'use_isda', 'use_csv', 'nyrs_ss', 'nyrs_fwd']):
         if attrib not in config:
             print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
             sleep(sleepTime)
@@ -456,6 +458,7 @@ def read_config_file(form):
     form.w_tab_wdgt.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
     return True
 
+
 def write_config_file(form, message_flag=True):
     """
     write current selections to config file
@@ -496,6 +499,7 @@ def write_config_file(form, message_flag=True):
             print()
 
     return
+
 
 # not yet used - experimental
 # ===========================
