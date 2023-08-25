@@ -38,7 +38,7 @@ from ora_wthr_misc_fns import read_csv_wthr_file, prod_system_to_descr
 from display_gui_charts import display_metric
 from ora_lookup_df_fns import fetch_defn_units_from_pyora_display, fetch_pyora_varname_from_pyora_display
 
-from CropGui import edit_dyn_vars
+from DynVarsGui import edit_dyn_vars
 from MgmtGui import display_subarea
 
 STD_FLD_SIZE_60 = 60
@@ -924,6 +924,33 @@ class AllTabs(QTabWidget):
         irow += 1
         grid.addWidget(QLabel(), irow, 0)  # spacer
 
+        # extra line for Neem
+        # ===================
+        syn_fert = 'Neem coated urea'
+        if syn_fert in self.ora_parms.syn_fert_parms:
+            rate_inhibit = self.ora_parms.syn_fert_parms[syn_fert]['rate_inhibit']
+        else:
+            rate_inhibit = 0.5
+
+        irow += 1
+        w_lbl32 = QLabel('Neem coated urea inhibition rate modifier:')
+        w_lbl32.setAlignment(Qt.AlignRight)
+        grid.addWidget(w_lbl32, irow, 0, 1, 2)
+
+        w_inhibit = QLineEdit()
+        w_inhibit.setFixedWidth(STD_FLD_SIZE_40)
+        w_inhibit.setAlignment(Qt.AlignRight)
+        w_inhibit.setToolTip('this field enables the default Neem coated urea inhibition rate modifier to be overridden')
+        grid.addWidget(w_inhibit, irow, 2)
+        # w_inhibit.clicked.connect(self.displayXlsxOutput)
+        w_inhibit.setText(str(rate_inhibit))
+        self.w_inhibit = w_inhibit
+
+        # end of Neem
+        # ===========
+        irow += 1
+        grid.addWidget(QLabel(), irow, 0)  # spacer
+
         # =============================
         irow += 1
         w_make_xls = QCheckBox('Write Excel output files')
@@ -972,6 +999,7 @@ class AllTabs(QTabWidget):
         w_dyn_vars.setToolTip(helpText)
         w_dyn_vars.setFixedWidth(STD_BTN_SIZE + 40)
         w_dyn_vars.clicked.connect(self.editDynVars)
+        w_dyn_vars.setEnabled(False)
         grid.addWidget(w_dyn_vars, irow, icol)
         self.w_dyn_vars = w_dyn_vars
 

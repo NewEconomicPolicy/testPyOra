@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Name:        CropGui.py
+# Name:        DynVarsGui.py
 # Purpose:     enables user to adjust crop parameters
 # Author:      Mike Martin
 # Created:     05/07/2023
@@ -9,7 +9,7 @@
 # -------------------------------------------------------------------------------
 # !/usr/bin/env python
 
-__prog__ = 'CropGui.py'
+__prog__ = 'DynVarsGui.py'
 __version__ = '0.0.0'
 
 # Version history
@@ -92,6 +92,7 @@ class DispCropVars(QMainWindow):
         w_inhibit.setFixedWidth(STD_FLD_SIZE_40)
         w_inhibit.setAlignment(Qt.AlignRight)
         lay_grid.addWidget(w_inhibit, irow, 1, alignment=Qt.AlignHCenter)
+        w_inhibit.setText(str(1))
         self.w_inhibit = w_inhibit
 
         # add space
@@ -119,10 +120,6 @@ class DispCropVars(QMainWindow):
         """
         method for constructing control panel
         """
-        w_clr_crps = QPushButton("Clear crops")
-        w_clr_crps.setFixedWidth(65)
-        w_clr_crps.clicked.connect(self.resetClicked)
-
         w_reset = QPushButton("Reset")
         w_reset.setFixedWidth(65)
         w_reset.clicked.connect(self.resetClicked)
@@ -132,7 +129,7 @@ class DispCropVars(QMainWindow):
         w_submit.setToolTip(helpText)
         w_submit.setFixedWidth(65)
         w_submit.setEnabled(True)
-        w_submit.clicked.connect(self.saveCropParsClicked)
+        w_submit.clicked.connect(self.saveDynVarsClicked)
         self.w_submit = w_submit
 
         w_dismiss = QPushButton("Dismiss")
@@ -140,7 +137,6 @@ class DispCropVars(QMainWindow):
         w_dismiss.clicked.connect(self.dismissClicked)
 
         lay_hbox_cntrl = QHBoxLayout()
-        lay_hbox_cntrl.addWidget(w_clr_crps)
         lay_hbox_cntrl.addWidget(w_submit)
         lay_hbox_cntrl.addWidget(w_reset)
         lay_hbox_cntrl.addWidget(w_dismiss)
@@ -149,12 +145,15 @@ class DispCropVars(QMainWindow):
 
         return
 
-    def saveCropParsClicked(self, dummy):
+    def saveDynVarsClicked(self, dummy):
         """
         gather all fields
         """
         syn_fert = self.w_combo00.currentText()
-        rate_inhibit = float(self.w_inhibit.text())
+        try:
+            rate_inhibit = float(self.w_inhibit.text())
+        except ValueError as err:
+            rate_inhibit = 1
 
         self.syn_fert_parms[syn_fert]['rate_inhibit'] = rate_inhibit
 

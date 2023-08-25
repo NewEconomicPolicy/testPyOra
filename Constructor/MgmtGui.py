@@ -33,15 +33,12 @@ NO_CROP = 'No crop'
 NONE_STR = 'None'
 
 def display_subarea(form, sba_indx):
-    '''
+    """
     check to see if subarea sheet already exists - if so read it
     create arguments
-    '''
-    inorg_ferts = [NONE_STR, 'Urea', 'Neem coated urea']
-    org_wastes = [NONE_STR]
-    for ow_typ in form.ora_parms.ow_parms:
-        if ow_typ != 'Organic waste type':
-            org_wastes.append(ow_typ)
+    """
+    inorg_ferts = [NONE_STR] + [inorg_fert for inorg_fert in form.ora_parms.syn_fert_parms]
+    org_wastes = [NONE_STR] + [ow_typ for ow_typ in form.ora_parms.ow_parms if ow_typ != 'Organic waste type']
 
     sba_descr = form.w_sba_descrs[sba_indx].text()
     # irrig = form.w_typ_irri[sba_indx].text()
@@ -66,16 +63,16 @@ def display_subarea(form, sba_indx):
     return
 
 class DispSubareaMgmt(QMainWindow):
-    '''
+    """
 
-    '''
+    """
     submitted = pyqtSignal(str, str)  # will send 2 strings
 
     def __init__(self, arg_list, parent=None):
-        '''
+        """
          calls the __init__() method of the QMainWindow (or QWidget) class, allowing
          the DispSubareaMgmt class to be used without repeating code
-        '''
+        """
         super(DispSubareaMgmt, self).__init__(parent)
 
         self.fname_run, self.subarea, self.sba_descr, self.crop_vars, self.org_wastes, self.inorg_ferts, self.irrig, \
@@ -97,9 +94,9 @@ class DispSubareaMgmt(QMainWindow):
         self.show()  # showing all the widgets
 
     def closeEvent(self, event):
-        '''
+        """
 
-        '''
+        """
         close = QMessageBox()
         close.setText("You sure?")
         close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
@@ -111,9 +108,9 @@ class DispSubareaMgmt(QMainWindow):
             event.ignore()
 
     def UiGridCmpnts(self):
-        '''
+        """
         method for grid components
-        '''
+        """
         mnth_keys = get_mnth_yr_names(self.nyrs_rota)
         self.mnth_keys = mnth_keys
         self.rllvr_lim = len(mnth_keys)  # rollover limit
@@ -223,9 +220,9 @@ class DispSubareaMgmt(QMainWindow):
         self.lay_grid = lay_grid  # used in UiScrllLayout
 
     def ApplyPrvSttngs(self, mgmt_ss):
-        '''
+        """
         method for populating managment GUI
-        '''
+        """
         if mgmt_ss is not None:
             mnth_keys = get_mnth_yr_names(self.nyrs_rota)
             for mnth, rec in zip(mnth_keys, mgmt_ss):
@@ -243,9 +240,9 @@ class DispSubareaMgmt(QMainWindow):
                     self.w_irri_amnts[mnth].setText(str(irrig))
 
     def UiControlPanel(self):
-        '''
+        """
         method for constructing control panel
-        '''
+        """
         w_clr_crps = QPushButton("Clear crops")
         w_clr_crps.setFixedWidth(65)
         w_clr_crps.clicked.connect(self.resetClicked)
@@ -275,9 +272,9 @@ class DispSubareaMgmt(QMainWindow):
         self.lay_hbox_cntrl = lay_hbox_cntrl
 
     def UiScrllLayout(self):
-        '''
+        """
         method for laying out UI
-        '''
+        """
         quit = QAction("Quit", self)
         quit.triggered.connect(self.closeEvent)
         '''
@@ -308,9 +305,9 @@ class DispSubareaMgmt(QMainWindow):
         lay_vbox.addLayout(self.lay_grid)
 
     def changeFert(self):
-        '''
+        """
         check each of 12 or 24 combos starting in January and working through the months.
-        '''
+        """
         for mnth_indx, mnth in enumerate(self.mnth_keys):
 
             fert_name = self.w_cmbo_ferts[mnth].currentText()
@@ -321,9 +318,9 @@ class DispSubareaMgmt(QMainWindow):
                 self.w_n_appld[mnth].setEnabled(True)
 
     def changeOrgWaste(self):
-        '''
+        """
         check each of 12 or 24 combos starting in January and working through the months.
-        '''
+        """
         for mnth_indx, mnth in enumerate(self.mnth_keys):
 
             ow_name = self.w_cmbo_ows[mnth].currentText()
@@ -334,9 +331,9 @@ class DispSubareaMgmt(QMainWindow):
                 self.w_ow_appld[mnth].setEnabled(True)
 
     def saveMgmtClicked(self, dummy):
-        '''
+        """
         gather all fields
-        '''
+        """
         rota_dict = {'mnth_keys': [], 'crop_names': [], 'yld_typcls': [], 'fert_typs': [], 'fert_n_amnts': [],
                                                                         'ow_typs': [], 'ow_amnts': [], 'irrigs': []}
 
@@ -370,11 +367,11 @@ class DispSubareaMgmt(QMainWindow):
         write_mgmt_sht(self.fname_run, self.subarea, self.sba_descr, nmnths_ss, nmnths_fwd, rota_dict)
 
     def changeCrop(self):
-        '''
+        """
         TODO consider using lambda to reduce logic
         check each of 12 or 24 combos starting in January and working through the months on a "first come, first
         served" basis.  The guiding principal is to keep the logic simple and maintainable.
-        '''
+        """
         mnth_keys = self.mnth_keys
         rllvr_lim = self.rllvr_lim  # rollover limit
 
@@ -435,9 +432,9 @@ class DispSubareaMgmt(QMainWindow):
         self.close()
 
     def resetClicked(self):
-        '''
+        """
 
-        '''
+        """
         for mnth in self.mnth_keys:
             self.w_cmbo_crops[mnth].setEnabled(True)
             self.w_cmbo_crops[mnth].setCurrentIndex(0)

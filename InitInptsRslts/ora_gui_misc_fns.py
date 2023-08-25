@@ -34,10 +34,26 @@ STRATEGIES = list(['On farm production', 'Buy/sell'])
 '''
 =========== BioModels ==============
 '''
+def edit_rate_inhibit(w_inhibit, syn_fert_parms):
+    """
+    required for Neem - crude TODO
+    """
+    syn_fert = 'Neem coated urea'
+
+    try:
+        rate_inhibit = float(w_inhibit.text())
+    except ValueError as err:
+        rate_inhibit = syn_fert_parms[syn_fert]['rate_inhibit']
+        print(ERROR_STR + str(err) + ' when reading rate inhibition - will use default: {}'.format(rate_inhibit))
+
+    syn_fert_parms[syn_fert]['rate_inhibit'] = rate_inhibit
+
+    return syn_fert_parms
+
 def rotation_yrs_validate(w_nrota_ss):
-    '''
+    """
     check number of rotation years
-    '''
+    """
     try:
         nyrs_rota  = int(w_nrota_ss.text())
     except ValueError as err:
@@ -48,9 +64,9 @@ def rotation_yrs_validate(w_nrota_ss):
 
 
 def simulation_yrs_validate(w_nyrs_ss, w_nyrs_fwd):
-    '''
+    """
     number of steady state and forward run years must be integers - subsitute defaults in event of non-compliance
-    '''
+    """
     try:
         nyrs_ss = int(w_nyrs_ss.text())
     except ValueError as err:
@@ -68,9 +84,9 @@ def simulation_yrs_validate(w_nyrs_ss, w_nyrs_fwd):
 =========== Livestock ==============
 '''
 def region_validate(site_defn, anml_prodn_obj):
-    '''
+    """
     TODO: improve - issue error
-    '''
+    """
     region = site_defn['region']
     if region not in anml_prodn_obj.world_regions:
         region = anml_prodn_obj.world_regions[-1]
@@ -78,9 +94,9 @@ def region_validate(site_defn, anml_prodn_obj):
     return region
 
 def farming_system(site_defn):
-    '''
+    """
     should be 3 characters, capitals
-    '''
+    """
     system = site_defn['system'].upper()
     if len(system) < 3:
         system = 'MRA'  # TODO: issue warning
@@ -101,9 +117,9 @@ def farming_system(site_defn):
 class LivestockEntity:
 
     def __init__(self, lvstck_content, anml_prodn_obj):
-        '''
+        """
         TODO: improve
-        '''
+        """
         type = lvstck_content['type']
         if type not in anml_prodn_obj.anml_types:
             type = anml_prodn_obj.anml_types[-1]
@@ -142,9 +158,9 @@ class LivestockEntity:
 class ReadLvstckJsonSubareas(object, ):
 
     def __init__(self, lvstck_files, anml_prodn_obj):
-        '''
+        """
         read and validate livestock JSON file
-        '''
+        """
         print('Reading livestock JSON files...')
 
         subareas = {}
@@ -175,9 +191,9 @@ class ReadLvstckJsonSubareas(object, ):
         print()     # cosmetic
 
 def disp_ow_parms(form):
-    '''
+    """
     display summary of selected organic waste type
-    '''
+    """
     ow_parms = form.ora_parms.ow_parms
 
     # build message
@@ -193,9 +209,9 @@ def disp_ow_parms(form):
     return mess
 
 def check_mngmnt_ow(form):
-    '''
+    """
     display summary of selected organic waste type
-    '''
+    """
 
     # TODO - delete if unnecessary
 
@@ -218,9 +234,9 @@ def check_mngmnt_ow(form):
     return mess
 
 def format_sbas(subareas):
-    '''
-     add list of subareas to message
-     '''
+    """
+    add list of subareas to message
+    """
     mess = 'Subareas: '
     if len(subareas) == 0:
         mess += 'none'      # no subareas
