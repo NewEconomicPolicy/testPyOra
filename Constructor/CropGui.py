@@ -29,7 +29,7 @@ def edit_dyn_vars(form):
     """
     
     """
-    form.crop_vars_gui = DispCropVars(form.ora_parms.crop_vars)
+    form.crop_vars_gui = DispCropVars(form.ora_parms)
     return
 
 class DispCropVars(QMainWindow):
@@ -38,14 +38,15 @@ class DispCropVars(QMainWindow):
     """
     submitted = pyqtSignal(str, str)  # will send 2 strings
 
-    def __init__(self, crop_vars, parent=None):
+    def __init__(self, ora_parms, parent=None):
         """
          calls the __init__() method of the QMainWindow (or QWidget) class, allowing
          the DispCropParms class to be used without repeating code
         """
         super(DispCropVars, self).__init__(parent)
 
-        self.crop_vars = crop_vars
+        self.crop_vars = ora_parms.crop_vars
+        self.syn_fert_parms = ora_parms.syn_fert_parms
 
         self.setWindowTitle('Adjust Crop Parameters')
 
@@ -58,12 +59,11 @@ class DispCropVars(QMainWindow):
         self.setGeometry(150, 50, 400, 240)  # posx, posy, width, height
         self.show()  # showing all the widgets
 
-
     def UiGridWdgts(self):
         """
         method for grid components
         """
-        crop_names = [crop_name for crop_name in self.crop_vars]
+        syn_fert_parms = [syn_fert for syn_fert in self.syn_fert_parms]
 
         # grid will be put in RH vertical box
         # ===================================
@@ -71,13 +71,12 @@ class DispCropVars(QMainWindow):
         lay_grid.setSpacing(10)  # set spacing between widgets
 
         irow = 1
-        w_lbl00s = QLabel('Crops:')
-        w_lbl00s.setToolTip('list of crops')
+        w_lbl00s = QLabel('Inorganic fertiliser:')
         lay_grid.addWidget(w_lbl00s, irow, 0)
 
         w_combo00 = QComboBox()
-        for crop_name in crop_names:
-            w_combo00.addItem(str(crop_name))
+        for syn_fert in syn_fert_parms:
+            w_combo00.addItem(str(syn_fert))
 
         w_combo00.currentIndexChanged[str].connect(self.changeCrop)
         lay_grid.addWidget(w_combo00, irow, 1)
@@ -86,15 +85,14 @@ class DispCropVars(QMainWindow):
         irow += 1
         lay_grid.addWidget(QLabel(' '), irow, 0)
 
-        w_lbl01s = QLabel('Number of growing months:')
-        w_lbl01s.setToolTip('list of crops')
+        w_lbl01s = QLabel('Inhibition rate modifier:')
         lay_grid.addWidget(w_lbl01s, irow, 0)
 
-        w_tgrow = QLineEdit()
-        w_tgrow.setFixedWidth(STD_FLD_SIZE_40)
-        w_tgrow.setAlignment(Qt.AlignRight)
-        lay_grid.addWidget(w_tgrow, irow, 1, alignment=Qt.AlignHCenter)
-        self.w_tgrow = w_tgrow
+        w_inhibit = QLineEdit()
+        w_inhibit.setFixedWidth(STD_FLD_SIZE_40)
+        w_inhibit.setAlignment(Qt.AlignRight)
+        lay_grid.addWidget(w_inhibit, irow, 1, alignment=Qt.AlignHCenter)
+        self.w_inhibit = w_inhibit
 
         # add space
         # =========
@@ -110,10 +108,10 @@ class DispCropVars(QMainWindow):
         """
 
         """
-        crop_name = self.w_combo00.currentText()
+        syn_fert = self.w_combo00.currentText()
 
-        t_grow = self.crop_vars[crop_name]['t_grow']
-        self.w_tgrow.setText(str(t_grow))
+        rate_inhibit = self.syn_fert_parms[syn_fert]['rate_inhibit']
+        self.w_inhibit.setText(str(rate_inhibit))
 
         return
 
@@ -155,15 +153,12 @@ class DispCropVars(QMainWindow):
         """
         gather all fields
         """
-        crop_name = self.w_combo00.currentText()
-        t_grow = int(self.w_tgrow.text())
+        syn_fert = self.w_combo00.currentText()
+        rate_inhibit = float(self.w_inhibit.text())
 
-        pi_tonnes, pi_props = plant_inputs_crops_distribution(t_grow)
-        self.crop_vars[crop_name]['pi_tonnes'] = pi_tonnes
-        self.crop_vars[crop_name]['pi_prop'] = pi_props
-        self.crop_vars[crop_name]['t_grow'] = t_grow
+        self.syn_fert_parms[syn_fert]['rate_inhibit'] = rate_inhibit
 
-        print('Updated ' + crop_name)
+        print('Updated ' + syn_fert)
         QApplication.processEvents()
 
         return
