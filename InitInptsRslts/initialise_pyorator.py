@@ -274,13 +274,14 @@ def _write_default_config_file(config_file, study_area_dir):
         dump_json(_default_config, fconfig, indent=2, sort_keys=True)
         return _default_config
 
-
 def read_config_file(form):
     """
     read widget settings used in the previous programme session from the config file, if it exists,
     or create config file using default settings if config file does not exist
     """
-    func_name = __prog__ + ' read_config_file'
+    MANDAT_ATTRIBS = list(['mgmt_dir0', 'write_excel', 'clim_scnr_indx', 'strt_yr_ss_indx', 'strt_yr_fwd_indx',
+                           'study', 'farm_name', 'use_exstng_soil', 'use_isda', 'use_csv', 'nyrs_ss', 'nyrs_fwd'])
+    EXTRA_ORG_WASTE = list(['owex_min', 'owex_max', 'ow_type_indx', 'mnth_appl_indx'])
 
     config_file = form.settings['config_file']
     if exists(config_file):
@@ -294,11 +295,14 @@ def read_config_file(form):
     else:
         config = _write_default_config_file(config_file, form.settings['study_area_dir'])
 
-    for attrib in list(['mgmt_dir0', 'write_excel']):
+    for attrib in MANDAT_ATTRIBS:
         if attrib not in config:
-            print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
-            sleep(sleepTime)
-            sys.exit(0)
+            if attrib == 'use_exstng_soil':
+                config['use_exstng_soil'] = True
+            else:
+                print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
+                sleep(sleepTime)
+                sys.exit(0)
 
     mgmt_dir0 = normpath(config['mgmt_dir0'])
     if isdir(mgmt_dir0):
@@ -334,7 +338,7 @@ def read_config_file(form):
 
     # stanza for extra org waste
     # ==========================
-    for attrib in list(['owex_min', 'owex_max', 'ow_type_indx', 'mnth_appl_indx']):
+    for attrib in EXTRA_ORG_WASTE:
         if attrib not in config:
             owex_min = 0.0
             owex_max = 0.0
@@ -393,22 +397,16 @@ def read_config_file(form):
     study = ReadStudy(form, mgmt_dir0, run_xls_fname)
     if not study.study_ok_flag:
         return False
-        # sleep(sleepTime)
-        # sys.exit(0)
 
     for sba in study.subareas:
         form.w_tab_wdgt.w_combo36.addItem(sba)  # Sensitivity Analysis tab
 
     form.settings['study'] = study
 
-    # from constructor
-    # ================
-    for attrib in list(['clim_scnr_indx', 'strt_yr_ss_indx', 'strt_yr_fwd_indx', 'study', 'farm_name',
-                        'use_isda', 'use_csv', 'nyrs_ss', 'nyrs_fwd']):
-        if attrib not in config:
-            print(ERROR_STR + 'attribute {} not present in configuration file: {}'.format(attrib, config_file))
-            sleep(sleepTime)
-            sys.exit(0)
+    if config['use_exstng_soil']:
+        form.w_tab_wdgt.w_use_exstng_soil.setChecked(True)
+    else:
+        form.w_tab_wdgt.w_use_exstng_soil.setChecked(False)
 
     # TODO: improve understanding of check boxes
     # ==========================================
@@ -477,6 +475,7 @@ def write_config_file(form, message_flag=True):
         'mnth_appl_indx': form.w_tab_wdgt.w_mnth_appl.currentIndex(),
         'clim_scnr_indx': form.w_tab_wdgt.w_combo30.currentIndex(),
         'csv_wthr_fn': form.w_tab_wdgt.w_csv_fn.text(),
+        'use_exstng_soil': form.w_tab_wdgt.w_use_exstng_soil.isChecked(),
         'use_isda': form.w_tab_wdgt.w_use_isda.isChecked(),
         'use_csv': form.w_tab_wdgt.w_use_csv.isChecked(),
         'farm_name': form.w_tab_wdgt.w_combo02.currentText(),

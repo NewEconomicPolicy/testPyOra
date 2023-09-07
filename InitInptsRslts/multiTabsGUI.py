@@ -14,8 +14,8 @@ __version__ = '0.0.1'
 __author__ = 's03mm5'
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox, \
-                                   QStyle, QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup
+from PyQt5.QtWidgets import (QLabel, QWidget, QTabWidget, QFileDialog, QGridLayout, QLineEdit, QMessageBox,
+                                   QStyle, QRadioButton, QApplication, QComboBox, QPushButton, QCheckBox, QButtonGroup)
 from PyQt5.QtGui import QPixmap, QFont
 from subprocess import Popen, DEVNULL
 from os.path import normpath, join, isdir, isfile, split
@@ -43,7 +43,7 @@ from MgmtGui import display_subarea
 
 STD_FLD_SIZE_60 = 60
 STD_FLD_SIZE_40 = 40
-STD_BTN_SIZE = 100
+STD_BTN_SIZE_100 = 100
 STD_CMBO_SIZE = 150
 
 ANML_ABBREVS = ['catdry', 'catmt', 'rumdry', 'rummt', 'pigs', 'pltry']
@@ -142,7 +142,7 @@ class AllTabs(QTabWidget):
         w_view_econ = QPushButton('View economics')
         helpText = 'View and edit economics Excel file with Purchases & Sales and Labour sheets'
         w_view_econ.setToolTip(helpText)
-        w_view_econ.setFixedWidth(STD_BTN_SIZE + 10)
+        w_view_econ.setFixedWidth(STD_BTN_SIZE_100 + 10)
         grid.addWidget(w_view_econ, irow, 7)
         w_view_econ.clicked.connect(self.viewEconFile)
 
@@ -154,10 +154,18 @@ class AllTabs(QTabWidget):
         irow += 1
         grid.addWidget(QLabel(), irow, 3)  # spacer
 
+        # soil detail source
+        # ==================
+        irow += 1
+        w_use_exstng_soil = QCheckBox('Use existing soil')
+        helpText = 'Use existing soil if available in run file'
+        w_use_exstng_soil.setToolTip(helpText)
+        grid.addWidget(w_use_exstng_soil, irow, 0)
+        self.w_use_exstng_soil = w_use_exstng_soil
+
         # line for soil
         # =============
         irow += 1
-
         w_lbl06b = QLabel('Soil resource:')
         w_lbl06b.setAlignment(Qt.AlignRight)
         grid.addWidget(w_lbl06b, irow, 0)
@@ -191,6 +199,7 @@ class AllTabs(QTabWidget):
         helpText = 'Create a new or update an existing Excel file for a PyOrator run consisting of farm details, management and weather data'
         w_save_farm0.setToolTip(helpText)
         w_save_farm0.clicked.connect(self.saveFarmClicked)
+        w_save_farm0.setFixedWidth(STD_BTN_SIZE_100)
         grid.addWidget(w_save_farm0, irow, 0)
         self.w_save_farm0 = w_save_farm0
 
@@ -199,6 +208,7 @@ class AllTabs(QTabWidget):
         w_rmv_farm.setToolTip(helpText)
         w_rmv_farm.setEnabled(False)
         w_rmv_farm.clicked.connect(self.removeFarmClicked)
+        w_rmv_farm.setFixedWidth(STD_BTN_SIZE_100)
         grid.addWidget(w_rmv_farm, irow, 1)
         self.w_rmv_farm = w_rmv_farm
 
@@ -206,9 +216,20 @@ class AllTabs(QTabWidget):
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
         w_chk_farm.setToolTip(helpText)
         w_chk_farm.clicked.connect(self.checkFarms)
+        w_chk_farm.setFixedWidth(STD_BTN_SIZE_100)
         grid.addWidget(w_chk_farm, irow, 2)
         self.w_chk_farm = w_chk_farm
 
+        # ====================================
+        w_chk_farm_icon = QPushButton('Check run file')
+        helpText = 'Check run file integrity, namely that weather and management subarea months are equal'  # temporary solution
+        w_chk_farm_icon.setToolTip(helpText)
+        w_chk_farm_icon.clicked.connect(self.checkFarm)
+        w_chk_farm_icon.setFixedWidth(STD_BTN_SIZE_100)
+        grid.addWidget(w_chk_farm_icon, irow, 3)
+        self.w_chk_farm_icon = w_chk_farm_icon
+
+        '''
         # Arkan: check timespan consistency for weather and subareas
         # ==========================================================
         w_chk_farm_icon = QPushButton()
@@ -219,12 +240,14 @@ class AllTabs(QTabWidget):
         w_chk_farm_icon.clicked.connect(self.checkFarm)
         grid.addWidget(w_chk_farm_icon, irow, 3)
         self.w_chk_farm_icon = w_chk_farm_icon
+        '''
 
         # =====================
         w_chk_lvstck = QPushButton('Check livestock sheet')
         helpText = 'Check Excel files for a PyOrator run consisting of farm details, management and weather data'
         w_chk_lvstck.setToolTip(helpText)
         w_chk_lvstck.clicked.connect(self.checkLvstck)
+        w_chk_lvstck.setFixedWidth(STD_BTN_SIZE_100 + 30)
         grid.addWidget(w_chk_lvstck, irow, 5, 1, 2)
         self.w_chk_lvstck = w_chk_lvstck
 
@@ -706,7 +729,7 @@ class AllTabs(QTabWidget):
         w_save_farm2 = QPushButton('Save farm')
         helpText = 'Create a new or update an existing Excel file for a PyOrator run consisting of farm details, management and weather data'
         w_save_farm2.setToolTip(helpText)
-        w_save_farm2.setFixedWidth(STD_BTN_SIZE)
+        w_save_farm2.setFixedWidth(STD_BTN_SIZE_100)
         w_save_farm2.clicked.connect(self.saveFarmClicked)
         grid.addWidget(w_save_farm2, irow, 0)
         self.w_save_farm2 = w_save_farm2
@@ -714,7 +737,7 @@ class AllTabs(QTabWidget):
         w_clear_data = QPushButton('Clear data')
         helpText = 'set livestock data to zeros'
         w_clear_data.setToolTip(helpText)
-        w_clear_data.setFixedWidth(STD_BTN_SIZE)
+        w_clear_data.setFixedWidth(STD_BTN_SIZE_100)
         w_clear_data.clicked.connect(self.clearDataClicked)
         grid.addWidget(w_clear_data, irow, 1)
         self.w_clear_data = w_clear_data
@@ -988,7 +1011,7 @@ class AllTabs(QTabWidget):
         helpText = 'Runs ORATOR soil carbon and nitrogen, livestock and economics models'
         w_run_model.setToolTip(helpText)
         w_run_model.setEnabled(False)
-        w_run_model.setFixedWidth(STD_BTN_SIZE)
+        w_run_model.setFixedWidth(STD_BTN_SIZE_100)
         w_run_model.clicked.connect(self.runModelClicked)
         grid.addWidget(w_run_model, irow, icol)
         self.w_run_model = w_run_model
@@ -997,7 +1020,7 @@ class AllTabs(QTabWidget):
         w_dyn_vars = QPushButton('Dynamic variables')
         helpText = 'Change dynamic variables e.g. default crop or fertiliser parameters'
         w_dyn_vars.setToolTip(helpText)
-        w_dyn_vars.setFixedWidth(STD_BTN_SIZE + 40)
+        w_dyn_vars.setFixedWidth(STD_BTN_SIZE_100 + 40)
         w_dyn_vars.clicked.connect(self.editDynVars)
         w_dyn_vars.setEnabled(False)
         grid.addWidget(w_dyn_vars, irow, icol)
@@ -1008,7 +1031,7 @@ class AllTabs(QTabWidget):
         helpText = 'Runs ORATOR economics model'
         w_economics.setToolTip(helpText)
         w_economics.setEnabled(True)
-        w_economics.setFixedWidth(STD_BTN_SIZE)
+        w_economics.setFixedWidth(STD_BTN_SIZE_100)
         w_economics.clicked.connect(self.runEconomicsClicked)
         grid.addWidget(w_economics, irow, icol)
         self.w_economics = w_economics
@@ -1018,7 +1041,7 @@ class AllTabs(QTabWidget):
         helpText = 'Runs ORATOR livestock model'
         w_livestock.setToolTip(helpText)
         w_livestock.setEnabled(False)
-        w_livestock.setFixedWidth(STD_BTN_SIZE)
+        w_livestock.setFixedWidth(STD_BTN_SIZE_100)
         w_livestock.clicked.connect(self.runLivestockClicked)
         grid.addWidget(w_livestock, irow, icol)
         self.w_livestock = w_livestock
@@ -1028,7 +1051,7 @@ class AllTabs(QTabWidget):
         helpText = 'Runs ORATOR soil carbon and nitrogen code'
         w_soil_cn.setToolTip(helpText)
         w_soil_cn.setEnabled(False)
-        w_soil_cn.setFixedWidth(STD_BTN_SIZE)
+        w_soil_cn.setFixedWidth(STD_BTN_SIZE_100)
         w_soil_cn.clicked.connect(self.runSoilCnClicked)
         grid.addWidget(w_soil_cn, irow, icol)
         self.w_soil_cn = w_soil_cn
@@ -1038,7 +1061,7 @@ class AllTabs(QTabWidget):
         helpText = 'Optimisation - not ready'
         w_optimise.setToolTip(helpText)
         w_optimise.setEnabled(False)
-        w_optimise.setFixedWidth(STD_BTN_SIZE)
+        w_optimise.setFixedWidth(STD_BTN_SIZE_100)
         w_optimise.clicked.connect(self.runOptimiseClicked)
         grid.addWidget(w_optimise, irow, icol)
         self.w_optimise = w_optimise

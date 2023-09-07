@@ -34,9 +34,9 @@ LRGE_NUM = 99999999
 THRESHOLD = 1e-10
 
 def _check_yaxis_extent(ymin, ymax):
-    '''
+    """
     adjust Y extent to sensible values
-    '''
+    """
     if ymin > ymax:
         ytmp = ymin
         ymin = ymax
@@ -66,9 +66,9 @@ def display_metric(form, category, metric, sba, recalc_flag):
     form.second.show()
 
 class Second(QWidget):
-    '''
+    """
 
-    '''
+    """
     def __init__(self, title, subareas, ntsteps, description, parent = None):
 
         # calls the __init__() of the QWidget class, allowing you to use it in the DispSubareaMgmt class without repeating code
@@ -173,9 +173,9 @@ class Second(QWidget):
 
     def post_line_series(self, yaxis_min, yaxis_max, subareas = None, data_for_display = None, ntsteps = None,
                                                             units = None, out_format = None, pyora_display = None):
-        '''
+        """
         create a dictionary of line series and populate table widget from data for each subarea
-        '''
+        """
         if subareas is None:
             ndecimals = self.ndecimals
             subareas = self.subareas
@@ -241,9 +241,9 @@ class Second(QWidget):
         self.close()
         
     def refreshClicked(self):
-        '''
+        """
         redisplay chart
-        '''
+        """
         try:
             ymin = float(self.w_min_yval.text())
         except ValueError as err:
@@ -295,9 +295,9 @@ def _generate_random_data(w_report):
     return rslts_set
 
 def _select_data_for_display(form, category, metric, sba, recalc_flag):
-    '''
+    """
 
-    '''
+    """
     group_indx = SET_INDICES[category]
 
     if metric is None:
@@ -328,9 +328,15 @@ def _select_data_for_display(form, category, metric, sba, recalc_flag):
         data_for_display = {}
         for subarea in subareas:
             if group_indx is None:
-                this_data = all_runs_output[subarea].data[metric]
+                try:
+                    this_data = all_runs_output[subarea].data[metric]
+                except KeyError as err:
+                    this_data = []
             else:
-                this_data = all_runs_output[subarea][group_indx].data[metric]
+                try:
+                    this_data = all_runs_output[subarea][group_indx].data[metric]
+                except KeyError as err:
+                    this_data = []
 
             if len(this_data) == 0:
                 mess = WARN_STR + 'could not display metric: ' + metric

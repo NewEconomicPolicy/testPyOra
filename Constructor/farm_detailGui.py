@@ -97,7 +97,7 @@ def farm_detail_gui(form, grid, irow):
     grid.addWidget(lbl00a, irow, 0)
 
     w_farm_name = QLineEdit()
-    w_farm_name.setFixedWidth(STD_FLD_SIZE_80)
+    w_farm_name.setFixedWidth(STD_FLD_SIZE_100)
     grid.addWidget(w_farm_name, irow, 1)
     w_farm_name.textChanged[str].connect(form.changeFarmName)
     form.w_farm_name = w_farm_name

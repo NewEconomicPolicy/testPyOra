@@ -221,15 +221,13 @@ def make_or_update_farm(form):
 
     # soil - use existing soil if available
     # =====================================
-    use_exstng_soil_flag = True
+    use_exstng_soil_flag = form.w_use_exstng_soil.isChecked()
     soil_recs = None
     if use_exstng_soil_flag:
         run_xls_fname = join(farm_dir, form.settings['fname_run'])
         if exists(run_xls_fname):
             print('Reading soils: Run file: ' + run_xls_fname)
             soil_recs = read_subareas_soil(run_xls_fname)
-        else:
-            use_exstng_soil_flag = False
 
     if soil_recs is None:
         # soil - if lat/lon are out of area for iSDA then use HWSD
