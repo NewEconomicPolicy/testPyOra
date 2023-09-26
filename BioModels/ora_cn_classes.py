@@ -26,9 +26,9 @@ ERROR_STR = '*** Error *** '
 
 def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
                                                                         npp_ann_miami, yld_ann_miami, crops_ann):
-    '''
+    """
     add values for each year
-    '''
+    """
     crop_model.data['yld_ann_typ'].append(yld_ann_typ)
     crop_model.data['yld_ann_n_lim'].append(yld_ann_n_lim)
     crop_model.data['npp_ann_zaks'].append(npp_ann_zaks)
@@ -40,10 +40,10 @@ def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, 
     return 6*[0]
 
 def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
-    '''
+    """
     add values relating to specific crop e.g. cumulative N uptake
     Harvest index is defined as the weight of grain divided by the total weight of above ground biomass (stover plus grain).
-    '''
+    """
     crop_model.data['crop_name'].append(this_crop_name)
     crop_model.data['cml_n_uptk'].append(cml_n_uptk)
     crop_model.data['cml_n_uptk_adj'].append(float(cml_n_uptk_adj))
@@ -63,13 +63,13 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     return indx, 0, 0, yld_ann_typ, yld_ann_n_lim       # resets cummulated nitrogen uptakes to zero
 
 class LivestockModel(object, ):
-    '''
+    """
     dummy object
-    '''
+    """
     def __init__(self, complete_run = None, area_ha = None):
-        '''
+        """
         construct a crop model object suitable for livestock model
-        '''
+        """
         self.title = 'LivestockModel'
         self.data = {}
 
@@ -89,13 +89,13 @@ class LivestockModel(object, ):
             self.area_ha = area_ha
 
 class EconomicsModel(object, ):
-    '''
+    """
     dummy object
-    '''
+    """
     def __init__(self, complete_run = None, area_ha = None):
-        '''
+        """
         construct a crop model object suitable for livestock model
-        '''
+        """
         self.title = 'LivestockModel'
         self.data = {}
 
@@ -112,13 +112,13 @@ class EconomicsModel(object, ):
             self.area_ha = area_ha
 
 class CropModel(object, ):
-    '''
+    """
     ensure continuity during equilibrium phase then between steady state and forward run
-    '''
+    """
     def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None, area_ha = None):
-        '''
+        """
         construct a crop model object suitable for livestock model
-        '''
+        """
         self.title = 'CropModel'
         self.data = {}
 
@@ -193,13 +193,13 @@ class CropModel(object, ):
                                                                             yld_ann_typ, yld_ann_n_lim)
 
 class EnsureContinuity(object, ):
-    '''
+    """
     ensure continuity during equilibrium phase then between steady state and forward run
-    '''
+    """
     def __init__(self, tot_soc_meas = None):
-        '''
+        """
 
-        '''
+        """
         if tot_soc_meas is None:
             self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = 5*[None]
         else:
@@ -212,31 +212,31 @@ class EnsureContinuity(object, ):
         self.c_n_rat_hum_prev = 8.5
 
     def adjust_soil_water(self, soil_water):
-        '''
+        """
 
-        '''
+        """
         self.wc_t0 = soil_water.data['wat_soil'][-1]  # carry forward to next iteration
         self.wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
 
     def adjust_soil_n_change(self, nitrogen_change):
-        '''
+        """
 
-        '''
+        """
         self.no3_start = nitrogen_change.data['no3_end'][-1]
         self.nh4_start = nitrogen_change.data['nh4_end'][-1]
         self.c_n_rat_hum_prev = nitrogen_change.data['c_n_rat_hum'][-1]
 
     def sum_c_pools(self):
-        '''
+        """
 
-        '''
+        """
         tot_soc_simul = self.pool_c_dpm + self.pool_c_rpm + self.pool_c_bio + self.pool_c_hum + self.pool_c_iom
         return tot_soc_simul
 
     def write_c_pools(self, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom):
-        '''
+        """
 
-        '''
+        """
         self.pool_c_dpm = pool_c_dpm
         self.pool_c_rpm = pool_c_rpm
         self.pool_c_bio = pool_c_bio
@@ -244,24 +244,24 @@ class EnsureContinuity(object, ):
         self.pool_c_iom = pool_c_iom
 
     def get_rothc_vars(self):
-        '''
+        """
 
-        '''
+        """
 
         return self.wc_t0, self.wat_strss_indx, self.pool_c_dpm, self.pool_c_rpm, \
                                                                 self.pool_c_bio, self.pool_c_hum, self.pool_c_iom
 
     def get_n_change_vars(self):
-        '''
+        """
 
-        '''
+        """
 
         return self.no3_start, self.nh4_start, self.c_n_rat_hum_prev
 
 class MngmntSubarea(object, ):
-    '''
+    """
 
-    '''
+    """
     def __init__(self, mngmnt, ora_parms, pi_tonnes_ss = None):
         """
         determine temporal extent of the management
@@ -314,9 +314,9 @@ class CarbonChange(object, ):
         self.var_name_list = var_name_list
 
     def get_last_tstep_pools(self):
-        '''
+        """
 
-        '''
+        """
         pool_c_dpm = self.data['pool_c_dpm'][-1]
         pool_c_rpm = self.data['pool_c_rpm'][-1]
         pool_c_hum = self.data['pool_c_hum'][-1]
@@ -337,9 +337,9 @@ class CarbonChange(object, ):
         return last_tstep_vars
 
     def get_cvals_for_tstep(self, tstep):
-        '''
+        """
 
-        '''
+        """
         rate_mod = self.data['rate_mod'][tstep]
         cow = self.data['cow'][tstep]
 
@@ -371,10 +371,10 @@ class CarbonChange(object, ):
                                                 pool_c_bio, c_input_bio, c_loss_bio,
                                                 pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
                                                 pool_c_iom, cow_to_iom, co2_emiss):
-        '''
+        """
         add one set of values for this timestep to each of lists
         columns refer to A1. SOM change sheet
-        '''
+        """
 
         # rate modifier start of each month cols D, G and H
         # ==================================================
@@ -408,9 +408,9 @@ class CarbonChange(object, ):
             self.data[var].append(eval(var))
 
 class NitrogenChange(object, ):
-    '''
+    """
 
-    '''
+    """
     def __init__(self):
         """
         A2. Mineral N
@@ -448,12 +448,12 @@ class NitrogenChange(object, ):
                     nh4_immob, nh4_nitrif,
                     nh4_volat, nh4_volat_adj, nh4_crop_dem, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
                                 n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum):
-        '''
+        """
         add one set of values for this timestep to each of lists
         soil_n_sply  soil N supply
         n_crop      crop N demand
         columns refer to A2. Mineral N sheet
-        '''
+        """
 
         # Nitrate and Ammonium at start of each imnth cols D, E and Q
         # ===========================================================
@@ -498,9 +498,9 @@ class NitrogenChange(object, ):
         return
 
     def additional_n_variables(self):
-        '''
+        """
         populate additional fields from existing data
-        '''
+        """
 
         # cmlative N uptake - sheets A2 and A2b
         # =======================================

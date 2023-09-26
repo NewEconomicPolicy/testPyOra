@@ -9,7 +9,6 @@
 #   to enable the available water in a given depth of soil to be determined
 #
 #-------------------------------------------------------------------------------
-#!/usr/bin/env python
 
 __prog__ = 'ora_water_model.py'
 __version__ = '0.0.0'
@@ -20,10 +19,10 @@ __version__ = '0.0.0'
 from calendar import monthrange
 from thornthwaite import thornthwaite
 
-def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag = True):
-    '''
+def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag = False):
+    """
     Volumetric water content at field capacity and permanent wilting point
-    '''
+    """
     if halaba_flag:
         theta_fc = 4.442*pcnt_c - 0.061*pcnt_sand + 0.34*pcnt_clay + 22.821    # (eq.2.2.5)
 
@@ -40,11 +39,11 @@ def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag = True):
     return theta_fc, theta_pwp
 
 def get_soil_water_constants(soil_vars, n_parms, tot_soc):
-    '''
+    """
     get water content at field capacity and at permanent wilting point (mm)
     For a given depth of soil, d (cm), the available water is calculated as the difference between the water content at
                                                             field capacity, Vfc(mm), and a lower limit of water content
-    '''
+    """
     pcnt_clay = soil_vars.t_clay
     pcnt_silt = soil_vars.t_silt
     pcnt_sand = soil_vars.t_clay
@@ -70,9 +69,9 @@ def get_soil_water_constants(soil_vars, n_parms, tot_soc):
     return wc_fld_cap, wc_pwp, pcnt_c
 
 def add_pet_to_weather(latitude, pettmp_grid_cell):
-    '''
+    """
     feed monthly annual temperatures to Thornthwaite equations to estimate Potential Evapotranspiration [mm/month]
-    '''
+    """
     # initialise output var
     # =====================
     nyears = int(len(pettmp_grid_cell['precip'])/12)
@@ -109,9 +108,9 @@ def add_pet_to_weather(latitude, pettmp_grid_cell):
     return pettmp_reform
 
 def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
-
-    # Initialisation and subsequent calculation of soil water
-    # =======================================================
+    """
+    Initialisation and subsequent calculation of soil water
+    """
     if wc_t0 is None:
         wat_soil = (wc_fld_cap + wc_pwp)/2     # see Initialisation of soil water in 2.2. Soil water
     else:
@@ -120,10 +119,9 @@ def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
     return wat_soil
 
 class SoilWaterChange(object, ):
-    '''
+    """
 
-    '''
-
+    """
     def __init__(self):
         """
         A3 - Soil water
@@ -143,7 +141,9 @@ class SoilWaterChange(object, ):
         self.var_name_list = var_name_list
 
     def get_wvals_for_tstep(self, tstep):
+        """
 
+        """
         wc_pwp = self.data['wc_pwp'][tstep]
         wat_soil = self.data['wat_soil'][tstep]
         wc_fld_cap = self.data['wc_fld_cap'][tstep]
@@ -159,33 +159,30 @@ class SoilWaterChange(object, ):
 
     def append_vars(self, imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap,
                                                                                                 pcnt_c, wat_strss_indx):
-        '''
-
-        '''
-        dummy, days_in_mnth = monthrange(2011, imnth)
+        """
+        all values are in mm unless otherwise specified
+        """
+        dummy, days_in_mnth = monthrange(2011, imnth)   # use 2011 as this is not a leap year
 
         # TODO: check
         # ===========
         if len(self.data['wat_drain']) > 0:
-
-            # (eq.3.2.4) col L - AET to rooting depth before irrigation (mm)
-            # =============================================================
-            aet = min(pet_prev, 5*days_in_mnth, (wat_soil - wc_pwp))
+            aet = min(pet_prev, 5*days_in_mnth, (wat_soil - wc_pwp))    # (eq.3.2.4) col L - AET to rooting depth before irrigation
             if pet_prev > 0.0:
                 self.data['wat_strss_indx'].append(self.data['aet'][-1]/pet_prev)
             else:
-                self.data['wat_strss_indx'].append(0.0)
+                self.data['wat_strss_indx'].append(1.0)
             wat_soil_prev = self.data['wat_soil'][-1]
         else:
             self.data['wat_strss_indx'].append(wat_strss_indx)
-            aet = 0
-            wat_soil_prev = 0
+            aet = pet
+            wat_soil_prev = wat_soil
 
         self.data['aet'].append(aet)    # TODO: revisit
-        self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth (mm)
-        self.data['wc_pwp'].append(wc_pwp)  # col I - Lower limit for water extraction (mm)
-        self.data['wc_fld_cap'].append(wc_fld_cap)  # col J - Water content of root zone at field capacity (mm)
-        self.data['wat_soil'].append(wat_soil)  # col K - Soil water content of root zone before irrigation (mm)
+        self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth
+        self.data['wc_pwp'].append(wc_pwp)  # col I - Lower limit for water extraction
+        self.data['wc_fld_cap'].append(wc_fld_cap)  # col J - Water content of root zone at field capacity
+        self.data['wat_soil'].append(wat_soil)  # col K - Soil water content of root zone before irrigation
 
         # required: num months growing, col I in D2. Water use for crops
         self.data['irrig'].append(irrig)  # col M - irrigation

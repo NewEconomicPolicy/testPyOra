@@ -22,13 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="modified Dynamic variables UI to enable Neem inhibition rate modifier value change.">
-      <change beforePath="$PROJECT_DIR$/../Constructor/farm_detailGui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/farm_detailGui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Constructor/ora_utils_write_farm_sheets.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="recent minor mods uploaded to ensure we are syncronised.">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/display_gui_charts.py" beforeDir="false" afterPath="$PROJECT_DIR$/display_gui_charts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initialise_pyorator.py" beforeDir="false" afterPath="$PROJECT_DIR$/initialise_pyorator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,12 +42,13 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;last_opened_file_path&quot;: &quot;E:/ORATOR/setup&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "E:/ORATOR/setup",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="G:\PyOraDev\testPyOra\Constructor" />
@@ -322,7 +321,21 @@
       <option name="project" value="LOCAL" />
       <updated>1692952134875</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="modified Dynamic variables UI to enable Neem inhibition rate modifier value change.">
+      <created>1694078859992</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1694078859992</updated>
+    </task>
+    <task id="LOCAL-00035" summary="recent minor mods uploaded to ensure we are syncronised.">
+      <created>1694079057496</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1694079057496</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -337,7 +350,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="introduced separate economics Excel file comprising Purchases &amp; Sales and Labour sheets" />
     <MESSAGE value="introduced separate economics Excel file comprising Purchases &amp; Sales and Labour sheets. Renamed attributes pertaining to livestock to remove africa_ prefix e.g. africa_systems is now farm_systems, africa_regions is now world_regions" />
     <MESSAGE value="1) modified function linked to the ‘View Economics’ push button so that default PurchasesSalesLabour Excel file is copied to farm run directory&#10;2) Clear data push button added to Livestock tab.&#10;3) Addressed condition where a subarea is present in the farm run file  but has no description in the Subareas sheet." />
     <MESSAGE value="Addressed situation where a subarea management has a diffrent temporal length compared with weather." />
@@ -362,7 +374,8 @@
     <MESSAGE value="added Neem as an additional inorganic fertiliser and modified nh4_nitrification function to take inhibition rate modifier as an argument." />
     <MESSAGE value="further Neem implementation mods." />
     <MESSAGE value="modified Dynamic variables UI to enable Neem inhibition rate modifier value change." />
-    <option name="LAST_COMMIT_MESSAGE" value="modified Dynamic variables UI to enable Neem inhibition rate modifier value change." />
+    <MESSAGE value="recent minor mods uploaded to ensure we are syncronised." />
+    <option name="LAST_COMMIT_MESSAGE" value="recent minor mods uploaded to ensure we are syncronised." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -378,14 +391,9 @@
           <option name="timeStamp" value="127" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/display_gui_charts.py</url>
-          <line>308</line>
-          <option name="timeStamp" value="158" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/display_gui_charts.py</url>
-          <line>300</line>
-          <option name="timeStamp" value="164" />
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>180</line>
+          <option name="timeStamp" value="202" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

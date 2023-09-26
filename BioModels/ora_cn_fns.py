@@ -67,26 +67,25 @@ def npp_zaks_grow_season(management):
 
     return
 
-
 def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
     """
     This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
     calculated monthly using the water stress index for the previous month.
     """
-    gdds_scle_factr = 11500
-    iws_scle_factr = 2720
+    GDDS_SCLE_FACTR = 11500
+    IWS_SCLE_FACTR = 2720
+
     if management.pi_props[tstep] > 0:
         wat_strss_indx = soil_water.data['wat_strss_indx'][tstep]
         tgdd = pettmp['grow_dds'][tstep]
-        npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / gdds_scle_factr)))) * (39.58 * wat_strss_indx - 14.52)
-        npp_month = iws_scle_factr * max(0, npp / t_grow)  # (eq.3.2.1)
+        npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
+        npp_month = IWS_SCLE_FACTR * max(0, npp / t_grow)  # (eq.3.2.1)
     else:
         npp_month = 0
 
     management.npp_zaks[tstep] = npp_month
 
     return
-
 
 def _miami_dyce_growing_season(precip, tair, land_cover_type='ara'):
     """
