@@ -10,12 +10,11 @@
 #    The value of the total annual plant inputs will also be determined by the steady state simulation, but the
 #    distribution of the plant inputs should follow the cropping patterns observed in the field#
 #
-#    The simulation is continued for 100 years, after which time, the C in the DPM, RPM, BIO, HUM and IOM pools are summed and
-#    compared to the measured soil C. The soil C pools are then re-initialised with the values
-#    calculated after 100 years and the plant inputs, CPI, are adjusted according to the ratio of measured and simulated total soil C
+# The simulation is continued for 100 years, after which time, the C in the DPM, RPM, BIO, HUM and IOM pools are
+# summed and compared to the measured soil C. The soil C pools are then re-initialised with the values calculated
+# after 100 years and the plant inputs, CPI, are adjusted according to the ratio of measured and simulated total soil C
 #
 # -------------------------------------------------------------------------------
-# !/usr/bin/env python
 
 __prog__ = 'ora_cn_model.py'
 __version__ = '0.0.0'
@@ -27,6 +26,7 @@ from os.path import isfile, join
 from copy import copy
 from numpy import arange
 from PyQt5.QtWidgets import QApplication
+from calendar import month_abbr
 
 from livestock_output_data import check_livestock_run_data
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
@@ -46,7 +46,7 @@ MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001  # convergence criteria tonne/hectare
 # SOC_MIN_DIFF = 0.0005000   # convergence criteria tonne/hectare
 
-MNTH_NAMES_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 
 WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
@@ -58,7 +58,7 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
 
     """
     pettmp = weather.pettmp_ss
-    generate_miami_dyce_npp(pettmp, management)
+    generate_miami_dyce_npp(pettmp, management, weather.n_ss_yrs)
 
     dum, dum, dum, dum, tot_soc_meas, dum, dum, dum = get_soil_vars(soil_vars, subarea, write_flag=True)
     continuity = EnsureContinuity(tot_soc_meas)
@@ -116,7 +116,7 @@ def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, n
         return None
 
     management.pet_prev = weather.pettmp_ss['pet'][-1]  # TODO: ugly patch to ensure smooth tranistion in RothC
-    generate_miami_dyce_npp(pettmp, management)
+    generate_miami_dyce_npp(pettmp, management, weather.n_ss_yrs, ss_flag=False)
 
     # run RothC
     # =========

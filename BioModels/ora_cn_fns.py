@@ -104,7 +104,7 @@ def _miami_dyce_growing_season(precip, tair, land_cover_type='ara'):
     return npp
 
 
-def generate_miami_dyce_npp(pettmp, management):
+def generate_miami_dyce_npp(pettmp, management, n_ss_yrs, ss_flag=True):
     """
     return list of miami dyce npp estimates based on rainfall and temperature for growing months only
     """
@@ -113,6 +113,7 @@ def generate_miami_dyce_npp(pettmp, management):
     tair_cumul = 0
     tgrow = 0
     strt_indx = None
+    icrp = 0
     for tstep in range(ntsteps):
 
         # second condition covers last month of last year
@@ -125,14 +126,18 @@ def generate_miami_dyce_npp(pettmp, management):
                 tair_ave = tair_cumul / tgrow
                 npp = _miami_dyce_growing_season(precip_cumul, tair_ave)
                 management.npp_miami_grow.append(npp)
-
-                npp_mnthly = npp / tgrow
-                for indx in range(strt_indx, tstep):
-                    management.npp_miami[indx] = npp_mnthly
-
+                if ss_flag:
+                    management.npp_miami_rats.append(1.0)
+                else:
+                    npp_typ = management.npp_miami_grow[icrp]       # fetch ss val
+                    management.npp_miami_rats.append(npp/npp_typ)
                 tgrow = 0
                 precip_cumul = 0
                 tair_cumul = 0
+                icrp += 1
+                if icrp > n_ss_yrs:
+                    icrp = 0
+
                 strt_indx = None
         else:
             if strt_indx is None:
@@ -142,7 +147,6 @@ def generate_miami_dyce_npp(pettmp, management):
             tgrow += 1
 
     return
-
 
 def get_soil_vars(soil_vars, subarea=None, write_flag=False):
     """

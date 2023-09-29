@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Name:        ora_cn_classes.py
 # Purpose:     a collection of reusable functions
 # Author:      Mike Martin
@@ -10,8 +10,8 @@
 # Description:
 #   classes defined: EnsureContinuity, MngmntSubarea, CarbonChange, NitrogenChange
 #
-#-------------------------------------------------------------------------------
-#!/usr/bin/env python
+# -------------------------------------------------------------------------------
+# !/usr/bin/env python
 
 __prog__ = 'ora_cn_classes.py'
 __version__ = '0.0.0'
@@ -24,8 +24,9 @@ from ora_cn_fns import init_ss_carbon_pools
 
 ERROR_STR = '*** Error *** '
 
+
 def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
-                                                                        npp_ann_miami, yld_ann_miami, crops_ann):
+                          npp_ann_miami, yld_ann_miami, crops_ann):
     """
     add values for each year
     """
@@ -36,8 +37,9 @@ def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, 
     crop_model.data['yld_ann_zaks'].append(yld_ann_zaks)
     crop_model.data['yld_ann_miami'].append(yld_ann_miami)
     crop_model.data['crops_ann'].append(crops_ann)
-    
-    return 6*[0]
+
+    return 6 * [0]
+
 
 def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
     """
@@ -60,20 +62,22 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     yld_ann_n_lim += yld_n_lim
 
     indx += 1
-    return indx, 0, 0, yld_ann_typ, yld_ann_n_lim       # resets cummulated nitrogen uptakes to zero
+    return indx, 0, 0, yld_ann_typ, yld_ann_n_lim  # resets cummulated nitrogen uptakes to zero
+
 
 class LivestockModel(object, ):
     """
     dummy object
     """
-    def __init__(self, complete_run = None, area_ha = None):
+
+    def __init__(self, complete_run=None, area_ha=None):
         """
         construct a crop model object suitable for livestock model
         """
         self.title = 'LivestockModel'
         self.data = {}
 
-        var_name_list = list(['dairy_cat_n_excrete_nlim','dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
+        var_name_list = list(['dairy_cat_n_excrete_nlim', 'dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
                               'dairy_cat_manure_prod_nlim', 'beef_cat_n_excrete_nlim', 'beef_cat_meat_prod_nlim',
                               'beef_cat_manure_prod_nlim', 'goats_sheep_n_excrete_nlim', 'goats_sheep_milk_prod_nlim',
                               'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim', 'poultry_n_excrete_nlim',
@@ -88,11 +92,13 @@ class LivestockModel(object, ):
         if complete_run is not None:
             self.area_ha = area_ha
 
+
 class EconomicsModel(object, ):
     """
     dummy object
     """
-    def __init__(self, complete_run = None, area_ha = None):
+
+    def __init__(self, complete_run=None, area_ha=None):
         """
         construct a crop model object suitable for livestock model
         """
@@ -111,11 +117,13 @@ class EconomicsModel(object, ):
         if complete_run is not None:
             self.area_ha = area_ha
 
+
 class CropModel(object, ):
     """
     ensure continuity during equilibrium phase then between steady state and forward run
     """
-    def __init__(self, complete_run = None, mngmnt_ss = None, mngmnt_fwd = None, crop_vars = None, area_ha = None):
+
+    def __init__(self, complete_run=None, mngmnt_ss=None, mngmnt_fwd=None, crop_vars=None, area_ha=None):
         """
         construct a crop model object suitable for livestock model
         """
@@ -123,11 +131,9 @@ class CropModel(object, ):
         self.data = {}
 
         var_name_list = list(['crop_name', 'npp_zaks', 'npp_miami', 'cml_n_uptk', 'cml_n_uptk_adj',
-                              'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim', 'npp_ann_zaks','yld_ann_zaks',
+                              'yld_typ', 'yld_n_lim', 'yld_ann_typ', 'yld_ann_n_lim', 'npp_ann_zaks', 'yld_ann_zaks',
                               'npp_ann_miami', 'yld_ann_miami', 'crops_ann'])
-        for var_name in var_name_list:
-            self.data[var_name] = []
-
+        self.data = {var_name: [] for var_name in var_name_list}
         self.var_name_list = var_name_list
 
         if complete_run is not None:
@@ -138,11 +144,11 @@ class CropModel(object, ):
             self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
             crop_currs = mngmnt_ss.crop_currs + mngmnt_fwd.crop_currs
             for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
-                self.data['yld_typ'].append(crop_obj.yield_typ)     # typical yield
+                self.data['yld_typ'].append(crop_obj.yield_typ)  # typical yield
 
             num_grow_seasons = len(self.data['npp_miami'])
 
-            # cmlative N uptake and typical and adjusted annual yields
+            # cumlative N uptake and typical and adjusted annual yields
             # ==========================================================
             c_change, n_change, soil_water = complete_run
             cml_n_uptk = 0
@@ -157,19 +163,20 @@ class CropModel(object, ):
             this_crop_name = None
             indx = 0
             for imnth, crop_curr, crop_name, n_crop_dem, n_crop_dem_adj in zip(n_change.data['imnth'], crop_currs,
-                            n_change.data['crop_name'], n_change.data['n_crop_dem'], n_change.data['n_crop_dem_adj']):
-
+                                                                               n_change.data['crop_name'],
+                                                                               n_change.data['n_crop_dem'],
+                                                                               n_change.data['n_crop_dem_adj']):
                 if crop_name is None:
                     if cml_n_uptk > 0:
                         try:
                             npp_ann_zaks += self.data['npp_zaks'][indx]
-                            yld_ann_zaks += self.data['npp_zaks'][indx]*crop_vars[crop_curr]['harv_indx']
+                            yld_ann_zaks += self.data['npp_zaks'][indx] * crop_vars[crop_curr]['harv_indx']
                             npp_ann_miami += self.data['npp_miami'][indx]
-                            yld_ann_miami += self.data['npp_miami'][indx]*crop_vars[crop_curr]['harv_indx']
+                            yld_ann_miami += self.data['npp_miami'][indx] * crop_vars[crop_curr]['harv_indx']
                             crops_ann.append(crop_curr)
                             indx, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim = \
                                 _record_values(self, indx, this_crop_name,
-                                            cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
+                                               cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim)
                         except IndexError as err:
                             print(str(err) + '\tCrop: {}\tindx: {}'.format(crop_name, indx))
                             return
@@ -188,23 +195,25 @@ class CropModel(object, ):
 
             # catch situation when December is a growing month
             # ================================================
-            if (len(self.data['cml_n_uptk']) < num_grow_seasons):
+            if len(self.data['cml_n_uptk']) < num_grow_seasons:
                 dum, dum, dum, dum, dum = _record_values(self, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
-                                                                            yld_ann_typ, yld_ann_n_lim)
+                                                         yld_ann_typ, yld_ann_n_lim)
+
 
 class EnsureContinuity(object, ):
     """
     ensure continuity during equilibrium phase then between steady state and forward run
     """
-    def __init__(self, tot_soc_meas = None):
+
+    def __init__(self, tot_soc_meas=None):
         """
 
         """
         if tot_soc_meas is None:
-            self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = 5*[None]
+            self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = 5 * [None]
         else:
             self.pool_c_dpm, self.pool_c_rpm, self.pool_c_bio, self.pool_c_hum, self.pool_c_iom = \
-                                                                                    init_ss_carbon_pools(tot_soc_meas)
+                init_ss_carbon_pools(tot_soc_meas)
         self.wc_t0 = None
         self.no3_start = None
         self.nh4_start = None
@@ -249,7 +258,7 @@ class EnsureContinuity(object, ):
         """
 
         return self.wc_t0, self.wat_strss_indx, self.pool_c_dpm, self.pool_c_rpm, \
-                                                                self.pool_c_bio, self.pool_c_hum, self.pool_c_iom
+            self.pool_c_bio, self.pool_c_hum, self.pool_c_iom
 
     def get_n_change_vars(self):
         """
@@ -258,17 +267,19 @@ class EnsureContinuity(object, ):
 
         return self.no3_start, self.nh4_start, self.c_n_rat_hum_prev
 
+
 class MngmntSubarea(object, ):
     """
 
     """
-    def __init__(self, mngmnt, ora_parms, pi_tonnes_ss = None):
+
+    def __init__(self, mngmnt, ora_parms, pi_tonnes_ss=None):
         """
         determine temporal extent of the management
         should list indices correspond to the months?
         """
         ntsteps = len(mngmnt['crop_name'])
-        nyears = int(ntsteps/12)
+        nyears = int(ntsteps / 12)
 
         self.nyears = nyears
         self.ntsteps = ntsteps
@@ -281,19 +292,23 @@ class MngmntSubarea(object, ):
         self.org_fert = mngmnt['org_fert']
 
         if pi_tonnes_ss is None:
-            self.pi_tonnes = mngmnt['pi_tonne']      # required for seeding steady state
+            self.pi_tonnes = mngmnt['pi_tonne']  # required for seeding steady state
         else:
-            self.pi_tonnes = pi_tonnes_ss   # use plant inputs from steady state
+            self.pi_tonnes = pi_tonnes_ss  # use plant inputs from steady state
 
-        self.pi_props  = mngmnt['pi_prop']
+        self.pi_props = mngmnt['pi_prop']
         self.crop_currs = mngmnt['crop_curr']
         self.crop_mngmnt = mngmnt['crop_mngmnt']
         self.npp_zaks = ntsteps * [0]
         self.npp_zaks_grow = []
-        self.npp_miami = ntsteps * [0]
+        self.npp_miami_rats = []
         self.npp_miami_grow = []
 
+
 class CarbonChange(object, ):
+    """
+    C
+    """
 
     def __init__(self):
         """
@@ -303,11 +318,11 @@ class CarbonChange(object, ):
         self.data = {}
 
         var_name_list = list(['imnth', 'rate_mod', 'c_pi_mnth', 'cow',
-                                        'pool_c_dpm', 'pi_to_dpm', 'cow_to_dpm', 'c_loss_dpm',
-                                        'pool_c_rpm', 'pi_to_rpm', 'c_loss_rpm',
-                                        'pool_c_bio', 'c_input_bio', 'c_loss_bio',
-                                        'pool_c_hum', 'cow_to_hum', 'c_input_hum', 'c_loss_hum',
-                                        'pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss'])
+                              'pool_c_dpm', 'pi_to_dpm', 'cow_to_dpm', 'c_loss_dpm',
+                              'pool_c_rpm', 'pi_to_rpm', 'c_loss_rpm',
+                              'pool_c_bio', 'c_input_bio', 'c_loss_bio',
+                              'pool_c_hum', 'cow_to_hum', 'c_input_hum', 'c_loss_hum',
+                              'pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -332,7 +347,7 @@ class CarbonChange(object, ):
         tot_soc = self.data['tot_soc_simul'][-1]
 
         last_tstep_vars = (pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom,
-                            c_input_bio , c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc)
+                           c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc)
 
         return last_tstep_vars
 
@@ -362,15 +377,15 @@ class CarbonChange(object, ):
         c_loss_hum = self.data['c_loss_hum'][tstep]
 
         return cow, rate_mod, co2_emiss, \
-                            c_loss_bio, pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,  \
-                            pool_c_hum, cow_to_hum, c_loss_hum, pool_c_rpm, pi_to_rpm, c_loss_rpm
+            c_loss_bio, pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm, \
+            pool_c_hum, cow_to_hum, c_loss_hum, pool_c_rpm, pi_to_rpm, c_loss_rpm
 
     def append_vars(self, imnth, rate_mod, c_pi_mnth, cow,
-                                                pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
-                                                pool_c_rpm, pi_to_rpm, c_loss_rpm,
-                                                pool_c_bio, c_input_bio, c_loss_bio,
-                                                pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
-                                                pool_c_iom, cow_to_iom, co2_emiss):
+                    pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
+                    pool_c_rpm, pi_to_rpm, c_loss_rpm,
+                    pool_c_bio, c_input_bio, c_loss_bio,
+                    pool_c_hum, cow_to_hum, c_input_hum, c_loss_hum,
+                    pool_c_iom, cow_to_iom, co2_emiss):
         """
         add one set of values for this timestep to each of lists
         columns refer to A1. SOM change sheet
@@ -407,10 +422,12 @@ class CarbonChange(object, ):
         for var in ['pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss']:
             self.data[var].append(eval(var))
 
+
 class NitrogenChange(object, ):
     """
 
     """
+
     def __init__(self):
         """
         A2. Mineral N
@@ -420,18 +437,19 @@ class NitrogenChange(object, ):
 
         # Nitrate and Ammonium N (kg/ha) inputs and losses
         # ================================================
-        var_name_list = list(['imnth', 'crop_name',  'soil_n_sply', 'prop_yld_opt', 'prop_n_opt',
-                        'no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'rate_denit_no3',
-                        'no3_avail', 'no3_total_inp', 'no3_immob', 'no3_leach', 'no3_leach_adj',
-                        'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat',
-                        'no3_denit', 'no3_crop_dem', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
-                        'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end',  'n2o_emiss_denit',
-                        'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_avail',
-                        'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat', 'nh4_volat_adj',
-                        'nh4_crop_dem', 'nh4_total_loss', 'loss_adj_rat_nh4',
-                        'nh4_loss_adj', 'nh4_end', 'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
-                        'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum',
-                                        'prop_yld_opt_adj', 'cml_n_uptk', 'cml_n_uptk_adj', 'nut_n_fert'])
+        var_name_list = list(['imnth', 'crop_name', 'soil_n_sply', 'prop_yld_opt', 'prop_n_opt',
+                              'no3_start', 'no3_atmos', 'no3_inorg_fert', 'no3_nitrif', 'rate_denit_no3',
+                              'no3_avail', 'no3_total_inp', 'no3_immob', 'no3_leach', 'no3_leach_adj',
+                              'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat',
+                              'no3_denit', 'no3_crop_dem', 'n_denit_max', 'rate_denit_moist', 'rate_denit_bio',
+                              'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3', 'no3_end', 'n2o_emiss_denit',
+                              'nh4_start', 'nh4_ow_fert', 'nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_avail',
+                              'nh4_total_inp', 'nh4_immob', 'nh4_nitrif', 'nh4_nitrif_adj', 'nh4_volat',
+                              'nh4_volat_adj',
+                              'nh4_crop_dem', 'nh4_total_loss', 'loss_adj_rat_nh4',
+                              'nh4_loss_adj', 'nh4_end', 'n_crop_dem', 'n_crop_dem_adj', 'n_release', 'n_adjust',
+                              'c_n_rat_dpm', 'c_n_rat_rpm', 'c_n_rat_hum',
+                              'prop_yld_opt_adj', 'cml_n_uptk', 'cml_n_uptk_adj', 'nut_n_fert'])
 
         for var_name in var_name_list:
             self.data[var_name] = []
@@ -447,7 +465,7 @@ class NitrogenChange(object, ):
                     nh4_start, nh4_ow_fert, nh4_inorg_fert, nh4_miner, nh4_atmos, nh4_avail, nh4_total_inp,
                     nh4_immob, nh4_nitrif,
                     nh4_volat, nh4_volat_adj, nh4_crop_dem, nh4_loss_adj, loss_adj_rat_nh4, nh4_total_loss, nh4_end,
-                                n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum):
+                    n_crop_dem, n_crop_dem_adj, n_release, n_adjust, c_n_rat_dpm, c_n_rat_rpm, c_n_rat_hum):
         """
         add one set of values for this timestep to each of lists
         soil_n_sply  soil N supply
@@ -463,13 +481,13 @@ class NitrogenChange(object, ):
         # Ammonium N (kg/ha) cols R to W
         # ==============================
         for var in ['nh4_atmos', 'nh4_inorg_fert', 'nh4_miner', 'nh4_avail', 'nh4_total_inp',
-                                                                        'nh4_immob', 'nh4_nitrif', 'nh4_start']:
+                    'nh4_immob', 'nh4_nitrif', 'nh4_start']:
             self.data[var].append(eval(var))
 
         # Ammonium N cols X to AB
         # =======================
         for var in ['nh4_ow_fert', 'nh4_volat', 'nh4_volat_adj', 'nh4_crop_dem',
-                                                                        'nh4_total_loss', 'nh4_loss_adj', 'nh4_end']:
+                    'nh4_total_loss', 'nh4_loss_adj', 'nh4_end']:
             self.data[var].append(eval(var))
 
         # Nitrate N (kg/ha) cols F to L
@@ -480,14 +498,14 @@ class NitrogenChange(object, ):
 
         # Nitrate N (kg/ha) cols H to L
         # =============================
-        for var in [ 'no3_avail', 'no3_immob', 'no3_leach', 'no3_leach_adj', 'no3_denit', 'no3_end',
-                     'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat']:
+        for var in ['no3_avail', 'no3_immob', 'no3_leach', 'no3_leach_adj', 'no3_denit', 'no3_end',
+                    'no3_denit_adj', 'n2o_emiss_nitrif', 'prop_n2_no3', 'prop_n2_wat']:
             self.data[var].append(eval(var))
 
         # crop uptake
         # ===========
         for var in ['no3_crop_dem', 'n_denit_max', 'no3_total_loss', 'no3_loss_adj', 'loss_adj_rat_no3',
-                                                                                            'loss_adj_rat_nh4']:
+                    'loss_adj_rat_nh4']:
             self.data[var].append(eval(var))
 
         # crop uptake

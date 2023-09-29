@@ -87,7 +87,7 @@ class  B1CropProduction(object, ):
         sheet_data['tair'] = pettmp['tair']
 
         sheet_data['grow_dds'] = pettmp['grow_dds']
-        sheet_data['npp_miami'] = mngmnt_ss.npp_miami + mngmnt_fwd.npp_miami
+        sheet_data['npp_miami'] = len(pettmp['period'])*[0]
         sheet_data['npp_zaks'] = mngmnt_ss.npp_zaks + mngmnt_fwd.npp_zaks
 
         self.sheet_data = sheet_data

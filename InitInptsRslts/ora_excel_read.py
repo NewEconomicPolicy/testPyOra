@@ -577,7 +577,9 @@ class WeatherRelated(object, ):
         # generate PET from weather
         # =========================
         self.pettmp_ss = add_pet_to_weather(latitude, pettmp_ss)
+        self.n_ss_yrs = int(len(self.pettmp_ss['precip'])/12)
         self.pettmp_fwd = add_pet_to_weather(latitude, pettmp_fwd)
+        self.n_fws_yrs = int(len(self.pettmp_fwd['precip']) / 12)
 
         # growing degree days
         # ==================
