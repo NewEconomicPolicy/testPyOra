@@ -28,6 +28,9 @@ sleepTime = 5
 
 
 def get_crop_vars(management, crop_vars, tstep):
+    """
+    C
+    """
     crop_curr = management.crop_currs[tstep]
     crop_name = management.crop_names[tstep]
     if crop_name is None:
@@ -231,6 +234,9 @@ def get_fert_vals_for_tstep(management, parameters, tstep):
 
 
 def get_values_for_tstep(pettmp, management, parameters, tstep):
+    """
+    C
+    """
     func_name = __prog__ + ' get_values_for_tstep'
 
     try:

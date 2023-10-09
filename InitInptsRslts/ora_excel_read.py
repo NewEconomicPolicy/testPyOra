@@ -328,6 +328,9 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
             print(ERR_STR + 'null values encountered on line {} when reading run file weather sheet'.format(iline))
             return ret_var
 
+        precip = float(precip)
+        tair = float(tair)
+
         if mode == 'steady state':
             pettmp_ss['precip'].append(precip)
             pettmp_ss['tair'].append(tair)
@@ -572,7 +575,7 @@ class WeatherRelated(object, ):
     """
     def __init__(self, pettmp_ss, pettmp_fwd, latitude):
         """
-        onstruct weather object including degree days
+        construct weather object including degree days
         """
         # generate PET from weather
         # =========================
@@ -588,8 +591,8 @@ class WeatherRelated(object, ):
 
         # average monthly precip and temp is required for spin up
         # =======================================================
-        self.ave_precip_ss, self.ave_temp_ss, self.ave_pet_ss = \
-            average_weather(latitude, self.pettmp_ss['precip'], self.pettmp_ss['tair'])
+        self.ave_precip_ss, self.ave_temp_ss, self.ave_pet_ss = average_weather(latitude,
+                                                        self.pettmp_ss['precip'], self.pettmp_ss['tair'])
 
         # get average annual rain and temperature of first 10 years
         # =========================================================
@@ -602,7 +605,6 @@ class Soil(object, ):
     """
     X
     """
-
     def __init__(self, soil_defn):
         """
         Assumptions:

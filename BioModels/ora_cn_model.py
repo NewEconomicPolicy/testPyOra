@@ -31,7 +31,7 @@ from calendar import month_abbr
 from livestock_output_data import check_livestock_run_data
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, extend_out_dir
 from ora_cn_fns import get_soil_vars, init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
-from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropModel
+from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropModel, CropProduction
 from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
@@ -175,6 +175,8 @@ def run_soil_cn_algorithms(form):
     form.all_runs_output = {}  # clear previously recorded outputs
     all_runs = {}
     for sba in ora_subareas:
+
+        crop_prod_model = CropProduction(ora_subareas[sba])
 
         soil_vars = ora_subareas[sba].soil_for_area
 

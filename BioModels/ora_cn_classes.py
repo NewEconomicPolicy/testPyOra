@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------
 # Name:        ora_cn_classes.py
-# Purpose:     a collection of reusable functions
+# Purpose:     a collection of reusable functions and classes
 # Author:      Mike Martin
 # Created:     26/12/2019
 # Licence:     <your licence>
@@ -11,7 +11,6 @@
 #   classes defined: EnsureContinuity, MngmntSubarea, CarbonChange, NitrogenChange
 #
 # -------------------------------------------------------------------------------
-# !/usr/bin/env python
 
 __prog__ = 'ora_cn_classes.py'
 __version__ = '0.0.0'
@@ -21,9 +20,10 @@ __version__ = '0.0.0'
 #
 from operator import add, mul
 from ora_cn_fns import init_ss_carbon_pools
+from ora_low_level_fns import get_crops_growing
+from pandas import DataFrame
 
 ERROR_STR = '*** Error *** '
-
 
 def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, yld_ann_zaks,
                           npp_ann_miami, yld_ann_miami, crops_ann):
@@ -39,7 +39,6 @@ def _record_annual_values(crop_model, yld_ann_typ, yld_ann_n_lim, npp_ann_zaks, 
     crop_model.data['crops_ann'].append(crops_ann)
 
     return 6 * [0]
-
 
 def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ, yld_ann_n_lim):
     """
@@ -64,65 +63,28 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     indx += 1
     return indx, 0, 0, yld_ann_typ, yld_ann_n_lim  # resets cummulated nitrogen uptakes to zero
 
-
-class LivestockModel(object, ):
+class CropProduction(object, ):
     """
-    dummy object
+    create two dataframes
     """
-
-    def __init__(self, complete_run=None, area_ha=None):
+    def __init__(self, ora_subarea):
         """
         construct a crop model object suitable for livestock model
         """
-        self.title = 'LivestockModel'
-        self.data = {}
+        self.title = 'CropProduction'
 
-        var_name_list = list(['dairy_cat_n_excrete_nlim', 'dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
-                              'dairy_cat_manure_prod_nlim', 'beef_cat_n_excrete_nlim', 'beef_cat_meat_prod_nlim',
-                              'beef_cat_manure_prod_nlim', 'goats_sheep_n_excrete_nlim', 'goats_sheep_milk_prod_nlim',
-                              'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim', 'poultry_n_excrete_nlim',
-                              'poultry_eggs_prod_nlim', 'poultry_meat_prod_nlim', 'poultry_manure_prod_nlim',
-                              'pigs_n_excrete_nlim', 'pigs_meat_prod_nlim', 'pigs_manure_prod_nlim'])
+        column_nms = list(['crop_name', 'yld_ss', 'npp_ss', 'yld_act', 'npp_act', 'prod_cmpr_ss'])
 
-        for var_name in var_name_list:
-            self.data[var_name] = []
+        crop_names = ora_subarea.crop_mngmnt_ss['crop_name']
+        grow_crops = get_crops_growing(crop_names)
 
-        self.var_name_list = var_name_list
-
-        if complete_run is not None:
-            self.area_ha = area_ha
-
-
-class EconomicsModel(object, ):
-    """
-    dummy object
-    """
-
-    def __init__(self, complete_run=None, area_ha=None):
-        """
-        construct a crop model object suitable for livestock model
-        """
-        self.title = 'LivestockModel'
-        self.data = {}
-
-        var_name_list = list(['full_hh_income_n_lim',
-                              'per_capita_consumption_n_lim', 'relative_food_insecurity_n_lim',
-                              'dietary_diversity_n_lim'])
-
-        for var_name in var_name_list:
-            self.data[var_name] = []
-
-        self.var_name_list = var_name_list
-
-        if complete_run is not None:
-            self.area_ha = area_ha
-
+        data = {attrb: len(grow_crops) * [None] for attrb in column_nms}
+        self.crop_prodn = DataFrame(data)
 
 class CropModel(object, ):
     """
     ensure continuity during equilibrium phase then between steady state and forward run
     """
-
     def __init__(self, complete_run=None, mngmnt_ss=None, mngmnt_fwd=None, crop_vars=None, area_ha=None):
         """
         construct a crop model object suitable for livestock model
@@ -143,8 +105,10 @@ class CropModel(object, ):
             self.data['npp_zaks'] = mngmnt_ss.npp_zaks_grow + mngmnt_fwd.npp_zaks_grow
             self.data['npp_miami'] = mngmnt_ss.npp_miami_grow + mngmnt_fwd.npp_miami_grow
             crop_currs = mngmnt_ss.crop_currs + mngmnt_fwd.crop_currs
-            for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt):
-                self.data['yld_typ'].append(crop_obj.yield_typ)  # typical yield
+
+            # typical yield
+            # =============
+            self.data['yld_typ'] = [crop_obj.yield_typ for crop_obj in (mngmnt_ss.crop_mngmnt + mngmnt_fwd.crop_mngmnt)]
 
             num_grow_seasons = len(self.data['npp_miami'])
 
@@ -199,12 +163,10 @@ class CropModel(object, ):
                 dum, dum, dum, dum, dum = _record_values(self, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
                                                          yld_ann_typ, yld_ann_n_lim)
 
-
 class EnsureContinuity(object, ):
     """
     ensure continuity during equilibrium phase then between steady state and forward run
     """
-
     def __init__(self, tot_soc_meas=None):
         """
 
@@ -267,12 +229,10 @@ class EnsureContinuity(object, ):
 
         return self.no3_start, self.nh4_start, self.c_n_rat_hum_prev
 
-
 class MngmntSubarea(object, ):
     """
 
     """
-
     def __init__(self, mngmnt, ora_parms, pi_tonnes_ss=None):
         """
         determine temporal extent of the management
@@ -304,12 +264,10 @@ class MngmntSubarea(object, ):
         self.npp_miami_rats = []
         self.npp_miami_grow = []
 
-
 class CarbonChange(object, ):
     """
     C
     """
-
     def __init__(self):
         """
         A1. Change in soil organic matter
@@ -422,12 +380,10 @@ class CarbonChange(object, ):
         for var in ['pool_c_iom', 'cow_to_iom', 'tot_soc_simul', 'co2_emiss']:
             self.data[var].append(eval(var))
 
-
 class NitrogenChange(object, ):
     """
 
     """
-
     def __init__(self):
         """
         A2. Mineral N
@@ -548,3 +504,53 @@ class NitrogenChange(object, ):
         # =================================================
         self.data['nh4_nitrif_adj'] = list(map(mul, self.data['nh4_nitrif'], self.data['loss_adj_rat_nh4']))
         self.data['nut_n_fert'] = list(map(add, self.data['nh4_ow_fert'], self.data['nh4_inorg_fert']))
+
+class LivestockModel(object, ):
+    """
+    dummy object
+    """
+    def __init__(self, complete_run=None, area_ha=None):
+        """
+        construct a crop model object suitable for livestock model
+        """
+        self.title = 'LivestockModel'
+        self.data = {}
+
+        var_name_list = list(['dairy_cat_n_excrete_nlim', 'dairy_cat_milk_prod_nlim', 'dairy_cat_meat_prod_nlim',
+                              'dairy_cat_manure_prod_nlim', 'beef_cat_n_excrete_nlim', 'beef_cat_meat_prod_nlim',
+                              'beef_cat_manure_prod_nlim', 'goats_sheep_n_excrete_nlim', 'goats_sheep_milk_prod_nlim',
+                              'goats_sheep_meat_prod_nlim', 'goats_sheep_manure_prod_nlim', 'poultry_n_excrete_nlim',
+                              'poultry_eggs_prod_nlim', 'poultry_meat_prod_nlim', 'poultry_manure_prod_nlim',
+                              'pigs_n_excrete_nlim', 'pigs_meat_prod_nlim', 'pigs_manure_prod_nlim'])
+
+        for var_name in var_name_list:
+            self.data[var_name] = []
+
+        self.var_name_list = var_name_list
+
+        if complete_run is not None:
+            self.area_ha = area_ha
+
+
+class EconomicsModel(object, ):
+    """
+    dummy object
+    """
+    def __init__(self, complete_run=None, area_ha=None):
+        """
+        construct a crop model object suitable for livestock model
+        """
+        self.title = 'LivestockModel'
+        self.data = {}
+
+        var_name_list = list(['full_hh_income_n_lim',
+                              'per_capita_consumption_n_lim', 'relative_food_insecurity_n_lim',
+                              'dietary_diversity_n_lim'])
+
+        for var_name in var_name_list:
+            self.data[var_name] = []
+
+        self.var_name_list = var_name_list
+
+        if complete_run is not None:
+            self.area_ha = area_ha

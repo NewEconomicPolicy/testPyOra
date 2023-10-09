@@ -26,6 +26,25 @@ KEYS = ['Initiation', 'Plant inputs', 'DPM carbon', 'RPM carbon', 'BIO carbon', 
 
 ERROR_STR = '*** Error *** '
 
+def get_crops_growing(crop_names):
+    """
+    C
+    """
+    n_crops = 0
+    prev_crop = None
+    grow_crops = []
+    for crp_nm in crop_names:
+        if crp_nm == prev_crop:
+            continue
+        else:
+            prev_crop = crp_nm
+            if crp_nm is None:
+                continue
+            n_crops += 1
+            grow_crops.append(crp_nm)
+
+    return grow_crops
+
 def _dump_summary(sum_tbl):
     """
     C

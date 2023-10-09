@@ -73,7 +73,6 @@ def get_soil_water_constants(soil_vars, n_parms, tot_soc):
 
     return wc_fld_cap, wc_pwp, pcnt_c
 
-
 def add_pet_to_weather(latitude, pettmp_grid_cell):
     """
     feed monthly annual temperatures to Thornthwaite equations to estimate Potential Evapotranspiration [mm/month]
@@ -113,7 +112,6 @@ def add_pet_to_weather(latitude, pettmp_grid_cell):
 
     return pettmp_reform
 
-
 def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
     """
     Initialisation and subsequent calculation of soil water
@@ -125,12 +123,10 @@ def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
 
     return wat_soil
 
-
 class SoilWaterChange(object, ):
     """
     C
     """
-
     def __init__(self):
         """
         A3 - Soil water
@@ -177,8 +173,7 @@ class SoilWaterChange(object, ):
         # TODO: check
         # ===========
         if len(self.data['wat_drain']) > 0:
-            aet = min(pet_prev, 5 * days_in_mnth,
-                      (wat_soil - wc_pwp))  # (eq.3.2.4) col L - AET to rooting depth before irrigation
+            aet = min(pet_prev, 5 * days_in_mnth, (wat_soil - wc_pwp))  # (eq.3.2.4) col L - AET to rooting depth before irrigation
             if pet_prev > 0.0:
                 self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)
             else:
