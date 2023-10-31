@@ -63,24 +63,6 @@ def _record_values(crop_model, indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj,
     indx += 1
     return indx, 0, 0, yld_ann_typ, yld_ann_n_lim  # resets cummulated nitrogen uptakes to zero
 
-class CropProduction(object, ):
-    """
-    create two dataframes
-    """
-    def __init__(self, ora_subarea):
-        """
-        construct a crop model object suitable for livestock model
-        """
-        self.title = 'CropProduction'
-
-        column_nms = list(['crop_name', 'yld_ss', 'npp_ss', 'yld_act', 'npp_act', 'prod_cmpr_ss'])
-
-        crop_names = ora_subarea.crop_mngmnt_ss['crop_name']
-        grow_crops = get_crops_growing(crop_names)
-
-        data = {attrb: len(grow_crops) * [None] for attrb in column_nms}
-        self.crop_prodn = DataFrame(data)
-
 class CropModel(object, ):
     """
     ensure continuity during equilibrium phase then between steady state and forward run
@@ -233,7 +215,7 @@ class MngmntSubarea(object, ):
     """
 
     """
-    def __init__(self, mngmnt, ora_parms, pi_tonnes_ss=None):
+    def __init__(self, mngmnt, ora_weather, pi_tonnes_ss=None):
         """
         determine temporal extent of the management
         should list indices correspond to the months?
@@ -247,15 +229,6 @@ class MngmntSubarea(object, ):
         self.crop_names = mngmnt['crop_name']
         self.fert_n = mngmnt['fert_n']
 
-        # TODO: important for RothC calculations see function : get_values_for_tstep
-        # ==========================================================================
-        self.org_fert = mngmnt['org_fert']
-
-        if pi_tonnes_ss is None:
-            self.pi_tonnes = mngmnt['pi_tonne']  # required for seeding steady state
-        else:
-            self.pi_tonnes = pi_tonnes_ss  # use plant inputs from steady state
-
         self.pi_props = mngmnt['pi_prop']
         self.crop_currs = mngmnt['crop_curr']
         self.crop_mngmnt = mngmnt['crop_mngmnt']
@@ -263,6 +236,17 @@ class MngmntSubarea(object, ):
         self.npp_zaks_grow = []
         self.npp_miami_rats = []
         self.npp_miami_grow = []
+
+        self.org_fert = mngmnt['org_fert']  # important for RothC calculations see function : get_values_for_tstep
+
+        from ora_cn_fns import generate_miami_dyce_npp
+        if pi_tonnes_ss is None:
+            self.pi_tonnes = mngmnt['pi_tonne']  # required for seeding steady state
+            generate_miami_dyce_npp(ora_weather.pettmp_ss, self, ora_weather.n_ss_yrs)
+        else:
+            self.pi_tonnes = pi_tonnes_ss  # use plant inputs from steady state
+            self.pet_prev = ora_weather.pettmp_ss['pet'][-1]  # ensures smooth tranistion in RothC
+            generate_miami_dyce_npp(ora_weather.pettmp_fwd, self, ora_weather.n_ss_yrs, ss_flag=False)
 
 class CarbonChange(object, ):
     """

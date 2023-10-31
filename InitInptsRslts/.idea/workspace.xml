@@ -22,14 +22,16 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="cosmetic changes to some modules intended to improve readability and conformance to PEP 8 standard.">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard.">
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_low_level_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_low_level_fns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_read.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_read.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyOratorGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyOratorGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../OratorRun/lookup/Orator variables lookup table.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/../OratorRun/lookup/Orator variables lookup table.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +51,7 @@
   &quot;keyToString&quot;: {
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;E:/ORATOR/setup&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PythonContentEntriesConfigurable&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -345,7 +347,14 @@
       <option name="project" value="LOCAL" />
       <updated>1695726330716</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard.">
+      <created>1696860577980</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1696860577980</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -360,7 +369,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="1) modified function linked to the ‘View Economics’ push button so that default PurchasesSalesLabour Excel file is copied to farm run directory&#10;2) Clear data push button added to Livestock tab.&#10;3) Addressed condition where a subarea is present in the farm run file  but has no description in the Subareas sheet." />
     <MESSAGE value="Addressed situation where a subarea management has a diffrent temporal length compared with weather." />
     <MESSAGE value="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab" />
     <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
@@ -385,7 +393,8 @@
     <MESSAGE value="modified Dynamic variables UI to enable Neem inhibition rate modifier value change." />
     <MESSAGE value="recent minor mods uploaded to ensure we are syncronised." />
     <MESSAGE value="cosmetic changes to some modules intended to improve readability and conformance to PEP 8 standard." />
-    <option name="LAST_COMMIT_MESSAGE" value="cosmetic changes to some modules intended to improve readability and conformance to PEP 8 standard." />
+    <MESSAGE value="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard." />
+    <option name="LAST_COMMIT_MESSAGE" value="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -400,25 +409,40 @@
           <line>273</line>
           <option name="timeStamp" value="127" />
         </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_rothc_fns.py</url>
+          <line>56</line>
+          <option name="timeStamp" value="130" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_low_level_fns.py</url>
+          <line>146</line>
+          <option name="timeStamp" value="132" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_water_model.py</url>
+          <line>100</line>
+          <option name="timeStamp" value="133" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="144" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_classes.py</url>
+          <line>135</line>
+          <option name="timeStamp" value="148" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>184</line>
-          <option name="timeStamp" value="161" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_rothc_fns.py</url>
-          <line>108</line>
-          <option name="timeStamp" value="162" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_water_model.py</url>
-          <line>112</line>
-          <option name="timeStamp" value="163" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_low_level_fns.py</url>
-          <line>148</line>
+          <line>116</line>
           <option name="timeStamp" value="164" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_fns.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="167" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

@@ -168,25 +168,3 @@ def gui_optimisation_cycle(form, subarea=None, iteration=None):
 
         form.w_opt_cycle.setText(mess)
     return
-
-def extend_out_dir(form):
-    """
-     extend outputs directory by mirroring inputs location
-     check and if necessary create extended output directory
-    """
-    mgmt_dir = form.w_lbl06.text()
-    dummy, short_dir = split(mgmt_dir)
-    curr_out_dir = form.w_lbl15.text()
-
-    out_dir = normpath(join(curr_out_dir, short_dir))
-    if isdir(out_dir):
-        form.settings['out_dir'] = out_dir
-    else:
-        try:
-            mkdir(out_dir)
-            print('Created output directory: ' + out_dir)
-            form.settings['out_dir'] = out_dir
-        except PermissionError as err:
-            print('*** Error *** Could not create output directory: ' + out_dir + ' will use ' + curr_out_dir)
-
-    return

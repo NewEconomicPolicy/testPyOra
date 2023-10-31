@@ -122,7 +122,7 @@ class Form(QWidget):
         outer_layout.addLayout(bot_hbox)
         self.setLayout(outer_layout)
 
-        self.setGeometry(500, 50, 750, 400)     # posx, posy, width, height
+        self.setGeometry(100, 50, 750, 400)     # posx, posy, width, height
         self.setWindowTitle('Run ORATOR analysis')
 
         # reads and set values from last run

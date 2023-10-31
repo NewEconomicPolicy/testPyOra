@@ -6,7 +6,6 @@
 # Licence:     <your licence>
 ##
 # -------------------------------------------------------------------------------
-# !/usr/bin/env python
 
 __prog__ = 'ora_rothc_fns.py'
 __version__ = '0.0.0'
@@ -14,8 +13,8 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
-from ora_cn_fns import get_rate_temp, inert_organic_carbon, carbon_lost_from_pool, add_npp_zaks_by_month, \
-                                                                        get_values_for_tstep, get_soil_vars
+from ora_cn_fns import (get_rate_temp, inert_organic_carbon, carbon_lost_from_pool, add_npp_zaks_by_month,
+                                                                        get_values_for_tstep, get_soil_vars)
 from ora_water_model import get_soil_water, get_soil_water_constants
 
 # rate constants for decomposition of the pool
@@ -110,7 +109,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
                                                                     wc_fld_cap, pcnt_c, wat_strss_indx)
         wc_t0 = wc_t1
 
-        add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow)       # add npp by zaks to management
+        add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by zaks to management
 
         imnth += 1
         if imnth > 12:

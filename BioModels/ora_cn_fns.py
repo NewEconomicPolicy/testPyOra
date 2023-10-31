@@ -48,6 +48,7 @@ def get_crop_vars(management, crop_vars, tstep):
 
 def npp_zaks_grow_season(management):
     """
+    calculate npp for each growing season by summing monthly npp for that season
     """
     ntsteps = management.ntsteps
     npp_cumul = 0
@@ -70,7 +71,7 @@ def npp_zaks_grow_season(management):
 
     return
 
-def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
+def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
     """
     This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
     calculated monthly using the water stress index for the previous month.
@@ -82,7 +83,7 @@ def add_npp_zaks_by_month(management, pettmp, soil_water, tstep, t_grow):
         wat_strss_indx = soil_water.data['wat_strss_indx'][tstep]
         tgdd = pettmp['grow_dds'][tstep]
         npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
-        npp_month = IWS_SCLE_FACTR * max(0, npp / t_grow)  # (eq.3.2.1)
+        npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)
     else:
         npp_month = 0
 
@@ -106,10 +107,10 @@ def _miami_dyce_growing_season(precip, tair, land_cover_type='ara'):
 
     return npp
 
-
 def generate_miami_dyce_npp(pettmp, management, n_ss_yrs, ss_flag=True):
     """
     return list of miami dyce npp estimates based on rainfall and temperature for growing months only
+    modifies management only
     """
     ntsteps = management.ntsteps
     precip_cumul = 0

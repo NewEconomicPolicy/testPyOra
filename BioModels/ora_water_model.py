@@ -194,8 +194,7 @@ class SoilWaterChange(object, ):
         self.data['irrig'].append(irrig)  # col M - irrigation
 
         wc_soil_irri = wat_soil
-        self.data['wc_soil_irri_root_zone'].append(
-            wc_soil_irri)  # col N - Soil water content of root zone after irrigation (mm)
+        self.data['wc_soil_irri_root_zone'].append(wc_soil_irri)  # col N - Soil water content of root zone after irrigation (mm)
 
         aet_irri = aet
         self.data['aet_irri'].append(aet_irri)  # col O - AET to rooting depth after irrigation (mm)
