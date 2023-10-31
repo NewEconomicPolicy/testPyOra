@@ -183,7 +183,7 @@ def run_soil_cn_algorithms(form):
         if complete_run is None:
             continue
 
-        npp_zaks_grow_season(mngmnt_fwd)
+        npp_zaks_grow_season(mngmnt_fwd)    # derive npp for each growing season from the monthly npp values
 
         crop_model = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars, ora_subareas[sba].area_ha)
         form.all_runs_crop_model[sba] = crop_model
@@ -237,7 +237,6 @@ def run_soil_cn_algorithms(form):
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return 0
 
-
 def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     """
     amend crop management organic waste application
@@ -267,7 +266,6 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     crop_mngmnt_mod['org_fert'] = org_fert_mod
     return crop_mngmnt_mod
 
-
 def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
     """
     abbreviate carbon, nitrogen and soil water objects to steady state only
@@ -285,7 +283,6 @@ def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_s
         soil_h2o_chng.data[var_name] = soil_water.data[var_name][:nmnths_ss]
 
     return carbon_chng, nitrogen_chng, soil_h2o_chng
-
 
 def recalc_fwd_soil_cn(form):
     """

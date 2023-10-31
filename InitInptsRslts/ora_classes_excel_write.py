@@ -11,7 +11,6 @@
 #
 #
 #-------------------------------------------------------------------------------
-#!/usr/bin/env python
 
 __prog__ = 'ora_classes_excel_write.py'
 __version__ = '0.0.0'
@@ -65,8 +64,10 @@ def _setup_sheet_data_dict(pettmp, var_format_dict):
 
     return sheet_data, var_name_list, exclusion_list
 
-class  B1CropProduction(object, ):
-
+class B1CropProduction(object, ):
+    """
+    C
+    """
     def __init__(self, pettmp, soil_water, mngmnt_ss, mngmnt_fwd):
         """
         B1      TODO: removed 'days_month': 'd' from var_format_dict - don't know why it was there
