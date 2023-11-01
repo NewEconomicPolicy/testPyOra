@@ -169,7 +169,7 @@ def run_soil_cn_algorithms(form):
 
         carbon_change, nitrogen_change, soil_water, converge_flag = _cn_steady_state(form, ora_parms, ora_weather,
                                                                                      mngmnt_ss, soil_vars, sba)
-        if converge_flag is None:
+        if not converge_flag:
             print('Skipping forward run for ' + sba)
             continue
 
