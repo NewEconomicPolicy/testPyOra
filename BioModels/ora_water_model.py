@@ -175,7 +175,7 @@ class SoilWaterChange(object, ):
         if len(self.data['wat_drain']) > 0:
             aet = min(pet_prev, 5 * days_in_mnth, (wat_soil - wc_pwp))  # (eq.3.2.4) col L - AET to rooting depth before irrigation
             if pet_prev > 0.0:
-                self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)
+                self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)  # (eq.3.2.3)
             else:
                 self.data['wat_strss_indx'].append(1.0)
             wat_soil_prev = self.data['wat_soil'][-1]
