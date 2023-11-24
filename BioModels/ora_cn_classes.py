@@ -18,7 +18,7 @@ __version__ = '0.0.0'
 from operator import add, mul
 from copy import copy
 
-from ora_cn_fns import init_ss_carbon_pools, generate_miami_dyce_npp
+from ora_cn_fns import init_ss_carbon_pools, generate_miami_dyce_npp, npp_zaks_grow_season
 
 ERROR_STR = '*** Error *** '
 
@@ -40,16 +40,23 @@ class CropProdModel(object):
         self.var_name_list = var_name_list
         self.area_ha = area_ha
 
-    def add_management_fwd(self, complete_run_fwd, mngmnt_fwd, npp_model):
+    def add_management_fwd(self, complete_run_fwd, mngmnt, npp_model):
         """
-
+        foreward run only
         """
         print('model: ' + npp_model)
 
+        if npp_model == 'Zaks':
+            npp_zaks_grow_season(mngmnt)  # derive npp for each growing season from the monthly npp
+
+        return
+
     def add_management_ss(self, n_change, mngmnt):
         """
-
+        steady state only
         """
+        npp_zaks_grow_season(mngmnt)   # adds npp for each growing season
+
         self.nyears_ss = mngmnt.nyears
         self.data['npp_zaks'] = mngmnt.npp_zaks
         self.data['npp_zaks_grow'] = mngmnt.npp_zaks_grow

@@ -129,8 +129,6 @@ def _cn_forward_run(parameters, weather, mngmnt_fwd, soil_vars, c_change_ss, n_c
         continuity.adjust_soil_n_change(n_change)
         soil_nitrogen(c_change, soil_water, parameters, pettmp, mngmnt_fwd, soil_vars, n_change, continuity)
 
-        npp_zaks_grow_season(mngmnt_fwd)  # derive npp for each growing season from the monthly npp values
-
         complete_run = (c_change, n_change, soil_water)
         crop_model.add_management_fwd(complete_run, mngmnt_fwd, npp_model)
 
@@ -189,7 +187,6 @@ def run_soil_cn_algorithms(form):
             print('Skipping forward run for ' + sba)
             continue
 
-        npp_zaks_grow_season(mngmnt_ss)  # creates npp for each growing season
         crop_model.add_management_ss(n_change, mngmnt_ss)
 
         mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, mngmnt_ss)  # also calculates miami
