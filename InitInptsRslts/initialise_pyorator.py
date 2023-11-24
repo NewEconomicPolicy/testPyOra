@@ -18,7 +18,7 @@ __version__ = '0.0.0'
 # ---------------
 # 
 from os.path import isfile, isdir, normpath, join, exists, lexists, split
-from os import getcwd, makedirs
+from os import listdir, getcwd, makedirs
 from calendar import month_abbr
 
 from json import load as load_json, dump as dump_json
@@ -35,7 +35,7 @@ from weather_datasets import read_weather_dsets_detail
 from set_up_logging import set_up_logging
 from ora_excel_read import (check_params_excel_file, check_xls_run_file,
                             ReadStudy, ReadCropOwNitrogenParms, ReadAnmlProdn)
-from ora_cn_classes import CarbonChange, NitrogenChange, CropModel, LivestockModel, EconomicsModel
+from ora_cn_classes import CarbonChange, NitrogenChange, CropProdModel, LivestockModel, EconomicsModel
 from ora_water_model import SoilWaterChange
 from ora_lookup_df_fns import read_lookup_excel_file, fetch_display_names_from_metrics
 from ora_gui_misc_fns import simulation_yrs_validate
@@ -305,6 +305,14 @@ def read_config_file(form):
                 sys.exit(0)
 
     mgmt_dir0 = normpath(config['mgmt_dir0'])
+    if not isdir(mgmt_dir0) or mgmt_dir0 == '.':
+        # patch - select first study directory
+        # ====================================
+        study_dir = join(form.settings['study_area_dir'], config['study'])
+        study_dirs = [dirnm for dirnm in listdir(study_dir) if isdir(join(study_dir, dirnm))]
+        if len(study_dirs) > 0:
+            mgmt_dir0 = join(study_dir, study_dirs[0])
+
     if isdir(mgmt_dir0):
         form.w_tab_wdgt.w_run_dir0.setText(mgmt_dir0)
         form.w_tab_wdgt.w_run_dir3.setText(mgmt_dir0)
@@ -377,7 +385,7 @@ def read_config_file(form):
         form.w_tab_wdgt.w_combo09.addItem(display_name)
         form.w_tab_wdgt.w_combo39.addItem(display_name)
 
-    crop_model = CropModel()
+    crop_model = CropProdModel()
     display_names = fetch_display_names_from_metrics(lookup_df, crop_model)
     for display_name in display_names:
         form.w_tab_wdgt.w_combo10.addItem(display_name)

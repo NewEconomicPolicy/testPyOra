@@ -123,7 +123,7 @@ class AllTabs(QTabWidget):
         grid.addWidget(w_run_lbl0, irow, 0)
 
         w_run_dir = QLabel()
-        grid.addWidget(w_run_dir, irow, 1, 1, 4)
+        grid.addWidget(w_run_dir, irow, 1, 1, 5)
         self.w_run_dir0 = w_run_dir
 
         w_lbl_sbas = QLabel()
@@ -1083,13 +1083,17 @@ class AllTabs(QTabWidget):
         Popen(list([excel_path, run_xls_fname]), stdout = DEVNULL)
 
     def mnthApplicChanged(self):
-
+        """
+        C
+        """
         self.w_ow_rprt.setText(check_mngmnt_ow(self))
 
         return
 
     def displayOwParms(self):
-
+        """
+        C
+        """
         self.w_lbl_ow.setText(disp_ow_parms(self))
 
         return
@@ -1127,7 +1131,7 @@ class AllTabs(QTabWidget):
         '''
         import signal
         from os import kill as kill_prcs
-        os.kill(junk.pid, signal.SIGTERM)
+        kill_prcs(junk.pid, signal.SIGTERM)
         '''
 
     def runModelClicked(self):
@@ -1148,11 +1152,15 @@ class AllTabs(QTabWidget):
         pass
 
     def runLivestockClicked(self):
-
+        """
+        C
+        """
         calc_livestock_data(self)
 
     def runSoilCnClicked(self):
-
+        """
+        C
+        """
         run_soil_cn_algorithms(self)
 
     # ================================ end of tab3UI =========================

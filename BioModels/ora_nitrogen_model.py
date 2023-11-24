@@ -143,7 +143,7 @@ def soil_nitrogen(carbon_obj, soil_water_obj, parameters, pettmp, management, so
         nh4_volat_adj = nh4_volat * loss_adj_rat_nh4  # A2e - Volatilised N loss
         n2o_emiss_nitrif = n2o_lost_nitrif(nh4_nitrif, wat_soil, wc_fld_cap, n_parms)
 
-        nitrogen_change.append_vars(imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
+        nitrogen_change.append_nvars(imnth, crop_name, min_no3_nh4, soil_n_sply, prop_yld_opt, prop_n_opt,
                     no3_start, no3_atmos, no3_inorg_fert, no3_nitrif,
                     no3_avail, no3_total_inp, no3_immob, no3_leach, no3_leach_adj,
                     no3_denit, rate_denit_no3, n_denit_max, rate_denit_moist, rate_denit_bio,

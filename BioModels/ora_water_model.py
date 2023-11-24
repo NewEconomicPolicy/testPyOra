@@ -17,29 +17,32 @@ __version__ = '0.0.0'
 # ---------------
 #
 from calendar import monthrange
-from thornthwaite import thornthwaite
+from copy import copy
 
+from thornthwaite import thornthwaite
 
 def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag=False):
     """
     Volumetric water content at field capacity and permanent wilting point
     """
     if halaba_flag:
-        theta_fc = 4.442 * pcnt_c - 0.061 * pcnt_sand + 0.34 * pcnt_clay + 22.821  # (eq.2.2.5)
+        theta_fc = (4.442 * pcnt_c) - (0.061 * pcnt_sand) + (0.34 * pcnt_clay) + 22.821  # (eq.2.2.5)
 
-        theta_pwp = 1.963 * pcnt_c - 0.029 * pcnt_sand + 0.166 * pcnt_clay + 11.746  # (eq.2.2.6)
+        theta_pwp = (1.963 * pcnt_c) - (0.029 * pcnt_sand) + (0.166 * pcnt_clay) + 11.746  # (eq.2.2.6)
     else:
         invrs_c = 1 / (1 + pcnt_c)
 
         # (eq.2.2.3)
         # ==========
-        theta_fc = (24.49 - 18.87 * invrs_c + 0.4527 * pcnt_clay + 0.1535 * pcnt_silt +
-                    0.1442 * pcnt_silt * invrs_c - 0.00511 * pcnt_silt * pcnt_clay + 0.08676 * pcnt_clay * invrs_c)
+        theta_fc = (24.49 - (18.87 * invrs_c) + (0.4527 * pcnt_clay) + (0.1535 * pcnt_silt) +
+                        (0.1442 * pcnt_silt * invrs_c) - (0.00511 * pcnt_silt * pcnt_clay) +
+                                                                    (0.08676 * pcnt_clay * invrs_c))
 
         # (eq.2.2.4)
         # ==========
-        theta_pwp = (9.878 + 0.2127 * pcnt_clay - 0.08366 * pcnt_silt - 7.67 * invrs_c +
-                     0.003853 * pcnt_silt * pcnt_clay + 0.233 * pcnt_clay * invrs_c + 0.09498 * pcnt_silt * invrs_c)
+        theta_pwp = (9.878 + (0.2127 * pcnt_clay) - (0.08366 * pcnt_silt) - (7.67 * invrs_c) +
+                     (0.003853 * pcnt_silt * pcnt_clay) + (0.233 * pcnt_clay * invrs_c) +
+                                                                    (0.09498 * pcnt_silt * invrs_c))
 
     return theta_fc, theta_pwp
 
@@ -112,14 +115,14 @@ def add_pet_to_weather(latitude, pettmp_grid_cell):
 
     return pettmp_reform
 
-def get_soil_water(precip, pet, irrigation, wc_fld_cap, wc_pwp, wc_t0):
+def get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0):
     """
     Initialisation and subsequent calculation of soil water
     """
     if wc_t0 is None:
         wat_soil = (wc_fld_cap + wc_pwp) / 2  # see Initialisation of soil water in 2.2. Soil water
     else:
-        wat_soil = max(wc_pwp, min((wc_t0 + precip - pet + irrigation), wc_fld_cap))  # (eq.2.2.14)
+        wat_soil = max(wc_pwp, min((wc_t0 + precip - pet + irrig), wc_fld_cap))  # (eq.2.2.14)
 
     return wat_soil
 
@@ -137,10 +140,9 @@ class SoilWaterChange(object, ):
         self.irrig = 0  # D1. Water use
 
         self.data = {}
-        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
-                              'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff',
-                              'pcnt_c',
-                              'max_root_dpth'])
+        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'pet', 'aet', 'aet_irri', 'irrig',
+                    'wc_soil_irri_root_zone', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff',
+                                                                            'pcnt_c', 'max_root_dpth'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -163,8 +165,8 @@ class SoilWaterChange(object, ):
 
         return wat_soil, wc_pwp, wc_fld_cap
 
-    def append_vars(self, imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap,
-                    pcnt_c, wat_strss_indx):
+    def append_wvars(self, imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig,
+                                                wc_pwp, wat_soil, wc_fld_cap, wat_strss_indx):
         """
         all values are in mm unless otherwise specified
         """
@@ -175,7 +177,7 @@ class SoilWaterChange(object, ):
         if len(self.data['wat_drain']) > 0:
             aet = min(pet_prev, 5 * days_in_mnth, (wat_soil - wc_pwp))  # (eq.3.2.4) col L - AET to rooting depth before irrigation
             if pet_prev > 0.0:
-                self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)  # (eq.3.2.3)
+                self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)     # (eq.3.2.3)
             else:
                 self.data['wat_strss_indx'].append(1.0)
             wat_soil_prev = self.data['wat_soil'][-1]
@@ -184,6 +186,7 @@ class SoilWaterChange(object, ):
             aet = pet
             wat_soil_prev = wat_soil
 
+        self.data['pet'].append(pet)
         self.data['aet'].append(aet)  # TODO: revisit
         self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth
         self.data['wc_pwp'].append(wc_pwp)  # col I - Lower limit for water extraction
@@ -196,14 +199,14 @@ class SoilWaterChange(object, ):
         wc_soil_irri = wat_soil
         self.data['wc_soil_irri_root_zone'].append(wc_soil_irri)  # col N - Soil water content of root zone after irrigation (mm)
 
-        aet_irri = aet
+        aet_irri = copy(aet)
         self.data['aet_irri'].append(aet_irri)  # col O - AET to rooting depth after irrigation (mm)
         self.data['wc_soil_irri'].append(wc_soil_irri)  # col P - Soil water content to soil depth after irrigation (mm)
 
         self.data['max_root_dpth'].append(max_root_dpth)  # col H
-        dpth_soil_root_rat = t_depth / max_root_dpth  # used in PET (eq.2.2.13)
-        pet_dpth = min(pet, pet * dpth_soil_root_rat)
-        wat_hydro_eff = precip - pet_dpth
+        wat_hydro_eff = irrig + precip - pet   # effective rainfall
         wat_drain = max(wat_hydro_eff - (wc_fld_cap - wat_soil_prev), 0)  # (eq.2.4.7)
         self.data['wat_drain'].append(wat_drain)  # col Q - Drainage from soil depth (mm)
         self.data['wat_hydro_eff'].append(wat_hydro_eff)
+
+        return

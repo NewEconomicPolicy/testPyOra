@@ -23,15 +23,15 @@ __version__ = '0.0.0'
 # ---------------
 #
 from os.path import isfile, join
-from copy import copy
+from copy import copy, deepcopy
 from numpy import arange
 from PyQt5.QtWidgets import QApplication
 from calendar import month_abbr
 
 from livestock_output_data import check_livestock_run_data
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle
-from ora_cn_fns import get_soil_vars, generate_miami_dyce_npp, npp_zaks_grow_season
-from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropModel
+from ora_cn_fns import get_soil_vars, npp_zaks_grow_season
+from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropProdModel
 from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
 from ora_excel_write import retrieve_output_xls_files, generate_excel_outfiles
@@ -40,17 +40,19 @@ from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy, read_xls_run_file
 from ora_rothc_fns import run_rothc
 from ora_gui_misc_fns import edit_rate_inhibit
 
+MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
+
+NPP_MODELS = ('MIAMI', 'Zaks', 'N_lim')
+
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
 # =============================================================================================
 MAX_ITERS = 200
 SOC_MIN_DIFF = 0.0000001  # convergence criteria tonne/hectare
-# SOC_MIN_DIFF = 0.0005000   # convergence criteria tonne/hectare
-
-MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 
 WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
+
 
 def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     """
@@ -100,27 +102,41 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     QApplication.processEvents()  # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water, converge_flag
 
-def _cn_forward_run(parameters, weather, management, soil_vars, carbon_change, nitrogen_change, soil_water):
+def _cn_forward_run(parameters, weather, mngmnt_fwd, soil_vars, c_change_ss, n_change_ss, soil_water_ss, crop_model):
     """
 
     """
     pettmp = weather.pettmp_fwd
-    if management.ntsteps > len(pettmp['precip']):
+    if mngmnt_fwd.ntsteps > len(pettmp['precip']):
         print('Cannot proceed with forward run due to insuffient weather timesteps ')
         return None
 
-    # run RothC
-    # =========
+    complete_runs = {}
+
     continuity = EnsureContinuity()
-    continuity.adjust_soil_water(soil_water)
+    continuity.adjust_soil_water(soil_water_ss)
 
-    run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity)
-    continuity.adjust_soil_water(soil_water)
+    for npp_model in NPP_MODELS:
+        c_change = deepcopy(c_change_ss)
+        soil_water = deepcopy(soil_water_ss)
+        n_change = deepcopy(n_change_ss)
 
-    continuity.adjust_soil_n_change(nitrogen_change)
-    soil_nitrogen(carbon_change, soil_water, parameters, pettmp, management, soil_vars, nitrogen_change, continuity)
+        # run RothC
+        # =========
+        run_rothc(parameters, pettmp, mngmnt_fwd, c_change, soil_vars, soil_water, continuity, npp_model)
+        continuity.adjust_soil_water(soil_water)
 
-    return carbon_change, nitrogen_change, soil_water
+        continuity.adjust_soil_n_change(n_change)
+        soil_nitrogen(c_change, soil_water, parameters, pettmp, mngmnt_fwd, soil_vars, n_change, continuity)
+
+        npp_zaks_grow_season(mngmnt_fwd)  # derive npp for each growing season from the monthly npp values
+
+        complete_run = (c_change, n_change, soil_water)
+        crop_model.add_management_fwd(complete_run, mngmnt_fwd, npp_model)
+
+        complete_runs[npp_model] = complete_run
+
+    return complete_runs
 
 def run_soil_cn_algorithms(form):
     """
@@ -163,29 +179,27 @@ def run_soil_cn_algorithms(form):
     form.all_runs_output = {}  # clear previously recorded outputs
     all_runs = {}
     for sba in ora_subareas:
+        crop_model = CropProdModel(ora_subareas[sba].area_ha)
         soil_vars = ora_subareas[sba].soil_for_area
-
         mngmnt_ss = MngmntSubarea(ora_subareas[sba].crop_mngmnt_ss, ora_weather)
 
-        carbon_change, nitrogen_change, soil_water, converge_flag = _cn_steady_state(form, ora_parms, ora_weather,
-                                                                                     mngmnt_ss, soil_vars, sba)
-        if not converge_flag:
+        c_change, n_change, soil_water, cnvrg_flag = _cn_steady_state(form, ora_parms, ora_weather,
+                                                                                            mngmnt_ss, soil_vars, sba)
+        if not cnvrg_flag:
             print('Skipping forward run for ' + sba)
             continue
 
-        npp_zaks_grow_season(mngmnt_ss)  # requires water stress index
-        pi_tonnes = carbon_change.data['c_pi_mnth']
+        npp_zaks_grow_season(mngmnt_ss)  # creates npp for each growing season
+        crop_model.add_management_ss(n_change, mngmnt_ss)
 
-        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, pi_tonnes)
+        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, mngmnt_ss)  # also calculates miami
 
-        complete_run = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
-                                                                        carbon_change, nitrogen_change, soil_water)
+        complete_runs = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
+                                                c_change, n_change, soil_water, crop_model)
+        complete_run = complete_runs['MIAMI']
         if complete_run is None:
             continue
 
-        npp_zaks_grow_season(mngmnt_fwd)    # derive npp for each growing season from the monthly npp values
-
-        crop_model = CropModel(complete_run, mngmnt_ss, mngmnt_fwd, ora_parms.crop_vars, ora_subareas[sba].area_ha)
         form.all_runs_crop_model[sba] = crop_model
         form.crop_run = True
 
@@ -194,7 +208,7 @@ def run_soil_cn_algorithms(form):
         form.all_runs_output[sba] = complete_run
         if excel_out_flag:
             generate_excel_outfiles(form.lggr, study, sba, lookup_df, out_dir, ora_weather, complete_run,
-                                    mngmnt_ss, mngmnt_fwd)
+                                                                                    mngmnt_ss, mngmnt_fwd)
         print()
         all_runs[sba] = complete_run
 
@@ -237,6 +251,7 @@ def run_soil_cn_algorithms(form):
     print('\nCarbon, Nitrogen and Soil Water model run complete after {} subareas processed\n'.format(len(all_runs)))
     return 0
 
+
 def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     """
     amend crop management organic waste application
@@ -266,6 +281,7 @@ def _amend_crop_mngmnt(crop_mngmnt, mnth_appl, ow_type, owex_amnt):
     crop_mngmnt_mod['org_fert'] = org_fert_mod
     return crop_mngmnt_mod
 
+
 def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_ss):
     """
     abbreviate carbon, nitrogen and soil water objects to steady state only
@@ -283,6 +299,7 @@ def _abbrev_to_steady_state(carbon_change, nitrogen_change, soil_water, nmnths_s
         soil_h2o_chng.data[var_name] = soil_water.data[var_name][:nmnths_ss]
 
     return carbon_chng, nitrogen_chng, soil_h2o_chng
+
 
 def recalc_fwd_soil_cn(form):
     """

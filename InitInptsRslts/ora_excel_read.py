@@ -534,12 +534,12 @@ class ReadMngmntSubareas(object, ):
         # TODO: crude and unpythonic
         # ==========================
         crop_mngmnt_ss = {'crop_name': crop_names[:indx_mode], 'crop_curr': crop_currs[:indx_mode],
-                          'crop_mngmnt': crops_ss, 'fert_n': fert_n_list[:indx_mode],
+                          'crop_defns': crops_ss, 'fert_n': fert_n_list[:indx_mode],
                           'org_fert': org_fert_list[:indx_mode], 'pi_prop': pi_props[:indx_mode],
                           'pi_tonne': pi_tonnes[:indx_mode], 'irrig': irrigs[:indx_mode]}
 
         crop_mngmnt_fwd = {'crop_name': crop_names[indx_mode:], 'crop_curr': crop_currs[indx_mode:],
-                           'crop_mngmnt': crops_fwd, 'fert_n': fert_n_list[indx_mode:],
+                           'crop_defns': crops_fwd, 'fert_n': fert_n_list[indx_mode:],
                            'org_fert': org_fert_list[indx_mode:], 'pi_prop': pi_props[indx_mode:],
                            'pi_tonne': pi_tonnes[indx_mode:], 'irrig': irrigs[indx_mode:]}
 

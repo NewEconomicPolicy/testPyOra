@@ -14,14 +14,14 @@ __version__ = '0.0.0'
 # ---------------
 #
 from ora_cn_fns import (get_rate_temp, inert_organic_carbon, carbon_lost_from_pool, add_npp_zaks_by_month,
-                                                                        get_values_for_tstep, get_soil_vars)
+                                                                            get_values_for_tstep, get_soil_vars)
 from ora_water_model import get_soil_water, get_soil_water_constants
 
 # rate constants for decomposition of the pool
 # ============================================
 K_DPM = 10/12;    K_RPM = 0.3/12;   K_BIO = 0.66/12;  K_HUM = 0.02/12  # per month
 
-def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity):
+def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity, npp_model=None):
     """
     C
     """
@@ -41,16 +41,17 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
     else:
         # retrieve values from previous time step
         # =======================================
+        vals_prev = carbon_change.get_last_tstep_pools()
         pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom, \
-            c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc \
-                                                                            = carbon_change.get_last_tstep_pools()
+            c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio, tot_soc = vals_prev
 
     ntsteps = management.ntsteps
     imnth = 1
     for tstep in range(ntsteps):
 
+        vals_for_tstep = get_values_for_tstep(pettmp, management, parameters, t_depth, tstep)
         tair, precip, pet_prev, pet, irrig, c_pi_mnth, c_n_rat_ow, rat_dpm_rpm, cow, rat_dpm_hum_ow, prop_iom_ow, \
-                        max_root_dpth, t_grow = get_values_for_tstep(pettmp, management, parameters, tstep)
+                                                                                max_root_dpth, t_grow = vals_for_tstep
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
@@ -96,7 +97,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         c_input_hum = prop_hum * c_loss_total
         co2_emiss = prop_co2 * c_loss_total        # co2 due to aerobic decomp - Loss as CO2 (t ha-1)
 
-        carbon_change.append_vars(imnth, rate_mod, c_pi_mnth, cow,
+        carbon_change.append_cvars(imnth, rate_mod, c_pi_mnth, cow,
                                   pool_c_dpm, pi_to_dpm, cow_to_dpm, c_loss_dpm,
                                   pool_c_rpm, pi_to_rpm, c_loss_rpm,
                                   pool_c_bio, c_input_bio, c_loss_bio,
@@ -105,8 +106,8 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 
-        soil_water.append_vars(imnth, t_depth, max_root_dpth, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
-                                                                    wc_fld_cap, pcnt_c, wat_strss_indx)
+        soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
+                                                                                    wc_fld_cap, wat_strss_indx)
         wc_t0 = wc_t1
 
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by zaks to management

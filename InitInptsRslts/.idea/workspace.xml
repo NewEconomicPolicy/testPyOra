@@ -22,7 +22,8 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="part-way through reordering of crop production model">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="added comment for (eq.3.2.4)">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -353,7 +354,14 @@
       <option name="project" value="LOCAL" />
       <updated>1698752712460</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="added comment for (eq.3.2.4)">
+      <created>1698843706037</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1698843706037</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -368,7 +376,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="1) split livestock and economics push button in Run Model tab&#10;2) added empty Catchment tab" />
     <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
     <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
@@ -393,7 +400,8 @@
     <MESSAGE value="cosmetic changes to some modules intended to improve readability and conformance to PEP 8 standard." />
     <MESSAGE value="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard." />
     <MESSAGE value="part-way through reordering of crop production model" />
-    <option name="LAST_COMMIT_MESSAGE" value="part-way through reordering of crop production model" />
+    <MESSAGE value="added comment for (eq.3.2.4)" />
+    <option name="LAST_COMMIT_MESSAGE" value="added comment for (eq.3.2.4)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -435,13 +443,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>116</line>
-          <option name="timeStamp" value="164" />
+          <line>180</line>
+          <option name="timeStamp" value="171" />
         </line-breakpoint>
         <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_fns.py</url>
-          <line>85</line>
-          <option name="timeStamp" value="167" />
+          <line>89</line>
+          <option name="timeStamp" value="172" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_water_model.py</url>
+          <line>177</line>
+          <option name="timeStamp" value="173" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

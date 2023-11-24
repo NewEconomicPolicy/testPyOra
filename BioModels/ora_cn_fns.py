@@ -26,7 +26,6 @@ from time import sleep
 
 sleepTime = 5
 
-
 def get_crop_vars(management, crop_vars, tstep):
     """
     C
@@ -45,13 +44,12 @@ def get_crop_vars(management, crop_vars, tstep):
 
     return crop_name, nut_n_min, n_crop_dem, n_respns_coef, c_n_rat_pi
 
-
 def npp_zaks_grow_season(management):
     """
     calculate npp for each growing season by summing monthly npp for that season
     """
     ntsteps = management.ntsteps
-    npp_cumul = 0
+    npp_cumul = 0.0
     tgrow = 0
     for tstep, crop_name in enumerate(management.crop_names):
 
@@ -64,7 +62,7 @@ def npp_zaks_grow_season(management):
                 management.npp_zaks_grow.append(npp_cumul)
 
                 tgrow = 0
-                npp_cumul = 0
+                npp_cumul = 0.0
         else:
             npp_cumul += management.npp_zaks[tstep]
             tgrow += 1
@@ -73,6 +71,7 @@ def npp_zaks_grow_season(management):
 
 def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
     """
+    called from fn run_rothc only
     This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
     calculated monthly using the water stress index for the previous month.
     """
@@ -80,7 +79,7 @@ def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
     IWS_SCLE_FACTR = 2720
 
     if management.pi_props[tstep] > 0:
-        wat_strss_indx = soil_water.data['wat_strss_indx'][tstep]
+        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
         tgdd = pettmp['grow_dds'][tstep]
         npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
         npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)
@@ -107,15 +106,18 @@ def _miami_dyce_growing_season(precip, tair, land_cover_type='ara'):
 
     return npp
 
-def generate_miami_dyce_npp(pettmp, management, n_ss_yrs, ss_flag=True):
+def generate_miami_dyce_npp(pettmp, management, management_ss=None):
     """
     return list of miami dyce npp estimates based on rainfall and temperature for growing months only
     modifies management only
     """
+    if management_ss is None:
+        ngrow_seasons = len(management.crop_defns)
+    else:
+        ngrow_seasons = len(management_ss.crop_defns)
+
     ntsteps = management.ntsteps
-    precip_cumul = 0
-    tair_cumul = 0
-    tgrow = 0
+    precip_cumul, tair_cumul, tgrow = 3*[0]
     strt_indx = None
     icrp = 0
     for tstep in range(ntsteps):
@@ -123,6 +125,7 @@ def generate_miami_dyce_npp(pettmp, management, n_ss_yrs, ss_flag=True):
         # second condition covers last month of last year
         # ===============================================
         if management.pi_props[tstep] == 0 or tstep == (ntsteps - 1):
+            management.npp_miami.append(0.0)
             if tgrow > 0:
 
                 # fetch npp for this growing season and backfill monthly NPPs
@@ -130,24 +133,29 @@ def generate_miami_dyce_npp(pettmp, management, n_ss_yrs, ss_flag=True):
                 tair_ave = tair_cumul / tgrow
                 npp = _miami_dyce_growing_season(precip_cumul, tair_ave)
                 management.npp_miami_grow.append(npp)
-                if ss_flag:
+                if management_ss is None:
                     management.npp_miami_rats.append(1.0)
                 else:
-                    npp_typ = management.npp_miami_grow[icrp]       # fetch ss val
+                    npp_typ = management_ss.npp_miami_grow[icrp]       # fetch ss val
                     management.npp_miami_rats.append(npp/npp_typ)
                 tgrow = 0
                 precip_cumul = 0
                 tair_cumul = 0
                 icrp += 1
-                if icrp > n_ss_yrs:
+                if icrp >= ngrow_seasons:
                     icrp = 0
 
                 strt_indx = None
         else:
+            precip = pettmp['precip'][tstep]
+            tair = pettmp['tair'][tstep]
+            npp = _miami_dyce_growing_season(precip, tair)
+            management.npp_miami.append(npp)
+
             if strt_indx is None:
                 strt_indx = tstep
-            precip_cumul += pettmp['precip'][tstep]
-            tair_cumul += pettmp['tair'][tstep]
+            precip_cumul += precip
+            tair_cumul += tair
             tgrow += 1
 
     return
@@ -175,7 +183,6 @@ def get_soil_vars(soil_vars, subarea=None, write_flag=False):
         print(mess + '\tHUM: {}\tBIO: {}\tCO2: {}'.format(round(prop_hum, 3), round(prop_bio, 3), round(prop_co2, 3)))
 
     return t_depth, t_bulk, t_pH_h2o, t_salinity, tot_soc_meas, prop_hum, prop_bio, prop_co2
-
 
 def init_ss_carbon_pools(tot_soc_meas):
     """
@@ -233,20 +240,11 @@ def get_fert_vals_for_tstep(management, parameters, tstep):
     pi_tonnes = management.pi_tonnes[tstep]
     return nh4_ow_fert, nh4_inorg_fert, no3_inorg_fert, c_n_rat_ow, pi_tonnes
 
-
-def get_values_for_tstep(pettmp, management, parameters, tstep):
+def get_values_for_tstep(pettmp, management, parameters, t_depth, tstep):
     """
     C
     """
-    func_name = __prog__ + ' get_values_for_tstep'
-
-    try:
-        tair = pettmp['tair'][tstep]
-    except IndexError as err:
-        print('*** Error *** ' + str(err) + ' in ' + func_name)
-        sleep(sleepTime)
-        sys.exit(0)
-
+    tair = pettmp['tair'][tstep]
     precip = pettmp['precip'][tstep]
     pet = pettmp['pet'][tstep]
 
@@ -279,10 +277,14 @@ def get_values_for_tstep(pettmp, management, parameters, tstep):
     rat_dpm_hum_ow = ow_parms[ow_type]['rat_dpm_hum_ow']  # ratio of DPM:HUM in the active organic waste added
     cow = amount * ow_parms[ow_type]['pcnt_c']  # proportion of plant input is carbon (t ha-1)
 
-    return (tair, precip, pet_prev, pet, irrig, c_pi_mnth, c_n_rat_ow, rat_dpm_rpm, cow, rat_dpm_hum_ow,
-           prop_iom_ow, max_root_dpth, t_grow)
+    # PET from selected soil depth (eq.2.2.13)
+    # ========================================
+    dpth_soil_root_rat = t_depth / max_root_dpth
+    pet_dpth = min(pet, pet * dpth_soil_root_rat)
+    pet_prev_dpth = min(pet_prev, pet_prev * dpth_soil_root_rat)
 
-
+    return (tair, precip, pet_prev_dpth, pet_dpth, irrig, c_pi_mnth, c_n_rat_ow, rat_dpm_rpm,
+                                        cow, rat_dpm_hum_ow, prop_iom_ow, max_root_dpth, t_grow)
 def get_rate_temp(tair, pH, salinity, wc_fld_cap, wc_pwp, wc_tstep):
     """
     wc_tstep: water content in this timestep
@@ -311,7 +313,6 @@ def carbon_lost_from_pool(c_in_pool, k_rate_constant, rate_mod):
     c_loss = c_in_pool * (1.0 - exp(-k_rate_constant * rate_mod))  # (eq.2.1.2)
 
     return c_loss
-
 
 def plant_inputs_crops_distribution(t_grow, c_pi_yr=None):
     """

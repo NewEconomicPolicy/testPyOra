@@ -149,28 +149,30 @@ def soil_nitrogen_supply(prop_hum, prop_bio, prop_co2, c_n_rat_pi, c_n_rat_ow, c
 
 def prop_n_opt_from_soil_n_supply(soil_n_sply, nut_n_fert, nut_n_min, nut_n_opt):
     """
-    TODO: put warning message in log file
+    return the proportion of nutrient, N, available compared to the optimum amount of supply of the nutrient
     """
     denom = nut_n_opt - nut_n_min
     if denom == 0.0:
-        mess = WARN_STR + 'potential division by zero in eq.3.3.1 - '
-        '''
-        print(mess + 'check value of the optimum amount of nutrient for the crop which results in crop yield: '
-                                                                                            + str(nut_n_opt))
-        '''
         prop_n_opt = 0.5
     else:
-        prop_n_opt = (soil_n_sply + nut_n_fert - nut_n_min)/(nut_n_opt - nut_n_min)  # (eq.3.3.1)
+        prop_n_opt = (soil_n_sply + nut_n_fert - nut_n_min)/denom  # (eq.3.3.1)
 
-    return max( min(prop_n_opt,1), 0)
+    prop_n_opt = max( min(prop_n_opt,1), 0)
+
+    return prop_n_opt
 
 def prop_n_optimal_from_yield(prop_yld_opt, crop_vars):
     """
     calculate proportion of the optimum supply of N in the soil using fitted curve coefficients
     pXopt = a pYldopt3 + b pYldopt2 + c pYldopt + d
+
+    see manual in relation to (eq.2.4.16) and (eq.3.3.2)
     """
-    prop_n_opt = crop_vars['n_rcoef_a']*prop_yld_opt**3 + crop_vars['n_rcoef_b']*prop_yld_opt**2 + \
-                                                    crop_vars['n_rcoef_c']*prop_yld_opt + crop_vars['n_rcoef_d']
+    n_rcoef_a, n_rcoef_b, n_rcoef_c, n_rcoef_d = (crop_vars['n_rcoef_a'], crop_vars['n_rcoef_b'],
+                                                                    crop_vars['n_rcoef_c'], crop_vars['n_rcoef_d'])
+
+    prop_n_opt = n_rcoef_a * prop_yld_opt**3 + n_rcoef_b*prop_yld_opt**2 + n_rcoef_c*prop_yld_opt + n_rcoef_d
+
     return prop_n_opt
 
 def get_n_parameters(n_parms):
