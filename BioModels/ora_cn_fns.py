@@ -11,10 +11,9 @@
 # Description:#
 #
 #-------------------------------------------------------------------------------
-#!/usr/bin/env python
 """
 
-__prog__ = 'ora_low_level_fns.py'
+__prog__ = 'ora_cn_fns.py'
 __version__ = '0.0.0'
 
 # Version history
@@ -24,7 +23,26 @@ import sys
 from math import exp, atan
 from time import sleep
 
-sleepTime = 5
+GDDS_SCLE_FACTR = 11500
+IWS_SCLE_FACTR = 2720
+
+def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
+    """
+    called from fn run_rothc only
+    This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
+    calculated monthly using the water stress index for the previous month.
+    """
+    if management.pi_props[tstep] > 0.0:
+        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
+        tgdd = pettmp['grow_dds'][tstep]
+        npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
+        npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)
+    else:
+        npp_month = 0
+
+    management.npp_zaks[tstep] = npp_month
+
+    return
 
 def get_crop_vars(management, crop_vars, tstep):
     """
@@ -66,27 +84,6 @@ def npp_zaks_grow_season(management):
         else:
             npp_cumul += management.npp_zaks[tstep]
             tgrow += 1
-
-    return
-
-def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
-    """
-    called from fn run_rothc only
-    This differs from the  calculation presented by Zaks et al. (2007) in that the net primary production was
-    calculated monthly using the water stress index for the previous month.
-    """
-    GDDS_SCLE_FACTR = 11500
-    IWS_SCLE_FACTR = 2720
-
-    if management.pi_props[tstep] > 0:
-        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
-        tgdd = pettmp['grow_dds'][tstep]
-        npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
-        npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)
-    else:
-        npp_month = 0
-
-    management.npp_zaks[tstep] = npp_month
 
     return
 
@@ -304,7 +301,6 @@ def get_rate_temp(tair, pH, salinity, wc_fld_cap, wc_pwp, wc_tstep):
     rate_mod = rate_temp * rate_moisture * rate_ph * rate_salinity
 
     return rate_mod
-
 
 def carbon_lost_from_pool(c_in_pool, k_rate_constant, rate_mod):
     """

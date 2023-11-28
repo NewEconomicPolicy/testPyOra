@@ -13,31 +13,25 @@ __version__ = '0.0.0'
 # Version history
 # ---------------
 #
+from ora_water_model import get_soil_water, get_soil_water_constants
 from ora_cn_fns import (get_rate_temp, inert_organic_carbon, carbon_lost_from_pool, add_npp_zaks_by_month,
                                                                             get_values_for_tstep, get_soil_vars)
-from ora_water_model import get_soil_water, get_soil_water_constants
 
-# rate constants for decomposition of the pool
-# ============================================
-K_DPM = 10/12;    K_RPM = 0.3/12;   K_BIO = 0.66/12;  K_HUM = 0.02/12  # per month
+K_DPM = 10/12; K_RPM = 0.3/12; K_BIO = 0.66/12; K_HUM = 0.02/12  # rate constants for decomposition of the pool per month
 
 def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity, npp_model=None):
     """
     C
     """
-    wc_t0, wat_strss_indx, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = continuity.get_rothc_vars()
 
+    # retrieve water content, stress index and C pool values for initial and first time step
+    # ======================================================================================
+    wc_t0, wat_strss_indx, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = continuity.get_rothc_vars()
     t_depth, dum, t_pH_h2o, t_salinity, dum, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
     if len(carbon_change.data['pool_c_dpm']) == 0:
-
-        # water content at initial and first time step
-        # ============================================
         c_input_bio, c_input_hum, c_loss_dpm, c_loss_rpm, c_loss_hum, c_loss_bio = 6*[0]
-
-        # use measured SOC initially for get_soil_water_constants
-        # =======================================================
-        tot_soc = soil_vars.tot_soc_meas
+        tot_soc = soil_vars.tot_soc_meas     # use measured SOC initially for get_soil_water_constants
     else:
         # retrieve values from previous time step
         # =======================================
@@ -57,10 +51,14 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_t1 = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
 
-        rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wc_t1)
+        soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
+                                                                                wc_fld_cap, wat_strss_indx)
+
+        add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by Zaks to management
 
         # plant inputs and losses (t ha-1) passed to the DPM pool
         # =======================================================
+        rate_mod = get_rate_temp(tair, t_pH_h2o, t_salinity, wc_fld_cap, wc_pwp, wc_t1)
         pi_to_dpm = c_pi_mnth * rat_dpm_rpm/(1.0 + rat_dpm_rpm)                       # (eq.2.1.10)
         cow_to_dpm = cow * rat_dpm_hum_ow * (1.0 - prop_iom_ow)/(1 + rat_dpm_hum_ow)  # (eq.2.1.12)
         pool_c_dpm += pi_to_dpm + cow_to_dpm - c_loss_dpm
@@ -106,11 +104,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         tot_soc = pool_c_dpm + pool_c_rpm + pool_c_bio + pool_c_hum + pool_c_iom
 
-        soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
-                                                                                    wc_fld_cap, wat_strss_indx)
         wc_t0 = wc_t1
-
-        add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by zaks to management
 
         imnth += 1
         if imnth > 12:

@@ -22,8 +22,8 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="added comment for (eq.3.2.4)">
-      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="first phase of extensive modifications relating to the Crop Model">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -361,7 +361,21 @@
       <option name="project" value="LOCAL" />
       <updated>1698843706037</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="first phase of extensive modifications relating to the Crop Model">
+      <created>1700812059387</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1700812059387</updated>
+    </task>
+    <task id="LOCAL-00041" summary="first phase of extensive modifications relating to the Crop Model">
+      <created>1700825178435</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1700825178435</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -376,7 +390,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected bug whereby program falls over if run file has no subarea sheets" />
     <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
     <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
@@ -401,7 +414,8 @@
     <MESSAGE value="further cosmetic changes to some modules to improve readability and conformance to PEP 8 standard." />
     <MESSAGE value="part-way through reordering of crop production model" />
     <MESSAGE value="added comment for (eq.3.2.4)" />
-    <option name="LAST_COMMIT_MESSAGE" value="added comment for (eq.3.2.4)" />
+    <MESSAGE value="first phase of extensive modifications relating to the Crop Model" />
+    <option name="LAST_COMMIT_MESSAGE" value="first phase of extensive modifications relating to the Crop Model" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -417,44 +431,14 @@
           <option name="timeStamp" value="127" />
         </line-breakpoint>
         <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_rothc_fns.py</url>
-          <line>56</line>
-          <option name="timeStamp" value="130" />
-        </line-breakpoint>
-        <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_low_level_fns.py</url>
           <line>146</line>
           <option name="timeStamp" value="132" />
         </line-breakpoint>
         <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_water_model.py</url>
-          <line>100</line>
-          <option name="timeStamp" value="133" />
-        </line-breakpoint>
-        <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>58</line>
-          <option name="timeStamp" value="144" />
-        </line-breakpoint>
-        <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_classes.py</url>
-          <line>135</line>
+          <line>142</line>
           <option name="timeStamp" value="148" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>180</line>
-          <option name="timeStamp" value="171" />
-        </line-breakpoint>
-        <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_fns.py</url>
-          <line>89</line>
-          <option name="timeStamp" value="172" />
-        </line-breakpoint>
-        <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/../BioModels/ora_water_model.py</url>
-          <line>177</line>
-          <option name="timeStamp" value="173" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

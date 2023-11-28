@@ -43,6 +43,7 @@ from ora_gui_misc_fns import edit_rate_inhibit
 MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 
 NPP_MODELS = ('MIAMI', 'Zaks', 'N_lim')
+# NPP_MODELS = ('Zaks')
 
 # takes 83 (1e-09), 77 (1e-08) and 66 (1e-07) iterations for Gondar Single 'Base line mgmt.json'
 # =============================================================================================
@@ -52,7 +53,6 @@ SOC_MIN_DIFF = 0.0000001  # convergence criteria tonne/hectare
 WARN_STR = '*** Warning *** '
 ERROR_STR = '*** Error *** '
 FNAME_RUN = 'FarmWthrMgmt.xlsx'
-
 
 def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
     """
@@ -189,7 +189,7 @@ def run_soil_cn_algorithms(form):
 
         crop_model.add_management_ss(n_change, mngmnt_ss)
 
-        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, mngmnt_ss)  # also calculates miami
+        mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, mngmnt_ss)  # also calculates MIAMI
 
         complete_runs = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
                                                 c_change, n_change, soil_water, crop_model)
