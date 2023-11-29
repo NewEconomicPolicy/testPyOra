@@ -22,8 +22,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="first phase of extensive modifications relating to the Crop Model">
-      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="implementing Zaks crop model, first step">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -375,7 +376,14 @@
       <option name="project" value="LOCAL" />
       <updated>1700825178435</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="implementing Zaks crop model, first step">
+      <created>1701173721768</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1701173721768</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -390,7 +398,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected bugs encountered during demonstration on 7 Dec 2022 itemised by MJM in current_bugs.xlsx" />
     <MESSAGE value="reordered reading of configuration file to come after invocation of OutLog class" />
     <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
@@ -415,7 +422,8 @@
     <MESSAGE value="part-way through reordering of crop production model" />
     <MESSAGE value="added comment for (eq.3.2.4)" />
     <MESSAGE value="first phase of extensive modifications relating to the Crop Model" />
-    <option name="LAST_COMMIT_MESSAGE" value="first phase of extensive modifications relating to the Crop Model" />
+    <MESSAGE value="implementing Zaks crop model, first step" />
+    <option name="LAST_COMMIT_MESSAGE" value="implementing Zaks crop model, first step" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -439,6 +447,11 @@
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_classes.py</url>
           <line>142</line>
           <option name="timeStamp" value="148" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>136</line>
+          <option name="timeStamp" value="153" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

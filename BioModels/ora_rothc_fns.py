@@ -26,7 +26,7 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
     # retrieve water content, stress index and C pool values for initial and first time step
     # ======================================================================================
-    wc_t0, wat_strss_indx, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = continuity.get_rothc_vars()
+    wc_t0, dummy, pool_c_dpm, pool_c_rpm, pool_c_bio, pool_c_hum, pool_c_iom = continuity.get_rothc_vars()
     t_depth, dum, t_pH_h2o, t_salinity, dum, prop_hum, prop_bio, prop_co2 = get_soil_vars(soil_vars)
 
     if len(carbon_change.data['pool_c_dpm']) == 0:
@@ -49,10 +49,10 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
-        wc_t1 = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
+        wc_t1 = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)   # Zaks (2)
 
-        soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wc_t1,
-                                                                                wc_fld_cap, wat_strss_indx)
+        soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet,
+                                                                irrig, wc_pwp, wc_t1, wc_fld_cap) # Zaks (3) and (4)
 
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by Zaks to management
 

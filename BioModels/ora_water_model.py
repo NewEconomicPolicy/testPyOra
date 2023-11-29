@@ -21,6 +21,8 @@ from copy import copy
 
 from thornthwaite import thornthwaite
 
+WAT_STRSS_INDX_DFLT = 1.0
+
 def _theta_values(pcnt_c, pcnt_clay, pcnt_silt, pcnt_sand, halaba_flag=False):
     """
     Volumetric water content at field capacity and permanent wilting point
@@ -165,8 +167,7 @@ class SoilWaterChange(object, ):
 
         return wat_soil, wc_pwp, wc_fld_cap
 
-    def append_wvars(self, imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig,
-                                                wc_pwp, wat_soil, wc_fld_cap, wat_strss_indx):
+    def append_wvars(self, imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap):
         """
         all values are in mm unless otherwise specified
         """
@@ -179,10 +180,10 @@ class SoilWaterChange(object, ):
             if pet_prev > 0.0:
                 self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)     # (eq.3.2.3)
             else:
-                self.data['wat_strss_indx'].append(1.0)
+                self.data['wat_strss_indx'].append(WAT_STRSS_INDX_DFLT)
             wat_soil_prev = self.data['wat_soil'][-1]
         else:
-            self.data['wat_strss_indx'].append(wat_strss_indx)
+            self.data['wat_strss_indx'].append(WAT_STRSS_INDX_DFLT)
             aet = pet
             wat_soil_prev = wat_soil
 
