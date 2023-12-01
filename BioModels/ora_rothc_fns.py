@@ -49,10 +49,9 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
 
         wc_fld_cap, wc_pwp, pcnt_c = get_soil_water_constants(soil_vars, parameters.n_parms, tot_soc)
 
-        wc_t1 = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)   # Zaks (2)
-
+        wc_t1, wc_t1_no_irri = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
         soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet,
-                                                                irrig, wc_pwp, wc_t1, wc_fld_cap) # Zaks (3) and (4)
+                                                    irrig, wc_pwp, wc_t1, wc_t1_no_irri, wc_fld_cap)
 
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by Zaks to management
 

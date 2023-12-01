@@ -318,16 +318,14 @@ class A3SoilWater(object, ):
 
     def __init__(self, pettmp, nitrogen_change, soil_water):
         """
-        A3
+        Columns refer to sheet A3
         """
         self.title = 'Soil water'
-
-        # TODO: rooting depth
-        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's', 'pet': '2f', 'pcnt_c': '2f',
-                           'max_root_dpth': '2f', 'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_soil': '2f',
-                           'aet': '2f', 'irrig': '2f','wc_soil_irri_root_zone': '2f',           # cols L, M, N
-                           'aet_irri': '2f', 'wc_soil_irri': '2f', 'wat_drain': '2f',           # cols O, P, Q
-                           'wat_strss_indx': '2f'}
+        var_format_dict = {'period': 's', 'year':'d', 'month': 'd', 'crop_name': 's',        # cols C, D, E
+                        'pet': '2f', 'pcnt_c': '2f',  'max_root_dpth': '2f',                 # cols F, G, H
+                        'wc_pwp': '2f', 'wc_fld_cap': '2f', 'wat_soil_no_irri': '2f',        # cols I, J, K
+                        'aet_no_irri': '2f', 'irrig': '2f', 'wat_soil': '2f', 'aet': '2f',   # cols L, M, N, 0
+                             'wat_drain': '2f',  'wat_strss_indx': '2f'}         # TODO: cols P, Q
 
         sheet_data, var_name_list, exclusion_list = _setup_sheet_data_dict(pettmp, var_format_dict)
 

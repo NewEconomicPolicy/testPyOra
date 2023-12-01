@@ -54,8 +54,8 @@ CHANGE_VARS = {'carbon': list(['rate_mod', 'pool_c_dpm', 'pool_c_rpm', 'pool_c_b
                                'tot_soc_simul', 'co2_emiss']),
                'nitrogen': list(['soil_n_sply', 'no3_crop_dem', 'no3_nitrif', 'no3_leach', 'no3_denit',
                                  'nh4_crop_dem', 'nh4_volat']),
-               'water': list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet', 'irrig',
-                              'wc_soil_irri_root_zone', 'aet_irri', 'wc_soil_irri', 'wat_drain', 'pcnt_c'])}
+               'water': list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'aet_no_irri', 'irrig',
+                              'wat_soil_no_irri', 'aet', 'wat_soil', 'wat_drain', 'pcnt_c'])}
 
 PREFERRED_LINE_WIDTH = 25000  # 100020 taken from chart_example.py  width in EMUs
 

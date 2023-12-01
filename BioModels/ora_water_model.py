@@ -123,10 +123,15 @@ def get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0):
     """
     if wc_t0 is None:
         wat_soil = (wc_fld_cap + wc_pwp) / 2  # see Initialisation of soil water in 2.2. Soil water
+        wat_soil_no_irri = copy(wat_soil)
     else:
-        wat_soil = max(wc_pwp, min((wc_t0 + precip - pet + irrig), wc_fld_cap))  # (eq.2.2.14)
+        # (eq.2.2.14)
+        # ===========
+        wat_add_soil = wc_t0 + precip - pet
+        wat_soil_no_irri = max(wc_pwp, min(wat_add_soil, wc_fld_cap))  # column K, sheet A3
+        wat_soil = max(wc_pwp, min((wat_add_soil + irrig), wc_fld_cap))  # column O
 
-    return wat_soil
+    return wat_soil, wat_soil_no_irri
 
 class SoilWaterChange(object, ):
     """
@@ -135,16 +140,17 @@ class SoilWaterChange(object, ):
     def __init__(self):
         """
         A3 - Soil water
-        Assumptions:
+        Conventions:
+            a) irrigation is included unless variable is appended with _no_irrig
+            b) water content is measured at root zone
         """
         self.title = 'SoilWaterChange'
 
         self.irrig = 0  # D1. Water use
 
         self.data = {}
-        var_name_list = list(['wc_pwp', 'wat_soil', 'wc_fld_cap', 'wat_strss_indx', 'pet', 'aet', 'aet_irri', 'irrig',
-                    'wc_soil_irri_root_zone', 'wc_soil_irri', 'wat_drain', 'wat_hydro_eff',
-                                                                            'pcnt_c', 'max_root_dpth'])
+        var_name_list = list(['wat_soil', 'wat_soil_no_irri', 'wc_pwp', 'wc_fld_cap', 'wat_strss_indx', 'wat_drain',
+                                    'wat_hydro_eff', 'pet', 'aet', 'aet_no_irri', 'irrig', 'pcnt_c', 'max_root_dpth'])
         for var_name in var_name_list:
             self.data[var_name] = []
 
@@ -160,23 +166,27 @@ class SoilWaterChange(object, ):
         aet = self.data['aet'][tstep]
 
         irrig = self.data['irrig'][tstep]
-        wc_soil_irri_root_zone = self.data['wc_soil_irri_root_zone'][tstep]
-        aet_irri = self.data['aet_irri'][tstep]
-        wc_soil_irri = self.data['wc_soil_irri'][tstep]
+        aet_no_irri = self.data['aet_no_irri'][tstep]
         wat_drain = self.data['wat_drain'][tstep]
 
         return wat_soil, wc_pwp, wc_fld_cap
 
-    def append_wvars(self, imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp, wat_soil, wc_fld_cap):
+    def append_wvars(self, imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet, irrig, wc_pwp,
+                                                                            wat_soil, wat_soil_no_irri, wc_fld_cap):
         """
         all values are in mm unless otherwise specified
+        columns refer to sheet A3
+
+        # NB required: num months growing, col I in sheet D2. Water use for crops
         """
         dummy, days_in_mnth = monthrange(2011, imnth)  # use 2011 as this is not a leap year
 
-        # TODO: check
-        # ===========
         if len(self.data['wat_drain']) > 0:
-            aet = min(pet_prev, 5 * days_in_mnth, (wat_soil - wc_pwp))  # (eq.3.2.4) col L - AET to rooting depth before irrigation
+
+            # AET to rooting depth without and with irrigation using (eq.3.2.4) cols L and O sheet A3
+            # =======================================================================================
+            aet_no_irri = min(pet_prev, 5 * days_in_mnth, (wat_soil_no_irri - wc_pwp))
+            aet = min(pet_prev, 5 * days_in_mnth, (wat_soil - wc_pwp))
             if pet_prev > 0.0:
                 self.data['wat_strss_indx'].append(self.data['aet'][-1] / pet_prev)     # (eq.3.2.3)
             else:
@@ -184,27 +194,24 @@ class SoilWaterChange(object, ):
             wat_soil_prev = self.data['wat_soil'][-1]
         else:
             self.data['wat_strss_indx'].append(WAT_STRSS_INDX_DFLT)
-            aet = pet
+            aet_no_irri = min(pet, 5 * days_in_mnth, (wat_soil_no_irri - wc_pwp))
+            aet = min(pet, 5 * days_in_mnth, (wat_soil - wc_pwp))
             wat_soil_prev = wat_soil
 
         self.data['pet'].append(pet)
-        self.data['aet'].append(aet)  # TODO: revisit
-        self.data['pcnt_c'].append(pcnt_c)  # col Q - Drainage from soil  depth
+        self.data['aet'].append(aet)    # col O - AET to rooting depth after irrigation (mm)
+        self.data['aet_no_irri'].append(aet_no_irri)
+
+        self.data['pcnt_c'].append(pcnt_c)
+        self.data['max_root_dpth'].append(max_root_dpth)  # col H
         self.data['wc_pwp'].append(wc_pwp)  # col I - Lower limit for water extraction
         self.data['wc_fld_cap'].append(wc_fld_cap)  # col J - Water content of root zone at field capacity
-        self.data['wat_soil'].append(wat_soil)  # col K - Soil water content of root zone before irrigation
 
-        # required: num months growing, col I in D2. Water use for crops
+        self.data['wat_soil'].append(wat_soil)  # col P - Soil water content of root zone after irrigation
+        self.data['wat_soil_no_irri'].append(wat_soil_no_irri)  # col K - Soil water content before irrigation
+
         self.data['irrig'].append(irrig)  # col M - irrigation
 
-        wc_soil_irri = wat_soil
-        self.data['wc_soil_irri_root_zone'].append(wc_soil_irri)  # col N - Soil water content of root zone after irrigation (mm)
-
-        aet_irri = copy(aet)
-        self.data['aet_irri'].append(aet_irri)  # col O - AET to rooting depth after irrigation (mm)
-        self.data['wc_soil_irri'].append(wc_soil_irri)  # col P - Soil water content to soil depth after irrigation (mm)
-
-        self.data['max_root_dpth'].append(max_root_dpth)  # col H
         wat_hydro_eff = irrig + precip - pet   # effective rainfall
         wat_drain = max(wat_hydro_eff - (wc_fld_cap - wat_soil_prev), 0)  # (eq.2.4.7)
         self.data['wat_drain'].append(wat_drain)  # col Q - Drainage from soil depth (mm)
