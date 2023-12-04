@@ -1,11 +1,12 @@
-#-------------------------------------------------------------------------------
+"""
+# -------------------------------------------------------------------------------
 # Name:        merge_data.py
 # Purpose:     Functions to create TODO
 # Author:      Dave Mcbey
 # Created:     22/03/2020
 # Description:
-#-------------------------------------------------------------------------------
-#!/usr/bin/env python
+# -------------------------------------------------------------------------------
+"""
 
 __prog__ = 'merge_data.py'
 __version__ = '0.0.0'
@@ -15,7 +16,6 @@ from pandas import concat, DataFrame
 
 
 def merge_harvest_land_use(orator_obj):
-
     '''
     Function to create dictionary of dictionaries; each dictionary of dictionaries contains annual crop yields
     using N limitation, Zaks, and Miami model calculations.
@@ -42,46 +42,46 @@ def merge_harvest_land_use(orator_obj):
         # Get each years crop production data into a list of dictionaries for each calc method
         # Use only forward run years
         yld_n_lim = crop_model.data['yld_ann_n_lim']
-#        yld_n_lim = yld_n_lim[ss_years:]
+        #        yld_n_lim = yld_n_lim[ss_years:]
         yld_n_lim_dic = []
         for year in fr_crops_per_year:
-            crop_yield_dic = {crop : 0 for crop in year}
+            crop_yield_dic = {crop: 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
                 # trap to avoid IndexError
                 if len(yld_n_lim) == 0:
                     break
-                crop_yield_dic_values = {crop : yld_n_lim[0]}
+                crop_yield_dic_values = {crop: yld_n_lim[0]}
                 del yld_n_lim[0]
                 temp_dic.update(crop_yield_dic_values)
             yld_n_lim_dic.append(temp_dic)
 
         yld_zaks = crop_model.data['yld_ann_zaks']
-#        yld_zaks = yld_zaks[ss_years:]
+        #        yld_zaks = yld_zaks[ss_years:]
         yld_zaks_dic = []
         for year in fr_crops_per_year:
-            crop_yield_dic = {crop : 0 for crop in year}
+            crop_yield_dic = {crop: 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
                 # trap to avoid IndexError
                 if len(yld_zaks) == 0:
                     break
-                crop_yield_dic_values = {crop : yld_zaks[0]}
+                crop_yield_dic_values = {crop: yld_zaks[0]}
                 del yld_zaks[0]
                 temp_dic.update(crop_yield_dic_values)
             yld_zaks_dic.append(temp_dic)
 
         yld_miami = crop_model.data['yld_ann_miami']
-#        yld_miami = yld_miami[ss_years:]
+        #        yld_miami = yld_miami[ss_years:]
         yld_miami_dic = []
         for year in fr_crops_per_year:
-            crop_yield_dic = {crop : 0 for crop in year}
+            crop_yield_dic = {crop: 0 for crop in year}
             temp_dic = {}
             for crop in crop_yield_dic:
                 # trap to avoid IndexError
                 if len(yld_miami) == 0:
                     break
-                crop_yield_dic_values = {crop : yld_miami[0]}
+                crop_yield_dic_values = {crop: yld_miami[0]}
                 del yld_miami[0]
                 temp_dic.update(crop_yield_dic_values)
             yld_miami_dic.append(temp_dic)
@@ -92,8 +92,8 @@ def merge_harvest_land_use(orator_obj):
             harv_yld_dic = {}
             for key, value in year.items():
                 if key in typ_prod_dic:
-                    harv_chan = (value / typ_prod_dic[key] )
-                    temp_dic = {key : harv_chan}
+                    harv_chan = (value / typ_prod_dic[key])
+                    temp_dic = {key: harv_chan}
                     harv_yld_dic.update(temp_dic)
             n_lim_harv_change.append(harv_yld_dic)
 
@@ -103,7 +103,7 @@ def merge_harvest_land_use(orator_obj):
             for key, value in year.items():
                 if key in typ_prod_dic:
                     harv_chan = (value / typ_prod_dic[key])
-                    temp_dic = {key : harv_chan}
+                    temp_dic = {key: harv_chan}
                     harv_yld_dic.update(temp_dic)
             zaks_harv_change.append(harv_yld_dic)
 
@@ -113,17 +113,16 @@ def merge_harvest_land_use(orator_obj):
             for key, value in year.items():
                 if key in typ_prod_dic:
                     harv_chan = (value / typ_prod_dic[key])
-                    temp_dic = {key : harv_chan}
+                    temp_dic = {key: harv_chan}
                     harv_yld_dic.update(temp_dic)
             miami_harv_change.append(harv_yld_dic)
 
-        harv_change_dic_of_dics = { 'n_lim' : n_lim_harv_change,
-                                    'zaks' : zaks_harv_change,
-                                    'miami' : miami_harv_change,
-        }
-        subarea_dic = {subarea : harv_change_dic_of_dics}
+        harv_change_dic_of_dics = {'n_lim': n_lim_harv_change,
+                                   'zaks': zaks_harv_change,
+                                   'miami': miami_harv_change,
+                                   }
+        subarea_dic = {subarea: harv_change_dic_of_dics}
         subarea_crop_prod_change_dic.update(subarea_dic)
-
 
     return subarea_crop_prod_change_dic
 
