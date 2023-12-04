@@ -30,7 +30,7 @@ from calendar import month_abbr
 
 from livestock_output_data import check_livestock_run_data
 from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle
-from ora_cn_fns import get_soil_vars, npp_zaks_grow_season
+from ora_cn_fns import get_soil_vars, npp_zaks_grow_season, add_npp_zaks_by_month
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropProdModel
 from ora_water_model import SoilWaterChange
 from ora_nitrogen_model import soil_nitrogen
@@ -99,6 +99,11 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), round(tot_soc_meas, 3), iteration + 1))
 
+    # add npp by Zaks to management
+    # =============================
+    for tstep in range(management.ntsteps):
+        add_npp_zaks_by_month(management, pettmp, soil_water, tstep)
+
     QApplication.processEvents()  # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water, converge_flag
 
@@ -123,7 +128,7 @@ def _cn_forward_run(parameters, weather, mngmnt_fwd, soil_vars, c_change_ss, n_c
 
         # run RothC
         # =========
-        run_rothc(parameters, pettmp, mngmnt_fwd, c_change, soil_vars, soil_water, continuity, npp_model)
+        run_rothc(parameters, pettmp, mngmnt_fwd, c_change, soil_vars, soil_water, continuity, crop_model, npp_model)
         continuity.adjust_soil_water(soil_water)
 
         continuity.adjust_soil_n_change(n_change)

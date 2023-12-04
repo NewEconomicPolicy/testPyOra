@@ -22,12 +22,12 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="implementing Zaks crop model, a further, minor step">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="soil water module revision">
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_classes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_fns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_cn_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_rothc_fns.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BioModels/ora_water_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_water_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_classes_excel_write.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_classes_excel_write.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ora_excel_write_cn_water.py" beforeDir="false" afterPath="$PROJECT_DIR$/ora_excel_write_cn_water.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -392,7 +392,14 @@
       <option name="project" value="LOCAL" />
       <updated>1701266795869</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="soil water module revision">
+      <created>1701425953068</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1701425953068</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -407,7 +414,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Trying a fix an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action." />
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during the &quot;Save farm&quot; action. Tidied code." />
     <MESSAGE value="Fixed an &quot;Unhandled Python exception&quot; during generation of Excel results files - fixed by use of write.close() instead of write.save() in ora_excel_write.py and ora_excel_write_cn_water.py modules. &#10;Tidied code." />
     <MESSAGE value="Minor code Tidy" />
@@ -432,7 +438,8 @@
     <MESSAGE value="first phase of extensive modifications relating to the Crop Model" />
     <MESSAGE value="implementing Zaks crop model, first step" />
     <MESSAGE value="implementing Zaks crop model, a further, minor step" />
-    <option name="LAST_COMMIT_MESSAGE" value="implementing Zaks crop model, a further, minor step" />
+    <MESSAGE value="soil water module revision" />
+    <option name="LAST_COMMIT_MESSAGE" value="soil water module revision" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -454,13 +461,23 @@
         </line-breakpoint>
         <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_classes.py</url>
-          <line>142</line>
+          <line>136</line>
           <option name="timeStamp" value="148" />
         </line-breakpoint>
         <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
-          <line>136</line>
+          <line>141</line>
           <option name="timeStamp" value="153" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_cn_model.py</url>
+          <line>123</line>
+          <option name="timeStamp" value="157" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../BioModels/ora_rothc_fns.py</url>
+          <line>56</line>
+          <option name="timeStamp" value="159" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

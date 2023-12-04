@@ -38,11 +38,11 @@ def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
         npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
         npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)
     else:
-        npp_month = 0
+        npp_month = 0.0
 
     management.npp_zaks[tstep] = npp_month
 
-    return
+    return npp_month
 
 def get_crop_vars(management, crop_vars, tstep):
     """

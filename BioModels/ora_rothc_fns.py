@@ -19,7 +19,8 @@ from ora_cn_fns import (get_rate_temp, inert_organic_carbon, carbon_lost_from_po
 
 K_DPM = 10/12; K_RPM = 0.3/12; K_BIO = 0.66/12; K_HUM = 0.02/12  # rate constants for decomposition of the pool per month
 
-def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity, npp_model=None):
+def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_water, continuity,
+                                                                                crop_model = None, npp_model=None):
     """
     C
     """
@@ -52,8 +53,15 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
         wc_t1, wc_t1_no_irri = get_soil_water(precip, pet, irrig, wc_fld_cap, wc_pwp, wc_t0)
         soil_water.append_wvars(imnth, max_root_dpth, pcnt_c, precip, pet_prev, pet,
                                                     irrig, wc_pwp, wc_t1, wc_t1_no_irri, wc_fld_cap)
+        if npp_model == 'Zaks':
+            npp_atyp = add_npp_zaks_by_month(management, pettmp, soil_water, tstep) # add npp by Zaks to management
+            npp_typ = crop_model.npp_zaks[tstep]
+            if npp_typ == 0:
+                npp_rat = 1.0
+            else:
+                npp_rat =  npp_atyp/npp_typ
 
-        add_npp_zaks_by_month(management, pettmp, soil_water, tstep)       # add npp by Zaks to management
+            c_pi_mnth = c_pi_mnth * npp_rat
 
         # plant inputs and losses (t ha-1) passed to the DPM pool
         # =======================================================

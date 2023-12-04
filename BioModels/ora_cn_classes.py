@@ -106,12 +106,6 @@ class CropProdModel(object):
         if len(self.data['cml_n_uptk']) < ngrow_seasons:
             self.record_values(self, crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ)
 
-        # TODO patch
-        # ==========
-        self.data['yld_ann_miami'] = copy(self.data['yld_ann_typ'])
-        self.data['yld_ann_zaks'] = copy(self.data['yld_ann_typ'])
-        self.data['yld_ann_n_lim'] = copy(self.data['yld_ann_typ'])
-
         return
 
     def record_values(self, crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ):
