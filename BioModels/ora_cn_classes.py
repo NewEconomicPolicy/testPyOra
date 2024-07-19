@@ -55,7 +55,7 @@ class CropProdModel(object):
         """
         steady state only
         """
-        npp_zaks_grow_season(mngmnt)   # adds npp for each growing season
+        npp_zaks_grow_season(mngmnt)   # adds monthly npps for each growing season
 
         self.nyears_ss = mngmnt.nyears
         self.data['npp_zaks'] = mngmnt.npp_zaks

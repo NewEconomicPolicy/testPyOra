@@ -99,12 +99,13 @@ def _cn_steady_state(form, parameters, weather, management, soil_vars, subarea):
         print('Simulated SOC: {}\tMeasured SOC: {}\t *** failed to converge *** after iterations: {}'
               .format(round(tot_soc_simul, 3), round(tot_soc_meas, 3), iteration + 1))
 
+    QApplication.processEvents()  # allow event loop to update unprocessed events
+
     # add npp by Zaks to management
     # =============================
     for tstep in range(management.ntsteps):
         add_npp_zaks_by_month(management, pettmp, soil_water, tstep)
 
-    QApplication.processEvents()  # allow event loop to update unprocessed events
     return carbon_change, nitrogen_change, soil_water, converge_flag
 
 def _cn_forward_run(parameters, weather, mngmnt_fwd, soil_vars, c_change_ss, n_change_ss, soil_water_ss, crop_model):
@@ -195,6 +196,7 @@ def run_soil_cn_algorithms(form):
         crop_model.add_management_ss(n_change, mngmnt_ss)
 
         mngmnt_fwd = MngmntSubarea(ora_subareas[sba].crop_mngmnt_fwd, ora_weather, mngmnt_ss)  # also calculates MIAMI
+        crop_model.nyears_fwd = mngmnt_fwd.nyears
 
         complete_runs = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
                                                 c_change, n_change, soil_water, crop_model)

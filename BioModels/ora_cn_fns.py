@@ -33,7 +33,7 @@ def add_npp_zaks_by_month(management, pettmp, soil_water, tstep):
     calculated monthly using the water stress index for the previous month.
     """
     if management.pi_props[tstep] > 0.0:
-        wat_strss_indx = soil_water.data['wat_strss_indx'][-1]
+        wat_strss_indx = soil_water.data['wat_strss_indx'][tstep]
         tgdd = pettmp['grow_dds'][tstep]
         npp = (0.0396 / (1 + exp(6.33 - 1.5 * (tgdd / GDDS_SCLE_FACTR)))) * (39.58 * wat_strss_indx - 14.52)
         npp_month = IWS_SCLE_FACTR * max(0, npp)  # (eq.3.2.1)

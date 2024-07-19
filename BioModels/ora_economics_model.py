@@ -205,11 +205,12 @@ def test_economics_algorithms(form):
         hh_purchases_sales.append(hh_ps_instance)
 
     # ----------------------------------------
-    # Create instances of HouseholdMembers Class using Dataframe created from excel sheet. Store in list.
+    # Create instances of HouseholdMembers Class using Dataframe created from Excel sheet. Store in list.
     hh_members = []
     labour_df = labour_df.iloc[: , 1:]
-    for column_name, column_data in labour_df.iteritems():
-        hh_lab_instance = HouseholdMembers(column_name, column_data)
+    labour_df = labour_df.reset_index()  # make sure indexes pair with number of rows
+    for column_name in labour_df:
+        hh_lab_instance = HouseholdMembers(column_name, labour_df[column_name])
         if hh_lab_instance.number == 0:
             pass
         else:
@@ -221,10 +222,10 @@ def test_economics_algorithms(form):
     # If no > prompt user
     if form.crop_run:
         crop_data = form.crop_production
-
     else:
         crop_data = {}
         print('No crop data! Please run C and N model first')
+        return
 
     #----------------------------------------
     # Check if livestock model has been run
@@ -485,7 +486,7 @@ def test_economics_algorithms(form):
         fr_years = crops.nyears_fwd
         crops_fr = crop_list[-fr_years:]
 
-        # Use Full Household income for each year for each calc method to calculate yearly dietary diversity
+    # Use household income for each year for each calc method to calculate yearly dietary diversity
     farm_diet_div = {}
     for calc_method, calcs in all_subareas_full_hh_dic.items():
         diet_div = []
@@ -496,8 +497,6 @@ def test_economics_algorithms(form):
                       dd_alpha_7
             diet_div.append(year_dd)
         farm_diet_div.update({calc_method: diet_div})
-
-
 
 #    data = {}
 #    for calc_method, calcs in all_subareas_full_hh_dic.items():

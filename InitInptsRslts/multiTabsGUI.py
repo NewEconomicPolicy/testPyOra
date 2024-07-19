@@ -72,6 +72,9 @@ class AllTabs(QTabWidget):
         self.anml_prodn = anml_prodn
         self.all_runs_output = {}
         self.all_runs_crop_model = {}
+        self.crop_run = False
+        self.livestock_run = False
+        self.livestock_list = False
 
         self.w_tab0 = QWidget()
         self.w_tab1 = QWidget()
@@ -87,12 +90,12 @@ class AllTabs(QTabWidget):
         self.addTab(self.w_tab4, "Tab 4")
         self.addTab(self.w_tab5, "Tab 5")
 
-        self.tab0UI()
-        self.tab1UI()
-        self.tab2UI()
-        self.tab3UI()
-        self.tab4UI()
-        self.tab5UI()
+        self.tab0UI()   # Farm tab
+        self.tab1UI()   # Crop Management
+        self.tab2UI()   # Livestock
+        self.tab3UI()   # Run Model
+        self.tab4UI()   # Sensitivity Analysis
+        self.tab5UI()   # Catchment
 
     # ================================ end of AllTabs =========================
 
