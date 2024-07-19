@@ -15,7 +15,6 @@
 # after 100 years and the plant inputs, CPI, are adjusted according to the ratio of measured and simulated total soil C
 #
 # -------------------------------------------------------------------------------
-
 __prog__ = 'ora_cn_model.py'
 __version__ = '0.0.0'
 

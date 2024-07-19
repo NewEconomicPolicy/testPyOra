@@ -266,7 +266,13 @@ class AllTabs(QTabWidget):
 
         """
         ngroups = check_livestock_run_data(self, ntab = 0)
+        if ngroups is None:
+            return
+
         print('Livestock animal types to process: {}'.format(ngroups))
+        QApplication.processEvents()
+
+        return
 
     def viewEconFile(self):
         """

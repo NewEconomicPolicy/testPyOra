@@ -1009,15 +1009,21 @@ class ReadLivestockSheet(object, ):
         """
 
         """
+        lvstck_sht_name = RUN_SHT_NAMES['lvstck']
+
         mgmt_dir = w_run_dir3.text()
         run_xls_fn = join(mgmt_dir, FNAME_RUN)
 
         wb_obj = load_workbook(run_xls_fn, data_only=True)
+        if lvstck_sht_name not in wb_obj.sheetnames:
+            print(ERR_STR + 'Worksheet ' + lvstck_sht_name + ' must be present in run file ' + run_xls_fn)
+            wb_obj.close()
+            return
 
         print('Reading livestock sheet ')
         anml_abbrevs = ANML_ABBREVS
 
-        lvstck_sht = wb_obj[RUN_SHT_NAMES['lvstck']]
+        lvstck_sht = wb_obj[lvstck_sht_name]
         max_row = lvstck_sht.max_row
         max_col = lvstck_sht.max_column
 

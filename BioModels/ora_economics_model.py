@@ -162,9 +162,9 @@ def test_economics_algorithms(form):
     """
     Algorithm to model household economics
     """
-    #----------------------------------------------------------
-    # Import data on purchases and sales, and labour, from excel spreadsheet
-    # Save as a DataFrame
+
+    # Import data on purchases and sales, and labour, from Excel spreadsheet and save as a DataFrame
+    # ==============================================================================================
     mgmt_dir = form.w_run_dir3.text()
     econ_xls_fname = normpath(join(mgmt_dir, FNAME_ECONOMICS))
     if not isfile(econ_xls_fname):
@@ -177,11 +177,11 @@ def test_economics_algorithms(form):
             print('Copied economics Excel file ' + FNAME_ECONOMICS + ' from templates')
 
     purch_sales_df = read_econ_purch_sales_sheet(econ_xls_fname, 'Purchases & Sales', 3)
-    purch_sales_df = purch_sales_df.drop(columns=['Units.2','Units.3', 'Units.4', 'Units.5', 'Units.6', 'Units.7',
-                                                  'Unnamed: 18'])
-    purch_sales_df.columns= ['category', 'name', 'dryseas_pur_pr', 'units', 'dryseas_pur_quant', 'measure',
-                             'wetseas_pur_pr', 'wetseas_pur_quant', 'dryseas_sale_pr', 'dryseas_sale_quant',
-                             'wetseas_sale_pr', 'wetseas_sale_quant']
+    purch_sales_df = purch_sales_df.drop(columns=['Units.2', 'Units.3', 'Units.4', 'Units.5', 'Units.6', 'Units.7'])
+    purch_sales_df.columns = ('category', 'name', 'dryseas_pur_pr', 'units', 'dryseas_pur_quant', 'measure',
+                              'wetseas_pur_pr', 'wetseas_pur_quant', 'dryseas_sale_pr', 'dryseas_sale_quant',
+                              'wetseas_sale_pr',
+                              'wetseas_sale_quant', 'notes')
     # Calculate value of all sales
     purch_sales_df['dryseas_sales_value'] = purch_sales_df['dryseas_sale_pr'] * purch_sales_df['dryseas_sale_quant']
     purch_sales_df['wetseas_sales_value'] = purch_sales_df['wetseas_sale_pr'] * purch_sales_df['wetseas_sale_quant']

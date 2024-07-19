@@ -1,19 +1,17 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Name:        livestock_output_data.py
 # Purpose:     Functions to create TODO
 # Author:      Dave Mcbey
 # Created:     22/03/2020
 # Description:
-#-------------------------------------------------------------------------------
-#!/usr/bin/env python
-
+# -------------------------------------------------------------------------------
 __prog__ = 'livestock_output_data.py'
 __version__ = '1.0.1'
 __author__ = 's02dm4'
 
-
-from os.path import isfile, isdir, normpath, join, exists, lexists
+from os.path import isfile, normpath
 import numpy as np
+from PyQt5.QtWidgets import QApplication
 from pathlib import Path
 from ora_excel_read import ReadLivestockSheet
 from ora_excel_read import ReadAnmlProdn
@@ -23,17 +21,17 @@ from livestock_class import Livestock
 from ora_cn_classes import LivestockModel
 from ora_gui_misc_fns import simulation_yrs_validate
 
-
-def check_livestock_run_data(form, ntab = 3):
-    '''
+def check_livestock_run_data(form, ntab=3):
+    """
     Test livestock data
-    '''
+    """
 
     # read inputs and create folder to store graphs in
     # =================================================
     xls_inp_fname = normpath(form.settings['params_xls'])
     if not isfile(xls_inp_fname):
         print('Excel input file ' + xls_inp_fname + 'must exist')
+        QApplication.processEvents()
         return
 
     # read sheets from input Excel workbook
@@ -53,17 +51,24 @@ def check_livestock_run_data(form, ntab = 3):
         all_lvstck = ReadLivestockSheet(form.w_run_dir3, anml_prodn_obj)
     else:
         all_lvstck = ReadLivestockSheet(form.w_run_dir0, anml_prodn_obj)
+
+    try:
+        getattr(all_lvstck, 'subareas')
+    except AttributeError as err:
+        print(str(err))
+        QApplication.processEvents()
+        return None
+
     _get_production_and_n_excreted(anml_prodn_obj, all_lvstck)    # updates
 
     return len(all_lvstck.subareas['all']['lvstck_grp'])
 
 def _get_pigs_or_poultry_production(anml_type):
-    '''
+    """
     pigs are based on goats
     poultry are guessed
     NOT USED NOW
-    '''
-
+    """
     if anml_type == 'Pigs':
         manure = 180.0
         n_excrete = 15.0
@@ -78,13 +83,12 @@ def _get_pigs_or_poultry_production(anml_type):
     return manure, n_excrete, meat, milk
 
 def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
+    """
 
-    '''
-
-    '''
+    """
     anml_prodn_df = anml_prodn_obj.anml_prodn
 
-    for subarea in all_lvstck.subareas:
+    for subarea in 1:
         lvstck_defn = all_lvstck.subareas[subarea]
         region = lvstck_defn['region']
         system = lvstck_defn['system']
@@ -102,7 +106,7 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
 
             # capture instances where production system data isn't available, and default to 'ANY' in Herrero table
 
-            if  np.isnan(manure) == True:
+            if np.isnan(manure):
                 print(f'No {anml_type} data available for {system} production system for {region}. '
                       f'"ANY" data used instead.')
                 res = anml_prodn_df[(anml_prodn_df.Region == region) &
@@ -130,9 +134,9 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
     return
 
 def calc_livestock_data(form):
-    '''
+    """
     Calculate livestock data
-    '''
+    """
     # Change flag to show livestock module has been run
     # =================================================
     form.livestock_run = True
@@ -330,7 +334,6 @@ def calc_livestock_data(form):
     form.w_disp_lvstck.setEnabled(True)
 
     return
-
 
     # Create graphs and CSV for each data
     # THIS IS VERY VERY SLOW RIGHT NOW - NEEDS REDONE

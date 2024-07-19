@@ -17,8 +17,8 @@ __version__ = '0.0.0'
 #
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, \
-                                                                                        QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem,
+                                                                                        QPushButton, QLineEdit, QLabel)
 from PyQt5.QtChart import QChart, QValueAxis, QChartView, QLineSeries, QScatterSeries
 from random import random
 from math import floor, ceil
