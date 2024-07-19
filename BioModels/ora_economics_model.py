@@ -32,11 +32,9 @@ WARN_STR = '*** Warning *** '
 # Create class to store instances of family members, in order to work out labour
 
 class HouseholdMembers:
-
-    '''
+    """
     Class to store information on household members and their labour contribution
-    '''
-
+    """
     def __init__(self, name, labour_data):
 
         labour_data = labour_data
@@ -86,12 +84,10 @@ class HouseholdMembers:
         # Calculation for total labour value
         self.value_of_labour_year = self.awake_year * self.wage_hour
 
-
-
     def agricultural_labour_calc(self):
-        '''
+        """
         Function to calculate time spent on agricultural labour, including dung collection
-        '''
+        """
 
         # In excel sheet this says 'typical weather' - what does this mean? drought years need to be considered?
         livestock_time = self.daily_time_spent_tending_animals + self.daily_time_dung_management
@@ -106,26 +102,26 @@ class HouseholdMembers:
 
         self.harvest_crops_year = self.harvest_total_days_harvesting * self.harvest_average_day_hrs_spent_harvesting
         # Total hours spent annually
-        self.total_agriculture_labour_yearly = self.livestock_time_annual + self.sowing_time_year + \
-                                               self.tending_crops_time
+        self.total_agriculture_labour_yearly = (self.livestock_time_annual + self.sowing_time_year +
+                                               self.tending_crops_time)
         self.total_ag_labour_year_value = self.total_agriculture_labour_yearly * self.wage_hour
 
         return self.total_ag_labour_year_value
         
     def domestic_labour_calc(self):
-        '''
+        """
         Function to calculate time spent on household labour (collecting water, firewood, cooking)
-        '''
-        wood_collection_weekly = self.number_weekly_wood_trips * \
-                                 (self.per_wood_trip_time_spent_travelling + self.per_wood_trip_time_spent_collecting)
+        """
+        wood_collection_weekly = (self.number_weekly_wood_trips *
+                                 (self.per_wood_trip_time_spent_travelling + self.per_wood_trip_time_spent_collecting))
         self.year_wood_collect = wood_collection_weekly * 52
-        water_collection_weekly_normal = self.weekly_trips_water_collect_non_irrigation * \
+        water_collection_weekly_normal = (self.weekly_trips_water_collect_non_irrigation *
                                          (self.normal_year_time_travel_water_per_trip +
-                                          self.normal_year_time_queue_water_per_trip)
+                                          self.normal_year_time_queue_water_per_trip))
         self.water_collection_yearly_normal = water_collection_weekly_normal * 52
-        water_collection_weekly_drought = self.weekly_trips_water_collect_non_irrigation * \
+        water_collection_weekly_drought = (self.weekly_trips_water_collect_non_irrigation *
                                           (self.drought_year_time_travel_water_per_trip +
-                                           self.drought_year_time_queue_water_per_trip)
+                                           self.drought_year_time_queue_water_per_trip))
         self.water_collection_yearly_drought = water_collection_weekly_drought * 52
 
         # Currently doing this calc for 365 days, but how to do for only grow season?
@@ -140,12 +136,11 @@ class HouseholdMembers:
 
         return self.total_dom_labour_year_value
 
-
 class HouseholdPurchasesSales:
 
-    '''
+    """
     Class to store information on household/farm purchases and sales
-    '''
+    """
 
     def __init__(self, purchase_sales_data):
 
@@ -163,14 +158,10 @@ class HouseholdPurchasesSales:
         self.wetseas_sale_price = purchase_sales_data[10]
         self.wetseas_sale_quant = purchase_sales_data[11]
 
-
-
 def test_economics_algorithms(form):
-
-    '''
+    """
     Algorithm to model household economics
-    '''
-
+    """
     #----------------------------------------------------------
     # Import data on purchases and sales, and labour, from excel spreadsheet
     # Save as a DataFrame
@@ -246,7 +237,6 @@ def test_economics_algorithms(form):
                 # Update dictionary with calculation method total production
                 calc_method_manure_dic.update({calc_method: total_manure_fr})
             management_type_manure_dic.update({management_type:calc_method_manure_dic})
-
     else:
         print('No manure production data! Please run livestock module')
 
@@ -408,9 +398,9 @@ def test_economics_algorithms(form):
         fr_pcc = []
         for year in calcs:
                 # year is FHI for each year
-            year_pcc = pcc_alpha_0 + (pcc_alpha_1 * year) + (pcc_alpha_2 * land) + (pcc_alpha_3 * land_squared) + \
-                        (pcc_alpha_4 * tlu) + (pcc_alpha_5 * tlu_squared) + (pcc_alpha_6 * household_size_log) +\
-                       pcc_alpha_7
+            year_pcc = (pcc_alpha_0 + (pcc_alpha_1 * year) + (pcc_alpha_2 * land) + (pcc_alpha_3 * land_squared) +
+                        (pcc_alpha_4 * tlu) + (pcc_alpha_5 * tlu_squared) + (pcc_alpha_6 * household_size_log) +
+                       pcc_alpha_7)
             fr_pcc.append(year_pcc)
         farm_pcc.update({calc_method : fr_pcc})
 #    farm_pcc = farm_pcc
