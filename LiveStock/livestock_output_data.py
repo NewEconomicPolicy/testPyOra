@@ -88,7 +88,7 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
     """
     anml_prodn_df = anml_prodn_obj.anml_prodn
 
-    for subarea in 1:
+    for subarea in all_lvstck.subareas:
         lvstck_defn = all_lvstck.subareas[subarea]
         region = lvstck_defn['region']
         system = lvstck_defn['system']
