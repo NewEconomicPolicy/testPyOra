@@ -722,7 +722,7 @@ class AllTabs(QTabWidget):
         # write row descriptions
         # ======================
         for irow, row_dscr in enumerate(lvstck_row_dscrs):
-            grid.addWidget(QLabel(row_dscr), irow, 0, alignment=Qt.AlignRight)
+            grid.addWidget(QLabel(row_dscr), irow + 1, 0, alignment=Qt.AlignRight)
         irow += 1
         grid.addWidget(QLabel(), irow, 0)  # spacer
 

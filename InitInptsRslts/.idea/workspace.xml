@@ -22,10 +22,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="initial debug of ora_economics_model">
+    <list default="true" id="2326616a-9131-4c5e-8150-1078dfbdebae" name="Default Changelist" comment="improved readability and reliability of economics and livestock modules">
       <change beforePath="$PROJECT_DIR$/../BioModels/ora_economics_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BioModels/ora_economics_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Constructor/livestockGui.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../LiveStock/livestock_output_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/../LiveStock/livestock_output_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiTabsGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/multiTabsGUI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -418,7 +419,21 @@
       <option name="project" value="LOCAL" />
       <updated>1721383822483</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="improved readability and reliability of economics and livestock modules">
+      <created>1721542698601</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1721542698601</updated>
+    </task>
+    <task id="LOCAL-00049" summary="improved readability and reliability of economics and livestock modules">
+      <created>1721542836851</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1721542836851</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -433,7 +448,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Minor code Tidy" />
     <MESSAGE value="revising the &quot;all subareas&quot; component of the Excel results outputs. Further work required." />
     <MESSAGE value="Resolved bug when program failed when writing Excel output files in the  _generate_comparison_charts method of ora_excel_write_cn_water.py module." />
     <MESSAGE value="Resolved bug due to division by zero when calculating water stress index in ora_water_model.py module. Only manifest when AET is zero due to low temperature." />
@@ -458,7 +472,8 @@
     <MESSAGE value="soil water module revision" />
     <MESSAGE value="zaks crop model development" />
     <MESSAGE value="initial debug of ora_economics_model" />
-    <option name="LAST_COMMIT_MESSAGE" value="initial debug of ora_economics_model" />
+    <MESSAGE value="improved readability and reliability of economics and livestock modules" />
+    <option name="LAST_COMMIT_MESSAGE" value="improved readability and reliability of economics and livestock modules" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

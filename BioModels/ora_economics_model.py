@@ -170,8 +170,6 @@ def test_economics_algorithms(form):
         print('No crop data! Please run C and N model first')
         return
 
-
-
     crop_data = form.crop_production    # import crop production data for forward run
 
     # Import data on purchases and sales, and labour, from Excel spreadsheet and save as a DataFrame
