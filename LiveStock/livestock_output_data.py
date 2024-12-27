@@ -355,8 +355,8 @@ def calc_livestock_data(form):
     if not exists(parent_dir):
         makedirs(parent_dir)
     run_time = datetime.now()
-    '''
-  
+
+    '''  
     directory = f'Livestock run at {run_time.day}_{run_time.month}_{run_time.year} ' \
                 f'{run_time.hour}_{run_time.minute}_{run_time.second}'
     path = join(parent_dir, directory)
