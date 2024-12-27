@@ -9,10 +9,15 @@ __prog__ = 'livestock_output_data.py'
 __version__ = '1.0.1'
 __author__ = 's02dm4'
 
-from os.path import isfile, normpath
+from os.path import isfile, normpath, exists, join
+from os import makedirs
 import numpy as np
 from PyQt5.QtWidgets import QApplication
 from pathlib import Path
+from datetime import datetime
+from pandas import DataFrame, read_excel
+import matplotlib.pyplot as plt
+
 from ora_excel_read import ReadLivestockSheet
 from ora_excel_read import ReadAnmlProdn
 from ora_excel_read import ReadCropOwNitrogenParms, ReadStudy
@@ -109,6 +114,8 @@ def _get_production_and_n_excreted(anml_prodn_obj, all_lvstck):
             if np.isnan(manure):
                 print(f'No {anml_type} data available for {system} production system for {region}. '
                       f'"ANY" data used instead.')
+                QApplication.processEvents()
+
                 res = anml_prodn_df[(anml_prodn_df.Region == region) &
                                     (anml_prodn_df.System == 'ANY') & (anml_prodn_df.Type == anml_type)]
                 manure = res.Manure.values[0]
@@ -146,11 +153,13 @@ def calc_livestock_data(form):
     xls_inp_fname = normpath(form.settings['params_xls'])
     if not isfile(xls_inp_fname):
         print('Excel input file ' + xls_inp_fname + 'must exist')
+        QApplication.processEvents()
         return
 
     # read sheets from input Excel workbook
     # =====================================
     print('Loading: ' + xls_inp_fname)
+    QApplication.processEvents()
     ora_parms = ReadCropOwNitrogenParms(xls_inp_fname)
     out_dir = form.settings['out_dir']
     Path(out_dir + "/Livestock/Graphs").mkdir(parents = True, exist_ok = True)
@@ -208,6 +217,7 @@ def calc_livestock_data(form):
 
     # Calculate change in production for each crop sub-area and management type, using each calculation method
     print('Calculating livestock production')
+    QApplication.processEvents()
     total_an_prod_all_subareas = {}
     for subarea in harvest_land_use_merged.items():
         calc_method_dic = {}
@@ -232,6 +242,7 @@ def calc_livestock_data(form):
         tot_prod_data = {subarea[0] : calc_method_dic}
         total_an_prod_all_subareas.update(tot_prod_data)
     print('Livestock calcs completed')
+    QApplication.processEvents()
 
     form.total_an_prod_all_subareas = total_an_prod_all_subareas
 
@@ -333,30 +344,40 @@ def calc_livestock_data(form):
     form.w_disp_econ.setEnabled(True)
     form.w_disp_lvstck.setEnabled(True)
 
-    return
+    # return
 
     # Create graphs and CSV for each data
     # THIS IS VERY VERY SLOW RIGHT NOW - NEEDS REDONE
-'''
+
     print('Creating livestock charts')
-    parent_dir = 'c:/livestockoutputtest'
+    QApplication.processEvents()
+    parent_dir = join( form.settings['out_dir'], 'Livestock', 'Graphs')
     if not exists(parent_dir):
-        os.makedirs(parent_dir)
+        makedirs(parent_dir)
     run_time = datetime.now()
+    '''
+  
     directory = f'Livestock run at {run_time.day}_{run_time.month}_{run_time.year} ' \
                 f'{run_time.hour}_{run_time.minute}_{run_time.second}'
     path = join(parent_dir, directory)
-    os.makedirs(path)
+        makedirs(path)
+    '''
+    path = parent_dir
     all_livestock_df = DataFrame.from_dict(total_an_prod_all_subareas)
     all_livestock_df.to_csv(path+'\\all_data.csv')
     for subarea in total_an_prod_all_subareas.items():
+        nplots = 0
         subarea_path = f'{subarea[0]}'
         join_path = join(path, subarea_path)
-        os.makedirs(join_path)
+        if not exists(join_path):
+            makedirs(join_path)
+
         for calc_method in subarea[1].items():
             calc_method_path = f'{calc_method[0]}'
             calc_method_full = join(join_path, calc_method_path)
-            os.makedirs(calc_method_full)
+            if not exists(calc_method_full):
+                makedirs(calc_method_full)
+
             for animal_type in calc_method[1].items():
                 for output, values in animal_type[1].items():
                     values_array = np.array(values)
@@ -385,7 +406,11 @@ def calc_livestock_data(form):
                         filename = f'Goats or sheep for milk {output}'
                     else:
                         filename = f'{animal_type[0]} {output}'
+
                     filename_path = join(calc_method_full,filename)
                     plt.savefig(filename_path)
                     plt.close()
-'''
+                    nplots += 1
+
+        print('Generated {} plots for subarea {}'.format(nplots, sub_area))
+        QApplication.processEvents()
