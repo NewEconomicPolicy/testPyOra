@@ -17,6 +17,8 @@ from pathlib import Path
 from datetime import datetime
 from pandas import DataFrame, read_excel
 import matplotlib.pyplot as plt
+# import matplotlib
+# matplotlib.use('Agg')
 
 from ora_excel_read import ReadLivestockSheet
 from ora_excel_read import ReadAnmlProdn
@@ -378,6 +380,8 @@ def calc_livestock_data(form):
             if not exists(calc_method_full):
                 makedirs(calc_method_full)
 
+            plt.ioff()  # Turn interactive plotting off
+
             for animal_type in calc_method[1].items():
                 for output, values in animal_type[1].items():
                     values_array = np.array(values)
@@ -412,5 +416,8 @@ def calc_livestock_data(form):
                     plt.close()
                     nplots += 1
 
-        print('Generated {} plots for subarea {}'.format(nplots, sub_area))
+        print('\tGenerated {} plots for subarea {}'.format(nplots, subarea_path))
         QApplication.processEvents()
+
+    print('Livestock chart generation completed')
+    QApplication.processEvents()
