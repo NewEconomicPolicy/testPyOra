@@ -133,8 +133,12 @@ def generate_miami_dyce_npp(pettmp, management, management_ss=None):
                 if management_ss is None:
                     management.npp_miami_rats.append(1.0)
                 else:
-                    npp_typ = management_ss.npp_miami_grow[icrp]       # fetch ss val
-                    management.npp_miami_rats.append(npp/npp_typ)
+                    try:
+                        npp_typ = management_ss.npp_miami_grow[icrp]       # fetch ss val
+                    except IndexError as err:
+                        management.npp_miami_rats.append(1)
+                    else:
+                        management.npp_miami_rats.append(npp/npp_typ)
                 tgrow = 0
                 precip_cumul = 0
                 tair_cumul = 0

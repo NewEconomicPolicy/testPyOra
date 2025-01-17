@@ -104,7 +104,7 @@ class CropProdModel(object):
         # catch situation when December is a growing month
         # ================================================
         if len(self.data['cml_n_uptk']) < ngrow_seasons:
-            self.record_values(self, crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ)
+            self.record_values(crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ)
 
         # TODO patch
         # ==========
