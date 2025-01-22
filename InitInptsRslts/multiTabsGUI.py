@@ -1152,6 +1152,9 @@ class AllTabs(QTabWidget):
             calc_livestock_data(self)
             # test_economics_algorithms(self)
 
+        print('')   # cosmetic
+        QApplication.processEvents()
+
     def runEconomicsClicked(self):
 
         test_economics_algorithms(self)

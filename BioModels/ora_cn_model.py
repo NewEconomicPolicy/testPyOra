@@ -177,9 +177,13 @@ def run_soil_cn_algorithms(form):
     else:
         ora_weather, ora_subareas = retcode
 
+    # clear previously recorded outputs
+    # =================================
+    form.all_runs_output = {}
+    form.all_runs_crop_model = {}
+
     # process each subarea
     # ====================
-    form.all_runs_output = {}  # clear previously recorded outputs
     all_runs = {}
     for sba in ora_subareas:
         crop_model = CropProdModel(ora_subareas[sba].area_ha)
