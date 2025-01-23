@@ -22,6 +22,7 @@ __version__ = '0.0.0'
 import sys
 from math import exp, atan
 from time import sleep
+from PyQt5.QtWidgets import QApplication
 
 GDDS_SCLE_FACTR = 11500
 IWS_SCLE_FACTR = 2720

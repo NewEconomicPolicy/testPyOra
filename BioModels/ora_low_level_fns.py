@@ -25,6 +25,34 @@ MNTH_NAMES_SHORT = [mnth for mnth in month_abbr[1:]]
 KEYS = ['Initiation', 'Plant inputs', 'DPM carbon', 'RPM carbon', 'BIO carbon', 'HUM carbon', 'IOM carbon', 'TOTAL SOC']
 
 ERROR_STR = '*** Error *** '
+WARN_STR = '*** Warning *** '
+
+def chck_weather_mngmnt(ora_weather, ora_subareas, sba):
+    """
+    called from fn run_soil_cn_algorithms
+    """
+    integrity_flag = True
+
+    warn_str = WARN_STR + 'Subarea ' + sba + '\t'
+    pettmp_fwd_nvals = len(ora_weather.pettmp_fwd['precip'])
+    ntsteps_fwd = ora_subareas[sba].ntsteps_fwd
+    if ntsteps_fwd > pettmp_fwd_nvals:
+        integrity_flag = False
+        mess = warn_str
+        mess += 'Foward run weather months: {}\tmanagement months: {}'.format(pettmp_fwd_nvals, ntsteps_fwd)
+        print(mess)
+        QApplication.processEvents()
+
+    pettmp_ss_nvals = len(ora_weather.pettmp_ss['precip'])
+    ntsteps_ss = ora_subareas[sba].ntsteps_ss
+    if ntsteps_ss > pettmp_ss_nvals:
+        integrity_flag = False
+        mess = warn_str
+        mess += 'Steady state weather months: {}\tmanagement months: {}'.format(pettmp_ss_nvals, ntsteps_ss)
+        print(mess)
+        QApplication.processEvents()
+
+    return integrity_flag
 
 def get_crops_growing(crop_names):
     """
