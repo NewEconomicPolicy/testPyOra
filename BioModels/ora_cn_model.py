@@ -207,10 +207,10 @@ def run_soil_cn_algorithms(form):
 
         complete_runs = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
                                                 c_change, n_change, soil_water, crop_model)
-        complete_run = complete_runs['Zaks']
-        if complete_run is None:
+        if complete_runs is None:
             continue
 
+        complete_run = complete_runs['Zaks']
         form.all_runs_crop_model[sba] = crop_model
         form.crop_run = True
 

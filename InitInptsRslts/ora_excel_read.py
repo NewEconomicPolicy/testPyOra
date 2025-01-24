@@ -19,6 +19,7 @@ __version__ = '0.0.0'
 #
 from os.path import isfile, isdir, split, normpath, join
 from os import mkdir, sep as os_sep
+from PyQt5.QtWidgets import QApplication
 
 from string import ascii_uppercase
 from copy import copy
@@ -125,8 +126,10 @@ def _validate_timesteps(run_xls_fn, subareas):
             mess += '\tsubarea months: {}'.format(sba_mnths[0])
             if sba_mnths[0] != nmnths_wthr:
                 warn_mess += 'different subarea and weather months'
+                ret_code = False
         else:
             warn_mess += 'subarea sheets have inconsistent number of months: ' + str(nmnths_subareas)
+            ret_code = False
 
     wb_obj.close()
 
@@ -395,10 +398,22 @@ def _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
     ngrow_mnths = len(this_crop)
     indx_end = indx_strt + ngrow_mnths
 
-    if ngrow_mnths == crop_vars[crop]['t_grow']:
+    t_grow = crop_vars[crop]['t_grow']
+    if ngrow_mnths == t_grow:
         pi_tonnes[indx_strt:indx_end] = crop_vars[crop]['pi_tonnes']
         pi_props[indx_strt:indx_end] = crop_vars[crop]['pi_prop']
+
+    elif t_grow == 12:
+        # for perennials only
+        # ===================
+        pi_tonne_mnth = crop_vars[crop]['pi_tonnes'][0]
+        pi_tonnes[indx_strt:indx_end] = ngrow_mnths * [pi_tonne_mnth]
+        pi_props_mnth = crop_vars[crop]['pi_prop'][0]
+        pi_props[indx_strt:indx_end] = ngrow_mnths * [pi_props_mnth]
     else:
+        print(WARN_STR + 'flexible growing periods for annuals not yet implemented')
+        QApplication.processEvents()
+
         pi_tonnes[indx_strt:indx_end] = ngrow_mnths * [999]
         pi_props[indx_strt:indx_end] = ngrow_mnths * [999]
 
@@ -406,57 +421,57 @@ def _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
 
     return Crop(crop, yield_typ)
 
-def _make_pi_props_tonnes(crop_names, indx_mode, crop_vars):
+def _make_pi_props_tonnes(crop_names_all, indx_strt, indx_end, crop_vars):
     """
     accumulate growing months for each crop
     consider contiguous perennial crops - grassland, scrubland, coffee
     """
     func_name = __prog__ + '\t_make_pi_props_tonnes'
 
+    if indx_end is None:
+        crop_names = crop_names_all[indx_strt:]
+    else:
+        crop_names = crop_names_all[indx_strt: indx_end]
+
     ntsteps = len(crop_names)
     pi_props = ntsteps * [0]
     pi_tonnes = ntsteps * [0]
 
-    crops_ss = []
-    crops_fwd = []
+    crops = []
 
-    indx_strt = None
+    indx_frst = None
     prev_crop = None
     this_crop = []
 
     for indx, crop in enumerate(crop_names):
         if crop is not None:
-            if indx_strt is None:
-                indx_strt = indx
+            if indx_frst is None:
+                indx_frst = indx
                 this_crop = [crop]
 
             elif crop == prev_crop:
                 this_crop.append(crop)
 
-            # elif prev_crop is None and len(this_crop) == 1:
-            #     this_crop = [crop]
             else:
                 if len(this_crop) > 0:
+
                     # record plant inputs for this crop
                     # =================================
-                    crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
-                    if indx_strt < indx_mode:
-                        crops_ss.append(crop_obj)
-                    else:
-                        crops_fwd.append(crop_obj)
+                    crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_frst, pi_props, pi_tonnes)
+                    crops.append(crop_obj)
 
                     this_crop = [crop]
-                    indx_strt = indx
+                    indx_frst = indx
 
         prev_crop = crop
 
+    # check if final crop remains
+    # ===========================
     if len(this_crop) > 0:
-        # check if final crop remains
-        # ===========================
-        crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_strt, pi_props, pi_tonnes)
-        crops_fwd.append(crop_obj)
+        crop_obj = _amend_pi_props_tonnes(crop_vars, this_crop, indx_frst, pi_props, pi_tonnes)
+        crops.append(crop_obj)
 
-    return pi_props, pi_tonnes, crops_ss, crops_fwd
+    return pi_props, pi_tonnes, crops
 
 class Crop(object, ):
     """
@@ -512,6 +527,7 @@ class ReadMngmntSubareas(object, ):
         print('Reading management sheet ' + sba)
 
         mgmt_sht = wb_obj[sba]
+
         ntsteps = mgmt_sht.max_row - 1
         rows_generator = mgmt_sht.values
         header_row = next(rows_generator)
@@ -520,7 +536,7 @@ class ReadMngmntSubareas(object, ):
         df = DataFrame(data_rows, columns=MNGMNT_SHT_HDRS)
         period_list = list(df['period'].values)
         try:
-            indx_mode = period_list.index('forward run')
+            indx_trans = period_list.index('forward run')       # index marking the transition from steady state to forward run
         except ValueError as err:
             print(ERR_STR + 'bad subarea sheet ' + sba)
             return
@@ -529,19 +545,20 @@ class ReadMngmntSubareas(object, ):
 
         crop_currs = _make_current_crop_list(crop_names)
         fert_n_list, org_fert_list, irrigs = _create_ow_fert(df)
-        pi_props, pi_tonnes, crops_ss, crops_fwd = _make_pi_props_tonnes(crop_names, indx_mode, crop_vars)
+        pi_props_ss, pi_tonnes_ss, crops_ss = _make_pi_props_tonnes(crop_names, 0, indx_trans, crop_vars)
+        pi_props_fwd, pi_tonnes_fwd, crops_fwd = _make_pi_props_tonnes(crop_names, indx_trans, None, crop_vars)
 
         # TODO: crude and unpythonic
         # ==========================
-        crop_mngmnt_ss = {'crop_name': crop_names[:indx_mode], 'crop_curr': crop_currs[:indx_mode],
-                          'crop_defns': crops_ss, 'fert_n': fert_n_list[:indx_mode],
-                          'org_fert': org_fert_list[:indx_mode], 'pi_prop': pi_props[:indx_mode],
-                          'pi_tonne': pi_tonnes[:indx_mode], 'irrig': irrigs[:indx_mode]}
+        crop_mngmnt_ss = {'crop_name': crop_names[:indx_trans], 'crop_curr': crop_currs[:indx_trans],
+                          'crop_defns': crops_ss, 'fert_n': fert_n_list[:indx_trans],
+                          'org_fert': org_fert_list[:indx_trans], 'pi_prop': pi_props_ss,
+                          'pi_tonne': pi_tonnes_ss, 'irrig': irrigs[:indx_trans]}
 
-        crop_mngmnt_fwd = {'crop_name': crop_names[indx_mode:], 'crop_curr': crop_currs[indx_mode:],
-                           'crop_defns': crops_fwd, 'fert_n': fert_n_list[indx_mode:],
-                           'org_fert': org_fert_list[indx_mode:], 'pi_prop': pi_props[indx_mode:],
-                           'pi_tonne': pi_tonnes[indx_mode:], 'irrig': irrigs[indx_mode:]}
+        crop_mngmnt_fwd = {'crop_name': crop_names[indx_trans:], 'crop_curr': crop_currs[indx_trans:],
+                           'crop_defns': crops_fwd, 'fert_n': fert_n_list[indx_trans:],
+                           'org_fert': org_fert_list[indx_trans:], 'pi_prop': pi_props_fwd,
+                           'pi_tonne': pi_tonnes_fwd, 'irrig': irrigs[indx_trans:]}
 
         self.soil_for_area = soil_for_area
         self.crop_mngmnt_ss = crop_mngmnt_ss
