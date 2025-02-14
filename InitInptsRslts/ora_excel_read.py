@@ -871,7 +871,9 @@ def read_econ_labour_sheet(xls_fname, sheet_name, skip_until):
     return labour_df
 
 class ReadStudy(object, ):
-
+    """
+    C
+    """
     def __init__(self, form, mgmt_dir, run_xls_fname=None, output_excel=True):
         """
         read location sheet from ORATOR inputs Excel file

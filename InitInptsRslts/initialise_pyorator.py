@@ -464,7 +464,6 @@ def read_config_file(form):
     form.w_tab_wdgt.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
     return True
 
-
 def write_config_file(form, message_flag=True):
     """
     write current selections to config file

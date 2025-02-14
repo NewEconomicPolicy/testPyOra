@@ -31,10 +31,10 @@ PY_DISP = 'PyOrator display'
 APPNDX_A_SHEET = 'Appendix A'
 
 def fetch_display_names_from_metrics(lookup_df, category_change):
-    '''
+    """
     return list of PyOrator display names from lookup data frame for this category where
     category can be carbon, nitrogen or soil water
-    '''
+    """
     metric_list = []
     for metric in category_change.data.keys():
         if metric == 'imnth' or metric == 'tstep' or metric == 'crop_name':
@@ -58,9 +58,9 @@ def fetch_display_names_from_metrics(lookup_df, category_change):
     return sorted(display_names)
 
 def fetch_detail_from_varname(lookup_df, metric):
-    '''
+    """
     retrieve detail associated with metric if it is present
-    '''
+    """
     dflt_rtrn = list([metric, '', '', metric])
     result = lookup_df[PY_VAR][lookup_df[PY_VAR] == metric]
     if len(result) == 0:
@@ -78,9 +78,9 @@ def fetch_detail_from_varname(lookup_df, metric):
         return definition, units, out_format, pyora_display
 
 def fetch_display_from_varname(lookup_df, metric):
-    '''
+    """
     retrieve variable display name from metric if it is present
-    '''
+    """
     result = lookup_df[PY_VAR][lookup_df[PY_VAR] == metric]
     if len(result) == 0:
         return None
@@ -93,9 +93,9 @@ def fetch_display_from_varname(lookup_df, metric):
         return pyora_display
 
 def fetch_pyora_varname_from_pyora_display(lookup_df, pyora_display):
-    '''
+    """
     return PyOrator variable name from data frame for PyOrator display value if found
-    '''
+    """
     result = lookup_df[PY_DISP][lookup_df[PY_DISP] == pyora_display]
     if len(result) == 0:
         return None
@@ -106,9 +106,9 @@ def fetch_pyora_varname_from_pyora_display(lookup_df, pyora_display):
         return varname
 
 def fetch_definition_from_pyora_display(lookup_df, pyora_display):
-    '''
+    """
     return symbol definition from data frame for PyOrator display value if found
-    '''
+    """
     result = lookup_df[PY_DISP][lookup_df[PY_DISP] == pyora_display]
     if len(result) == 0:
         return list([pyora_display, ''])
@@ -119,9 +119,9 @@ def fetch_definition_from_pyora_display(lookup_df, pyora_display):
         return defn
 
 def fetch_defn_units_from_pyora_display(lookup_df, pyora_display):
-    '''
+    """
     retrieve variable definition from data frame if it is present
-    '''
+    """
     dflt_rtrn = list([pyora_display, ''])
     if lookup_df is None:
         return dflt_rtrn
@@ -138,9 +138,9 @@ def fetch_defn_units_from_pyora_display(lookup_df, pyora_display):
         return defn, units
 
 def read_lookup_excel_file(settings):
-    '''
+    """
     check to see if a lookup Excel file of variable names and definitions has been specified
-    '''
+    """
     lookup_df = None
     fname_lookup = settings['fname_lookup']
 
