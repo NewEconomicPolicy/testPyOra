@@ -274,7 +274,7 @@ def read_xls_run_file(run_xls_fn, crop_vars, latitude):
     sbas_sht = wb_obj[RUN_SHT_NAMES['sbas']]
     rows_generator = sbas_sht.values
     hdr_row = next(rows_generator)  # skip headers
-    data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]
+    data_rows = [list(row) for (_, row) in zip(range(MAX_SUB_AREAS), rows_generator)]       # use list comprehension
 
     ora_subareas = {}
     for rec in data_rows:
