@@ -11,7 +11,7 @@
 #------------------------------------------------------------------------------- (exit)
 """
 
-__prog__ = 'initialise_pyorator.py'
+__prog__ = 'initialise_pyorator_batch.py'
 __version__ = '0.0.0'
 
 # Version history
