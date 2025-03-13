@@ -160,7 +160,7 @@ def read_weather_dsets_detail(form):
     generic_resource = 'CRU'
     cru_flag = False
     valid_wthr_dset_rsrces = []
-    cru_dir  = wthr_dir + '\\CRU_Data'
+    cru_dir  = wthr_dir + '\\CRU_Data\\Monthly'
     if isdir(cru_dir):
         wthr_rsrc = 'CRU_hist'
         cru_fnames = glob(cru_dir + '/cru*dat.nc')
