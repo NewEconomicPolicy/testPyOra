@@ -41,9 +41,9 @@ FIELD_NAMES = {'Description': '',
                }
 
 def post_sbas_hdrs(grid, irow):
-    '''
+    """
     called once from main GUI at startup
-    '''
+    """
 
     for icol, fld_name in enumerate(RUN_MODE_HDRS):
         hdr_lbl = QLabel(fld_name)
@@ -61,9 +61,9 @@ def post_sbas_hdrs(grid, irow):
     return irow
 
 def farm_detail_gui(form, grid, irow):
-    '''
+    """
     construct that section of the GUI dedicated to farm detail
-    '''
+    """
 
     # ========
     lbl00 = QLabel('Study area:')
@@ -201,9 +201,9 @@ def farm_detail_gui(form, grid, irow):
     return irow
 
 def repopulate_farms_dropdown(form):
-    '''
+    """
     called at program start up or when user changes study area or if a farm is added or removed
-    '''
+    """
     farms = identify_farms_for_study(form)
 
     if hasattr(form, 'w_combo02'):      # TODO tidy
@@ -218,10 +218,10 @@ def repopulate_farms_dropdown(form):
     return
 
 def post_farm_detail(form):
-    '''
+    """
     called once from main GUI when farm changed
     if successful then return farm run file name
-    '''
+    """
     ret_code = None
     farm_name = form.w_farm_name.text()
     if farm_name == '':
@@ -269,9 +269,9 @@ def post_farm_detail(form):
     return ret_code
 
 def post_sbas_detail(form, run_xls_fn):
-    '''
+    """
     called once from main GUI after a successful farm change
-    '''
+    """
     ret_code = False
 
     if hasattr(form, 'w_nrota_ss'):

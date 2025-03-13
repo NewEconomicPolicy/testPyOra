@@ -137,7 +137,7 @@ def fetch_defn_units_from_pyora_display(lookup_df, pyora_display):
             units = ''
         return defn, units
 
-def read_lookup_excel_file(settings, batch_flag=False):
+def read_lookup_excel_file(settings):
     '''
     check to see if a lookup Excel file of variable names and definitions has been specified
     '''
@@ -171,8 +171,5 @@ def read_lookup_excel_file(settings, batch_flag=False):
         fname_lookup = None
 
     settings['fname_lookup'] = fname_lookup
-    if batch_flag:
-        return lookup_df
-    else:
-        settings['lookup_df'] = lookup_df
-        return
+    settings['lookup_df'] = lookup_df
+    return lookup_df
