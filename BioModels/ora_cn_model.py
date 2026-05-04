@@ -28,7 +28,7 @@ from PyQt5.QtWidgets import QApplication
 from calendar import month_abbr
 
 from livestock_output_data import check_livestock_run_data
-from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle
+from ora_low_level_fns import gui_summary_table_add, gui_optimisation_cycle, chck_weather_mngmnt
 from ora_cn_fns import get_soil_vars, npp_zaks_grow_season, add_npp_zaks_by_month
 from ora_cn_classes import MngmntSubarea, CarbonChange, NitrogenChange, EnsureContinuity, CropProdModel
 from ora_water_model import SoilWaterChange
@@ -174,14 +174,22 @@ def run_soil_cn_algorithms(form):
     retcode = read_xls_run_file(run_xls_fname, ora_parms.crop_vars, study.latitude)
     if retcode is None:
         return -1
-    else:
-        ora_weather, ora_subareas = retcode
+
+    ora_weather, ora_subareas = retcode
+
+    # clear previously recorded outputs
+    # =================================
+    form.all_runs_output = {}
+    form.all_runs_crop_model = {}
 
     # process each subarea
     # ====================
-    form.all_runs_output = {}  # clear previously recorded outputs
     all_runs = {}
     for sba in ora_subareas:
+        integrity_flag = chck_weather_mngmnt(ora_weather, ora_subareas, sba)
+        if not integrity_flag:
+            continue
+
         crop_model = CropProdModel(ora_subareas[sba].area_ha)
         soil_vars = ora_subareas[sba].soil_for_area
         mngmnt_ss = MngmntSubarea(ora_subareas[sba].crop_mngmnt_ss, ora_weather)
@@ -199,10 +207,10 @@ def run_soil_cn_algorithms(form):
 
         complete_runs = _cn_forward_run(ora_parms, ora_weather, mngmnt_fwd, soil_vars,
                                                 c_change, n_change, soil_water, crop_model)
-        complete_run = complete_runs['Zaks']
-        if complete_run is None:
+        if complete_runs is None:
             continue
 
+        complete_run = complete_runs['Zaks']
         form.all_runs_crop_model[sba] = crop_model
         form.crop_run = True
 

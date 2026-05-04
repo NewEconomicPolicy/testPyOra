@@ -14,7 +14,6 @@ __author__ = 's02dm4'
 from pandas import DataFrame, read_excel
 from openpyxl import load_workbook
 
-
 class Livestock:
     """Information on different types of livestock"""
 
@@ -372,5 +371,6 @@ class Charts(object):
 
             # Save output
             plt.savefig(f'Outputs/Livestock/Graphs/{livestock.neat_name}_N_excretion_atypical.png', bbox_inches='tight')
+            plt.close()
             '''
 

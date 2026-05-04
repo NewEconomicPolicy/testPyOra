@@ -58,7 +58,11 @@ def run_rothc(parameters, pettmp, management, carbon_change, soil_vars, soil_wat
                                 irrig, wc_pwp, wc_t1, wc_t1_no_irri, wc_fld_cap)
         if npp_model == 'Zaks':
             npp_atyp = add_npp_zaks_by_month(management, pettmp, soil_water, tstep)  # add npp by Zaks to management
-            npp_typ = crop_model.data['npp_zaks'][tstep]
+            try:
+                npp_typ = crop_model.data['npp_zaks'][tstep]
+            except IndexError as err:
+                npp_typ = 0
+
             if npp_typ == 0:
                 npp_rat = 1.0
             else:

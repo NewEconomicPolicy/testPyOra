@@ -11,7 +11,7 @@
 #------------------------------------------------------------------------------- (exit)
 """
 
-__prog__ = 'initialise_pyorator.py'
+__prog__ = 'initialise_pyorator_batch.py'
 __version__ = '0.0.0'
 
 # Version history
@@ -463,7 +463,6 @@ def read_config_file(form):
     prod_system = form.w_tab_wdgt.w_systems.currentText()
     form.w_tab_wdgt.sys_descr_lbl.setText(prod_system_to_descr(prod_system))
     return True
-
 
 def write_config_file(form, message_flag=True):
     """

@@ -38,6 +38,7 @@ class CropProdModel(object):
                                                                 'yld_typ',  'yld_ann_typ', 'yld_n_lim', 'crops_ann'])
         self.data = {var_name: [] for var_name in var_name_list}
         self.var_name_list = var_name_list
+        self.nyears_ss = None
         self.area_ha = area_ha
 
     def add_management_fwd(self, complete_run_fwd, mngmnt, npp_model):
@@ -104,7 +105,7 @@ class CropProdModel(object):
         # catch situation when December is a growing month
         # ================================================
         if len(self.data['cml_n_uptk']) < ngrow_seasons:
-            self.record_values(self, crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ)
+            self.record_values(crop_indx, this_crop_name, cml_n_uptk, cml_n_uptk_adj, yld_ann_typ)
 
         # TODO patch
         # ==========
