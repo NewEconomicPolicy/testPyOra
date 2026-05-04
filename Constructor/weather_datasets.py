@@ -163,7 +163,7 @@ def read_weather_dsets_detail(form):
     cru_dir  = wthr_dir + '\\CRU_Data'
     if isdir(cru_dir):
         wthr_rsrc = 'CRU_hist'
-        cru_fnames = glob(cru_dir + '/cru*dat.nc')
+        cru_fnames = glob(join(cru_dir, 'Monthly') + '/cru*dat.nc')
         if len(cru_fnames) > 0:
             wthr_sets[wthr_rsrc] = _fetch_weather_nc_parms(cru_fnames[0], wthr_rsrc, 'Monthly', 'historic')
             wthr_sets[wthr_rsrc]['base_dir']   = cru_dir
@@ -200,6 +200,7 @@ def read_weather_dsets_detail(form):
         weather_resources_generic.append(generic_resource)
         weather_set_linkages[generic_resource] = valid_wthr_dset_rsrces
     else:
+        wthr_sets = {}
         print('CRU historic or future datasets incomplete in ' + climgen_dir + 'or' + cru_dir)
 
     form.weather_resources_generic = weather_resources_generic
